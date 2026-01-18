@@ -1,0 +1,137 @@
+{
+    "reglements": [
+        {
+            "numero": "2024/1781",
+            "nom_complet": "Règlement (UE) 2024/1781 du Parlement européen et du Conseil",
+            "nom_court": "ESPR - Ecodesign for Sustainable Products Regulation",
+            "nom_francais": "Règlement sur l'écoconception des produits durables",
+            "date_adoption": "2024-06-13",
+            "date_publication": "2024-06-28",
+            "date_entree_vigueur": "2024-07-18",
+            "sujet": "Écoconception des produits durables, économie circulaire",
+            "description": "Établit un cadre pour fixer des exigences d'écoconception pour les produits durables. Remplace la directive 2009/125/CE. Vise à améliorer la durabilité environnementale, réduire l'empreinte carbone et rendre les produits durables la norme dans l'UE.",
+            "champ_application": "Presque tous les biens physiques mis sur le marché UE (sauf alimentation et médicaments)",
+            "mots_cles": [
+                "écoconception",
+                "produits durables",
+                "économie circulaire",
+                "empreinte carbone",
+                "cycle de vie",
+                "DPP",
+                "passeport numérique"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 28 juin 2024"
+        },
+        {
+            "numero": "2023/1230",
+            "nom_complet": "Règlement (UE) 2023/1230 du Parlement européen et du Conseil",
+            "nom_court": "Règlement Machines",
+            "nom_francais": "Règlement relatif aux machines",
+            "date_adoption": "2023-06-14",
+            "date_publication": "2023-06-29",
+            "date_entree_vigueur": "2027-01-20",
+            "sujet": "Sécurité des machines et équipements industriels",
+            "description": "Nouvel encadrement de la sécurité des machines. Remplace la directive 2006/42/CE (Directive Machines). Inclut des exigences spécifiques pour les machines intégrant de l'intelligence artificielle et les systèmes cyber-physiques.",
+            "champ_application": "Machines, équipements interchangeables, composants de sécurité, accessoires de levage, chaînes, câbles, sangles, dispositifs amovibles de transmission mécanique",
+            "mots_cles": [
+                "machines",
+                "sécurité",
+                "IA",
+                "équipements",
+                "marquage CE",
+                "directive machines"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 29 juin 2023"
+        },
+        {
+            "numero": "2024/1689",
+            "nom_complet": "Règlement (UE) 2024/1689 du Parlement européen et du Conseil",
+            "nom_court": "AI Act - Artificial Intelligence Act",
+            "nom_francais": "Règlement sur l'Intelligence Artificielle",
+            "date_adoption": "2024-06-13",
+            "date_publication": "2024-07-12",
+            "date_entree_vigueur": "2024-08-01",
+            "sujet": "Réglementation de l'intelligence artificielle dans l'UE",
+            "description": "Premier cadre juridique complet au monde sur l'IA. Établit une classification par niveau de risque (inacceptable, élevé, limité, minimal). Interdit certaines pratiques IA (manipulation, scoring social). Impose des obligations de transparence, documentation et conformité pour les systèmes IA à haut risque.",
+            "champ_application": "Tous les systèmes d'IA mis sur le marché ou utilisés dans l'UE, y compris les modèles de fondation (GPAI)",
+            "mots_cles": [
+                "intelligence artificielle",
+                "IA",
+                "AI",
+                "risque",
+                "transparence",
+                "GPAI",
+                "modèles de fondation",
+                "haut risque"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 12 juillet 2024"
+        },
+        {
+            "numero": "2024/2847",
+            "nom_complet": "Règlement (UE) 2024/2847 du Parlement européen et du Conseil",
+            "nom_court": "CRA - Cyber Resilience Act",
+            "nom_francais": "Règlement sur la cyber-résilience",
+            "date_adoption": "2024-10-10",
+            "date_publication": "2024-11-20",
+            "date_entree_vigueur": "2024-12-10",
+            "sujet": "Cybersécurité des produits comportant des éléments numériques",
+            "description": "Établit des exigences horizontales de cybersécurité pour les produits avec éléments numériques (logiciels, matériels connectés). Impose la sécurité by design, la gestion des vulnérabilités, les mises à jour de sécurité pendant le cycle de vie du produit.",
+            "champ_application": "Produits comportant des éléments numériques : logiciels, appareils IoT, systèmes d'exploitation, routeurs, etc. Exceptions : dispositifs médicaux, véhicules, aviation",
+            "mots_cles": [
+                "cybersécurité",
+                "cyber-résilience",
+                "vulnérabilités",
+                "IoT",
+                "sécurité",
+                "logiciels"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 20 novembre 2024"
+        },
+        {
+            "numero": "2023/2854",
+            "nom_complet": "Règlement (UE) 2023/2854 du Parlement européen et du Conseil",
+            "nom_court": "Data Act",
+            "nom_francais": "Règlement sur les données",
+            "date_adoption": "2023-12-13",
+            "date_publication": "2023-12-22",
+            "date_entree_vigueur": "2025-09-12",
+            "sujet": "Accès et utilisation équitable des données",
+            "description": "Règles harmonisées sur l'accès équitable aux données et leur utilisation. Donne aux utilisateurs de produits connectés le droit d'accéder aux données qu'ils génèrent. Facilite le changement de fournisseur de services cloud. Encadre le partage de données B2B et B2G.",
+            "champ_application": "Données générées par les produits connectés et services associés, services cloud, contrats de données",
+            "mots_cles": [
+                "données",
+                "data",
+                "IoT",
+                "cloud",
+                "partage",
+                "portabilité",
+                "B2B",
+                "B2G"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 22 décembre 2023"
+        },
+        {
+            "numero": "2016/679",
+            "nom_complet": "Règlement (UE) 2016/679 du Parlement européen et du Conseil",
+            "nom_court": "RGPD - GDPR",
+            "nom_francais": "Règlement Général sur la Protection des Données",
+            "date_adoption": "2016-04-27",
+            "date_publication": "2016-05-04",
+            "date_entree_vigueur": "2018-05-25",
+            "sujet": "Protection des données personnelles",
+            "description": "Cadre juridique européen pour la protection des données à caractère personnel. Établit les principes de licéité, loyauté, transparence, limitation des finalités, minimisation des données, exactitude, limitation de la conservation, intégrité et confidentialité. Donne aux personnes des droits (accès, rectification, effacement, portabilité, opposition).",
+            "champ_application": "Traitement de données à caractère personnel dans le cadre des activités d'un établissement UE, ou concernant des personnes dans l'UE",
+            "mots_cles": [
+                "données personnelles",
+                "vie privée",
+                "consentement",
+                "DPO",
+                "CNIL",
+                "droits",
+                "privacy"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 4 mai 2016"
+        }
+    ],
+    "derniere_mise_a_jour": "2026-01-17"
+}

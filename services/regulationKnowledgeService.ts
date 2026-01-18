@@ -1,0 +1,69 @@
+// Service pour injecter les connaissances réglementaires locales dans le prompt
+import reglements from '../data/reglements-europeens-2024.json';
+
+export function enrichPromptWithRegulation(userPrompt: string): { enrichedPrompt: string, systemAddition: string } {
+    console.log('🔍 [DEBUG] Enrichissement du prompt:', userPrompt);
+
+    // Détecter si la question porte sur un règlement spécifique
+    const regPattern = /(?:règlement|regulation|UE|EU)\s*(?:\(UE\)|EU)?\s*(\d{4}\/\d+)/gi;
+    const matches = userPrompt.match(regPattern);
+
+    console.log('🔍 [DEBUG] Matches trouvés:', matches);
+
+    let systemAddition = '';
+
+    if (matches) {
+        // Extraire les numéros de règlements mentionnés
+        const regNumbers = matches.map(m => {
+            const numMatch = m.match(/(\d{4}\/\d+)/);
+            return numMatch ? numMatch[1] : null;
+        }).filter(Boolean);
+
+        console.log('🔍 [DEBUG] Numéros extraits:', regNumbers);
+        console.log('🔍 [DEBUG] Base de données:', reglements);
+
+        // Chercher dans notre base de connaissances
+        const foundRegs = reglements.reglements.filter(r =>
+            regNumbers.includes(r.numero)
+        );
+
+        console.log('🔍 [DEBUG] Règlements trouvés dans la base:', foundRegs);
+
+        if (foundRegs.length > 0) {
+            systemAddition = '\n\nCONNAISSANCES RÉCENTES (Base locale 2024) :\n';
+            foundRegs.forEach(reg => {
+                systemAddition += `
+- Règlement (UE) ${reg.numero} :
+  * Nom : ${reg.nom_francais} (${reg.nom_court})
+  * Adopté : ${reg.date_adoption}
+  * Publié : ${reg.date_publication}
+  * Entrée en vigueur : ${reg.date_entree_vigueur}
+  * Sujet : ${reg.sujet}
+  * Description : ${reg.description}
+  * Champ d'application : ${reg.champ_application}
+`;
+            });
+            systemAddition += '\nUtilise UNIQUEMENT ces informations pour répondre sur ce règlement.\n';
+            console.log('✅ [DEBUG] System addition créé:', systemAddition);
+        } else {
+            console.log('❌ [DEBUG] Aucun règlement trouvé dans la base');
+        }
+    } else {
+        console.log('❌ [DEBUG] Aucun match de pattern trouvé');
+    }
+
+    return {
+        enrichedPrompt: userPrompt,
+        systemAddition
+    };
+}
+
+// Fonction helper pour détecter si un règlement est dans notre base
+export function hasRegulationInKnowledgeBase(regNumber: string): boolean {
+    return reglements.reglements.some(r => r.numero === regNumber);
+}
+
+// Obtenir les informations d'un règlement
+export function getRegulationInfo(regNumber: string) {
+    return reglements.reglements.find(r => r.numero === regNumber);
+}

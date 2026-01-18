@@ -24,23 +24,83 @@ export const t = {
       services: {
         title: "Services & Expertises",
         consulting: {
-            title: "Stratégie & Transformation",
-            desc: "Planification stratégique, transformation digitale et changement organisationnel. Formation du personnel opérationnel et adaptation neurocognitive."
+          title: "Stratégie & Transformation",
+          desc: "Planification stratégique, transformation digitale et changement organisationnel. Formation du personnel opérationnel et adaptation neurocognitive."
         },
         expertise: {
-            title: "Ingénierie & Écoconception",
-            desc: "Expertise technique industrielle, décarbonation, circularité et conception de systèmes cyberphysiques robustes et durables."
+          title: "Ingénierie & Écoconception",
+          desc: "Expertise technique industrielle, décarbonation, circularité et conception de systèmes cyberphysiques robustes et durables."
         },
         aegis_card: {
-            title: "IA, Risques & Compliance",
-            desc: "Intégration d'IA, agents copilotes, maîtrise de la complexité des écosystèmes et gestion de la conformité réglementaire.",
-            action: "Plateforme Aegis"
+          title: "Moteur d'AI, Risques & Compliance",
+          desc: "Intégration d'IA, agents copilotes, maîtrise de la complexité des écosystèmes et gestion de la conformité réglementaire.",
+          action: "Plateforme Aegis"
         }
       },
       contact: {
         title: "Parlons de votre futur",
         text: "Chaque projet commence par une écoute attentive. Je suis à votre disposition.",
-        email: "contact@jeanpierrecharles.com"
+        email: "contact@jeanpierrecharles.com",
+        linkedin: "https://www.linkedin.com/in/jpcharles6918/",
+        whatsapp: "https://wa.me/33679842208"
+      },
+      experience: {
+        title: "Parcours Industriel",
+        items: [
+          {
+            company: "Autoliv Group (via I-Smart Design)",
+            role: "Senior Consultant Industrialization",
+            period: "2022 - 2024",
+            desc: "Pilotage de l'industrialisation des volants airbag nouvelle génération pour Toyota (CH-R Europe 2024) et BMW (New Klass). Maîtrise des process complexes et lancements série."
+          },
+          {
+            company: "Forsee Power & Saft",
+            role: "Industrialization Manager",
+            period: "2018 - 2022",
+            desc: "Expertise en systèmes de stockage d'énergie et batteries haute capacité pour les secteurs Marine, Ferroviaire (TGV 1500V) et Mobilité Électrique (Bus)."
+          },
+          {
+            company: "Thales SIX GTS (via Kwhantic)",
+            role: "Industrialization Expert",
+            period: "2015 - 2018",
+            desc: "Innovation dans les équipements de télécom mobiles ultra-légers et intégration de la fabrication additive 3D."
+          },
+          {
+            company: "Faurecia (via Altran/Abylsen)",
+            role: "Technical Manager & Expert",
+            period: "2002 - 2018",
+            desc: "Direction technique de projets d'équipements intérieurs pour Renault (Mégane II), Volvo, Citroën (C6, Picasso), Ford (Fiesta) et GM Opel (Zafira)."
+          },
+          {
+            company: "Branson France (Groupe Emerson)",
+            role: "Responsable Technique",
+            period: "1995 - 2002",
+            desc: "Direction du bureau d'études pour la conception d'outillages de soudage industriel. Expertise en technologies avancées : Ultrasons HF, Vibration BF, Laser, Faisceaux d'Électrons. Soudabilité des métaux, thermoplastiques et composites."
+          }
+        ]
+      },
+      education: {
+        title: "Formation & Diplômes",
+        items: [
+          {
+            school: "IIMA (Indian Institute of Management Ahmedabad)",
+            degree: "Advanced Digital Transformation Strategy",
+            year: "2025",
+            desc: "Spécialisation en modèles de transformation digitale et stratégie data."
+          },
+          {
+            school: "Ecole Centrale Paris",
+            degree: "Formation Supérieure Professionnelle (ICTM)",
+            year: "1995",
+            desc: "Conception de production intégrée et simultanée."
+          },
+          {
+            school: "IUT Saint-Etienne - Coventry Polytechnic",
+            degree: "Bachelor of Mechatronic Engineering and Industrial Manufacturing",
+            year: "1991",
+            desc: "Double diplôme technique européen, spécialisation mécatronique et productique."
+          }
+        ]
       },
       footer: {
         legal: "Mentions Légales",
@@ -133,7 +193,25 @@ export const t = {
       title: "Assistant Aegis",
       placeholder: "Posez votre question réglementaire...",
       emptyState: "Posez-moi une question sur le \nRèglement Machine ou l'IA Act.",
-      systemPrompt: "Tu es Aegis, un assistant expert en conformité industrielle pour les TPE/PME européennes. Tu maîtrises le Règlement Machine (2023/1230), l'IA Act, le Cyber Resilience Act (CRA), le RGPD, et les Passeports Numériques de Produits (DPP/ESPR). Tes réponses doivent être en français, professionnelles, concises et orientées vers l'action pratique pour des industriels."
+      systemPrompt: `Tu es Aegis, un assistant expert en conformité industrielle pour les TPE/PME européennes.
+
+EXPERTISE :
+- Règlement Machine (UE) 2023/1230
+- AI Act (Règlement sur l'Intelligence Artificielle)
+- Cyber Resilience Act (CRA)
+- RGPD (Protection des données)
+- ESPR (UE) 2024/1781 - Règlement Écoconception des Produits Durables (Ecodesign for Sustainable Products)
+- Passeports Numériques de Produits (DPP)
+
+RÈGLES IMPORTANTES :
+1. Si tu n'es pas sûr d'une information, DIS-LE clairement.
+2. Si un règlement n'existe pas ou si tu ne connais pas son contenu exact, INDIQUE-LE.
+3. Ne jamais inventer de numéros de règlements ou de dates.
+4. Quand tu cites un règlement, vérifie que tu connais vraiment son contenu.
+
+EXEMPLE - Règlement (UE) 2024/1781 : C'est le règlement ESPR sur l'écoconception des produits durables, pas sur les fonds propres bancaires.
+
+Tes réponses doivent être en français, professionnelles, concises et orientées vers l'action pratique pour des industriels.`
     },
     landing: {
       heroTitle: "Conformité Industrielle & Passeport Numérique",
@@ -171,23 +249,83 @@ export const t = {
       services: {
         title: "Services & Expertise",
         consulting: {
-            title: "Strategy & Transformation",
-            desc: "Strategic planning, digital transformation, and organizational change. Operational personnel training and neurocognitive adaptation."
+          title: "Strategy & Transformation",
+          desc: "Strategic planning, digital transformation, and organizational change. Operational personnel training and neurocognitive adaptation."
         },
         expertise: {
-            title: "Engineering & Ecodesign",
-            desc: "Industrial technical expertise, decarbonization, circularity, and design of robust and sustainable cyber-physical systems."
+          title: "Engineering & Ecodesign",
+          desc: "Industrial technical expertise, decarbonization, circularity, and design of robust and sustainable cyber-physical systems."
         },
         aegis_card: {
-            title: "AI, Risk & Compliance",
-            desc: "AI integration, copilot agents, ecosystem complexity mastery, and regulatory compliance management.",
-            action: "Aegis Platform"
+          title: "AI Engine, Risk & Compliance",
+          desc: "AI integration, copilot agents, ecosystem complexity mastery, and regulatory compliance management.",
+          action: "Aegis Platform"
         }
       },
       contact: {
         title: "Let's discuss your future",
         text: "Every project starts with attentive listening. I am at your disposal.",
-        email: "contact@jeanpierrecharles.com"
+        email: "contact@jeanpierrecharles.com",
+        linkedin: "https://www.linkedin.com/in/jpcharles6918/",
+        whatsapp: "https://wa.me/33679842208"
+      },
+      experience: {
+        title: "Industrial Journey",
+        items: [
+          {
+            company: "Autoliv Group (via I-Smart Design)",
+            role: "Senior Consultant Industrialization",
+            period: "2022 - 2024",
+            desc: "Leading industrialization of next-gen airbag steering wheels for Toyota (CH-R 2024) and BMW (New Klass). Mastery of complex process launches."
+          },
+          {
+            company: "Forsee Power & Saft",
+            role: "Industrialization Manager",
+            period: "2018 - 2022",
+            desc: "Expertise in energy storage systems and high-capacity batteries for Marine, Rail (TGV 1500V), and Electric Mobility (Buses)."
+          },
+          {
+            company: "Thales SIX GTS (via Kwhantic)",
+            role: "Industrialization Expert",
+            period: "2015 - 2018",
+            desc: "Innovation in ultra-light mobile telecom equipment and integration of 3D additive manufacturing."
+          },
+          {
+            company: "Faurecia (via Altran/Abylsen)",
+            role: "Technical Manager & Expert",
+            period: "2002 - 2018",
+            desc: "Technical direction for interior equipment projects: Renault (Mégane II), Volvo, Citroën (C6, Picasso), Ford (Fiesta), and GM Opel (Zafira)."
+          },
+          {
+            company: "Branson France (Emerson Group)",
+            role: "Technical Manager",
+            period: "1995 - 2002",
+            desc: "Design office management for industrial welding tooling. Expertise in advanced technologies: High-Frequency Ultrasonics, Low-Frequency Vibration, Laser, Electron Beam. Weldability of metals, thermoplastics, and composites."
+          }
+        ]
+      },
+      education: {
+        title: "Education & Certifications",
+        items: [
+          {
+            school: "IIMA (Indian Institute of Management Ahmedabad)",
+            degree: "Advanced Digital Transformation Strategy",
+            year: "2025",
+            desc: "Specialization in digital transformation models and data strategy."
+          },
+          {
+            school: "Ecole Centrale Paris",
+            degree: "Post-Graduate Professional Training (ICTM)",
+            year: "1995",
+            desc: "Integrated and simultaneous production design."
+          },
+          {
+            school: "IUT Saint-Etienne - Coventry Polytechnic",
+            degree: "Bachelor of Mechatronic Engineering and Industrial Manufacturing",
+            year: "1991",
+            desc: "European joint degree, specializing in mechatronics and manufacturing."
+          }
+        ]
       },
       footer: {
         legal: "Legal Notice",
