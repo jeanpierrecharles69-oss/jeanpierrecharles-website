@@ -215,6 +215,7 @@ EXPERTISE :
 - Cyber Resilience Act (CRA)
 - RGPD (Protection des données)
 - ESPR (UE) 2024/1781 - Règlement Écoconception des Produits Durables (Ecodesign for Sustainable Products)
+- Règlement Batteries (UE) 2023/1542 - Batteries et déchets de batteries (Passeport Batterie DPP, empreinte carbone, recyclage)
 - Passeports Numériques de Produits (DPP)
 
 RÈGLES IMPORTANTES :

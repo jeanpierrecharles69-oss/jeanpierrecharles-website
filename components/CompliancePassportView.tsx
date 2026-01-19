@@ -83,21 +83,24 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
     };
 
     const handleExport = async () => {
-        // Dynamic import to avoid SSR/build issues if lib is heavy, though here top-level is fine too.
-        // We'll use window.print() as a quick robust fallback, or html2pdf if available.
-        // For this environment, let's try a robust window.print() specific to the passport.
         const element = document.getElementById('passport-content');
         if (!element) {
-            window.print();
+            alert('Erreur : Impossible de générer le PDF');
             return;
         }
 
-        // Simple Print logic is often better than complex PDF js for layouts like this
-        const originalContents = document.body.innerHTML;
-        document.body.innerHTML = element.innerHTML;
-        window.print();
-        document.body.innerHTML = originalContents;
-        window.location.reload(); // Reload to restore state listeners
+        // Dynamic import of html2pdf
+        const html2pdf = (await import('html2pdf.js')).default;
+
+        const opt = {
+            margin: 10,
+            filename: 'Passeport_Robot_R2000_Aegis.pdf',
+            image: { type: 'jpeg' as const, quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+        };
+
+        html2pdf().set(opt).from(element).save();
     };
 
     const mockAuditTrail: AuditEvent[] = [

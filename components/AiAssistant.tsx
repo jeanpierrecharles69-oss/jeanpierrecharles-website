@@ -18,7 +18,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onClose, lang }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeQuiz, setActiveQuiz] = useState<'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | null>(null);
+  const [activeQuiz, setActiveQuiz] = useState<'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries' | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const text = t[lang].assistant;
 
@@ -161,6 +161,41 @@ RÈGLES STRICTES :
     }
   };
 
+  const handleQuickQuestion = async (question: string) => {
+    if (question.trim() === '' || isLoading) return;
+
+    const userMessage: ChatMessage = { role: 'user', text: question };
+    setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const enrichedData = enrichPromptWithRegulation(question);
+      const finalPrompt = enrichedData.enrichedPrompt;
+      const systemAddition = enrichedData.systemAddition || text.systemPrompt;
+
+      const stream = runQueryStream(finalPrompt, systemAddition, false);
+
+      const modelMessageIndex = messages.length + 1;
+      setMessages((prev: ChatMessage[]) => [...prev, { role: 'model', text: '' }]);
+
+      let fullText = '';
+      for await (const chunk of stream) {
+        fullText += chunk;
+        setMessages((prev: ChatMessage[]) => {
+          const newMessages = [...prev];
+          newMessages[modelMessageIndex] = { role: 'model', text: fullText };
+          return newMessages;
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   // Message d'accueil enrichi et personnalisé
   const WelcomeMessage = () => (
     <div className="text-center px-4 py-8 max-w-md mx-auto">
@@ -222,6 +257,12 @@ RÈGLES STRICTES :
           className="px-3 py-1.5 bg-pink-50 text-pink-700 text-xs font-semibold rounded-full border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-all cursor-pointer transform hover:scale-105"
         >
           📊 Data Act
+        </button>
+        <button
+          onClick={() => handleQuickQuestion(lang === 'fr' ? 'Quelles sont les obligations du règlement batteries 2023/1542 ?' : 'What are the Battery Regulation 2023/1542 obligations?')}
+          className="px-3 py-1.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-all cursor-pointer transform hover:scale-105"
+        >
+          🔋 Batteries
         </button>
       </div>
 

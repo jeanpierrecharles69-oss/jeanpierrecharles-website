@@ -5,7 +5,8 @@ export function enrichPromptWithRegulation(userPrompt: string): { enrichedPrompt
     console.log('🔍 [DEBUG] Enrichissement du prompt:', userPrompt);
 
     // Détecter si la question porte sur un règlement spécifique
-    const regPattern = /(?:règlement|regulation|UE|EU)\s*(?:\(UE\)|EU)?\s*(\d{4}\/\d+)/gi;
+    // Pattern amélioré : capte aussi les numéros seuls (ex: "batteries 2023/1542")
+    const regPattern = /(?:règlement|regulation|UE|EU|batteries?|AI\s*Act|ESPR|CRA|Data\s*Act|RGPD|GDPR|machines?)?[:\s]*(?:\(UE\)|\(EU\)|UE|EU)?\s*(\d{4}\/\d+)/gi;
     const matches = userPrompt.match(regPattern);
 
     console.log('🔍 [DEBUG] Matches trouvés:', matches);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import questionnaires from '../data/regulation-questionnaires.json';
 
 interface RegulationQuizProps {
-    regulationKey: 'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act';
+    regulationKey: 'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries';
     onSubmit: (responses: Record<string, string | string[]>, context: string) => void;
     onClose: () => void;
 }
