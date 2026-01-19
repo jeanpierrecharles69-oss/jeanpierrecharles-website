@@ -111,6 +111,28 @@
             "source": "Journal officiel de l'Union européenne, L 22 décembre 2023"
         },
         {
+            "numero": "2023/1542",
+            "nom_complet": "Règlement (UE) 2023/1542 du Parlement européen et du Conseil",
+            "nom_court": "Règlement Batteries",
+            "nom_francais": "Règlement relatif aux batteries et aux déchets de batteries",
+            "date_adoption": "2023-07-12",
+            "date_publication": "2023-07-28",
+            "date_entree_vigueur": "2023-08-18",
+            "sujet": "Durabilité, sécurité et circularité des batteries",
+            "description": "Remplace la Directive 2006/66/CE. Couvre tout le cycle de vie des batteries (conception à fin de vie). Introduit le Passeport Numérique Batterie (DPP), des exigences d'empreinte carbone, de contenu recyclé et de diligence raisonnable (Due Diligence).",
+            "champ_application": "Toutes les batteries (portables, SLI, LMT, véhicules électriques, industrielles)",
+            "mots_cles": [
+                "batteries",
+                "déchets",
+                "Passeport Numérique",
+                "DPP",
+                "empreinte carbone",
+                "recyclage",
+                "diligence"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 28 juillet 2023"
+        },
+        {
             "numero": "2016/679",
             "nom_complet": "Règlement (UE) 2016/679 du Parlement européen et du Conseil",
             "nom_court": "RGPD - GDPR",

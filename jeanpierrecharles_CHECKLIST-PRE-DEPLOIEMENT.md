@@ -226,7 +226,7 @@
 ## 📊 Estimation Temps
 
 | Phase | Tâches | Temps estimé |
-|-------|--------|--------------|
+| ------- | -------- | -------------- |
 | **Phase 1** | Vérification fonctionnelle | 1-2h |
 | **Phase 2** | Cosmétique + CV + LinkedIn | 3-4h |
 | **Phase 3** | Déploiement Vercel | 30 min |

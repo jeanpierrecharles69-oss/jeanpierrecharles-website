@@ -6,47 +6,55 @@ export const t = {
     jpc: {
       nav: {
         home: "Accueil",
-        vision: "Vision Industrie 5.0",
+        vision: "Vision",
         services: "Mes Services",
         aegis: "Plateforme Aegis",
         contact: "Contact"
       },
       hero: {
-        title: "L'Humain au cœur de la Performance Industrielle",
-        subtitle: "Jean-Pierre Charles. Expert en transformation Industrie 5.0, robustesse mécatronique et intelligence collective.",
-        cta_talk: "Échanger ensemble",
-        cta_app: "Accéder à Aegis"
+        title: "L'ingénierie de l'Innovation Industrielle Démultipliée par l'IA",
+        subtitle: "Transformez la complexité réglementaire en avantage compétitif. L'alliance d'une expertise terrain de 30 ans et de la plateforme Aegis. Des décisions prouvées. Des systèmes conformes. Une exécution maîtrisée.",
+        cta_talk: "Démarrer un Diagnostic",
+        cta_app: "Découvrir la Plateforme Aegis"
       },
       vision: {
-        title: "Vers une Industrie Bienveillante et Résiliente",
-        text: "L'Industrie 5.0 n'est pas une simple évolution technologique. C'est la réconciliation entre la puissance de l'automatisation et la créativité unique de l'être humain. Ma mission est d'accompagner les PME et ETI européennes vers cette harmonie, en garantissant des systèmes robustes, durables et éthiques."
+        title: "Face à la Complexité : Rigueur et Méthode",
+        text: "Les organisations industrielles sont confrontées à un mur de complexité dans leur processus d'innovation et de certification : règlements en cascade (AI Act, ESPR, Machine, CRA), cybersécurité, traçabilité, time-to-market compressé. Les solutions d'IA génériques manquent de la rigueur d'ingénierie industrielle indispensable dès les phases d'études et de R&D. Je vous apporte une réponse pragmatique : l'expertise d'un Responsable Technique chevronné, démultipliée par la plateforme Aegis. Résultat : Des décisions plus rapides ET plus justes. Des systèmes conformes dès la conception. Une exécution traçable et maîtrisée."
       },
       services: {
         title: "Services & Expertises",
         consulting: {
-          title: "Stratégie & Transformation",
-          desc: "Planification stratégique, transformation digitale et changement organisationnel. Formation du personnel opérationnel et adaptation neurocognitive."
+          title: "Diagnostic & Transformation Industrie 5.0",
+          desc: "Audit de maturité R&D et systèmes industriels. Cartographie des risques. Priorités actionnables et feuille de route industrielle alignée sur vos enjeux (time-to-market, conformité, innovation)."
         },
         expertise: {
-          title: "Ingénierie & Écoconception",
-          desc: "Expertise technique industrielle, décarbonation, circularité et conception de systèmes cyberphysiques robustes et durables."
+          title: "Ingénierie de la Conformité",
+          desc: "Maîtrise des risques critiques (AMDEC, DRBFM, V&V). Conformité réglementaire prouvable (AI Act, Machine, CRA, ESPR). Impacts Nomenclatures, Plans de V&V et qualification. Passeport Numérique Produits, Dossiers techniques auditables et marquage CE."
         },
         aegis_card: {
-          title: "Moteur d'AI, Risques & Compliance",
-          desc: "Intégration d'IA, agents copilotes, maîtrise de la complexité des écosystèmes et gestion de la conformité réglementaire.",
-          action: "Plateforme Aegis"
+          title: "Plateforme Aegis - Moteur d'IA Industriel",
+          desc: "Le moteur d'IA qui démultiplie l'expertise. Workflows agentiques gouvernés, routage intelligent, traçabilité blockchain. Conformité continue et décisions auditables.",
+          action: "Accéder à la Démo"
         }
       },
       contact: {
-        title: "Parlons de votre futur",
-        text: "Chaque projet commence par une écoute attentive. Je suis à votre disposition.",
+        title: "Parlons de Votre Projet de Transformation",
+        text: "Chaque transformation industrielle commence par une écoute attentive de vos enjeux. Échangeons sur vos défis de conformité, risques ou innovation.",
         email: "contact@jeanpierrecharles.com",
         linkedin: "https://www.linkedin.com/in/jpcharles6918/",
         whatsapp: "https://wa.me/33679842208"
       },
       experience: {
-        title: "Parcours Industriel",
+        title: "30 Ans de Preuves Terrain & Rigueur Industrielle",
+        subtitle: "L'expérience qui fonde la plateforme Aegis. Equipements Industriels, Automobile, Énergie, Défense : des lancements de produits complexes pour des groupes internationaux.",
         items: [
+          {
+            company: "jeanpierrecharles.com",
+            role: "Ingénierie Conversationnelle Dynamique & Modélisation Systèmes Complexes",
+            period: "2023 - Présent",
+            project: "Applications des Modèles LLM/ML dans le Cadre de la Transformation Industrielle 5.0",
+            desc: "Recherche et maîtrise approfondie des modèles LLM/ML pour applications industrielles. Développement d'une méthodologie scientifique de vérification des sources, forensique des données contextuelles et herméneutique des systèmes de valeur. Modélisation des causalités et risques existentiels. Aboutissement : Conception et lancement de la plateforme Aegis et du projet jeanpierrecharles.com en janvier 2026."
+          },
           {
             company: "Autoliv Group (via I-Smart Design)",
             role: "Senior Consultant Industrialization",
@@ -84,15 +92,21 @@ export const t = {
         items: [
           {
             school: "IIMA (Indian Institute of Management Ahmedabad)",
-            degree: "Advanced Digital Transformation Strategy",
+            degree: "Spécialisation Advanced Digital Transformation",
             year: "2025",
             desc: "Spécialisation en modèles de transformation digitale et stratégie data."
           },
           {
-            school: "Ecole Centrale Paris",
-            degree: "Formation Supérieure Professionnelle (ICTM)",
+            school: "École Centrale Paris (ICTM)",
+            degree: "Responsable Conception Production Numérique des Systèmes Industriels Complexes",
             year: "1995",
             desc: "Conception de production intégrée et simultanée."
+          },
+          {
+            school: "École Européenne des Affaires de Paris",
+            degree: "Spécialisation en Développement Européen de l'Entreprise",
+            year: "1994",
+            desc: "Stratégie internationale et développement d'affaires européennes."
           },
           {
             school: "IUT Saint-Etienne - Coventry Polytechnic",
@@ -271,7 +285,15 @@ Tes réponses doivent être en français, professionnelles, concises et orienté
       },
       experience: {
         title: "Industrial Journey",
+        subtitle: "The experience that powers the Aegis platform. Industrial Equipment, Automotive, Energy, Defense: complex product launches for international groups.",
         items: [
+          {
+            company: "jeanpierrecharles.com",
+            role: "Dynamic Conversational Engineering & Complex Systems Modeling",
+            period: "2023 - Present",
+            project: "LLM/ML Models Applications in Industry 5.0 Transformation Framework",
+            desc: "In-depth research and mastery of LLM/ML models for industrial applications. Development of scientific methodology for source verification, digital forensics, and value systems hermeneutics. Causality modeling and existential risk analysis. Result: Design and launch of Aegis platform and jeanpierrecharles.com project in January 2026."
+          },
           {
             company: "Autoliv Group (via I-Smart Design)",
             role: "Senior Consultant Industrialization",

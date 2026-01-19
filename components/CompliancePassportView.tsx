@@ -43,11 +43,10 @@ const PassportSection: React.FC<{ module: RegulationModule }> = ({ module }) => 
                 {module.complianceItems.map(item => (
                     <li key={item.id} className="flex justify-between items-start">
                         <span className="text-slate-600 flex-1">{item.name}</span>
-                        <span className={`text-xs font-medium ml-2 px-2 py-0.5 rounded ${
-                            item.status === ComplianceStatus.Compliant ? 'bg-green-50 text-green-700' : 
-                            item.status === ComplianceStatus.AtRisk ? 'bg-yellow-50 text-yellow-700' : 
-                            'bg-red-50 text-red-700'
-                        }`}>
+                        <span className={`text-xs font-medium ml-2 px-2 py-0.5 rounded ${item.status === ComplianceStatus.Compliant ? 'bg-green-50 text-green-700' :
+                            item.status === ComplianceStatus.AtRisk ? 'bg-yellow-50 text-yellow-700' :
+                                'bg-red-50 text-red-700'
+                            }`}>
                             {item.status === ComplianceStatus.Compliant ? 'OK' : 'Action'}
                         </span>
                     </li>
@@ -66,6 +65,41 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
     const [activeTab, setActiveTab] = useState<'overview' | 'audit'>('overview');
     const text = t[lang].passport;
 
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Passeport Robot Industriel R-2000',
+                    text: 'Consultez la conformité de cet actif sur Aegis Circular.',
+                    url: window.location.href,
+                });
+            } catch (err) {
+                console.error('Share failed:', err);
+            }
+        } else {
+            await navigator.clipboard.writeText(window.location.href);
+            alert('Lien copié dans le presse-papier !');
+        }
+    };
+
+    const handleExport = async () => {
+        // Dynamic import to avoid SSR/build issues if lib is heavy, though here top-level is fine too.
+        // We'll use window.print() as a quick robust fallback, or html2pdf if available.
+        // For this environment, let's try a robust window.print() specific to the passport.
+        const element = document.getElementById('passport-content');
+        if (!element) {
+            window.print();
+            return;
+        }
+
+        // Simple Print logic is often better than complex PDF js for layouts like this
+        const originalContents = document.body.innerHTML;
+        document.body.innerHTML = element.innerHTML;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.location.reload(); // Reload to restore state listeners
+    };
+
     const mockAuditTrail: AuditEvent[] = [
         { id: 'a1', timestamp: '26 Oct 2023 14:30', user: 'Jean Dupont', action: text.audit.validated, details: 'Module 1: EN ISO 12100.' },
         { id: 'a2', timestamp: '22 Oct 2023 09:00', user: 'System', action: text.audit.check, details: 'Blockchain verified.' },
@@ -75,7 +109,7 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Passport Header Card */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200">
+            <div id="passport-content" className="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200">
                 <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 sm:p-8 text-white flex flex-col md:flex-row justify-between items-center">
                     <div className="flex items-center space-x-6">
                         {/* QR Code Mock */}
@@ -102,10 +136,16 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
                         </div>
                     </div>
                     <div className="mt-6 md:mt-0 flex space-x-3">
-                         <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg border border-white/10 transition-colors">
+                        <button
+                            onClick={handleShare}
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg border border-white/10 transition-colors transform active:scale-95"
+                        >
                             {text.share}
                         </button>
-                        <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg shadow-lg transition-colors flex items-center border border-slate-600">
+                        <button
+                            onClick={handleExport}
+                            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg shadow-lg transition-colors flex items-center border border-slate-600 transform active:scale-95"
+                        >
                             <ShieldCheckIcon className="h-4 w-4 mr-2" />
                             {text.export}
                         </button>
@@ -115,13 +155,13 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
                 {/* Tabs */}
                 <div className="border-b border-slate-200 px-6">
                     <nav className="-mb-px flex space-x-8">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('overview')}
                             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'overview' ? 'border-slate-800 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
                         >
                             {text.tabs.overview}
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('audit')}
                             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'audit' ? 'border-slate-800 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
                         >
@@ -144,7 +184,7 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
                                         ))}
                                     </div>
                                 </div>
-                                
+
                                 <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
                                     <h3 className="text-lg font-semibold text-slate-800 mb-4">{text.composition}</h3>
                                     <div className="space-y-4">
@@ -213,7 +253,7 @@ const CompliancePassportView: React.FC<CompliancePassportViewProps> = ({ lang, m
 
                     {activeTab === 'audit' && (
                         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-                             <table className="min-w-full divide-y divide-slate-200">
+                            <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{text.audit.date}</th>

@@ -1,106 +1,110 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
-// Ensure the API key is available as an environment variable
-// Vite requires import.meta.env for client-side environment variables
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 if (!apiKey) {
-    throw new Error("VITE_GEMINI_API_KEY environment variable not set. Please add it to your .env.local file.");
+    throw new Error("VITE_GEMINI_API_KEY environment variable not set.");
 }
 
-const ai = new GoogleGenAI({ apiKey });
+const genAI = new GoogleGenerativeAI(apiKey);
 
-// Gemini 2.5 Flash - Modèle stable et testé (production-ready)
-const model = 'gemini-2.5-flash';
+// Configuration robuste
+// Testé et validé: gemini-2.5-flash est disponible et performant.
+const MODEL_NAME = 'gemini-2.5-flash';
 
-// Configuration pour Google Search Grounding (recherche dynamique)
-// Permet à Gemini d'accéder à des informations récentes via Google Search
-const groundingTool = {
-    googleSearch: {}  // Syntaxe simplifiée pour activation
-};
+const modelInstance = genAI.getGenerativeModel({
+    model: MODEL_NAME,
+    safetySettings: [
+        {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+    ],
+});
 
 /**
- * Exécute une requête Gemini en streaming
- * @param prompt - La question/prompt de l'utilisateur
- * @param systemInstruction - Instructions système pour Gemini
- * @param useGrounding - Activer Google Search pour infos récentes (défaut: false)
+ * Exécute une requête Gemini en streaming avec mécanisme de retry (Exponential Backoff)
  */
 export const runQueryStream = async function* (
     prompt: string,
     systemInstruction: string,
     useGrounding: boolean = false
 ) {
-    try {
-        const requestConfig: any = {
-            model: model,
-            contents: prompt,
-            systemInstruction: systemInstruction,
-        };
+    let retries = 3;
+    let delay = 1000;
 
-        // Activer Google Search si demandé (pour données récentes)
-        if (useGrounding) {
-            requestConfig.tools = [groundingTool];
-        }
+    // Simulation tool grounding si supporté par le modèle (sinon ignoré par SDK std)
+    // Note: Le SDK @google/generative-ai gère les tools différemment.
+    // Pour l'instant on se concentre sur le texte pur pour la stabilité.
 
-        const response = await ai.models.generateContentStream(requestConfig);
+    while (retries > 0) {
+        try {
+            const result = await modelInstance.generateContentStream({
+                contents: [{ role: 'user', parts: [{ text: systemInstruction + "\n\n" + prompt }] }],
+                // Note: systemInstruction natif est supporté dans les modèles récents,
+                // mais l'injecter dans le prompt est souvent plus robuste cross-version.
+            });
 
-        for await (const chunk of response) {
-            if (chunk.text) {
-                yield chunk.text;
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                if (chunkText) {
+                    yield chunkText;
+                }
+            }
+            return; // Success
+        } catch (error: any) {
+            retries--;
+            console.error(`Gemini Stream Error (${retries} left):`, error);
+
+            const isOverloaded = error?.status === 503 || error?.message?.includes('503') || error?.message?.includes('overloaded');
+
+            if (isOverloaded && retries > 0) {
+                yield "⚠️ Trafic intense détecté. Reconnexion optimisée en cours...";
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+                continue;
+            }
+
+            if (retries === 0) {
+                yield "Désolé, le service est momentanément indisponible (Erreur Technique).";
             }
         }
-    } catch (error) {
-        console.error("Error calling Gemini API:", error);
-        yield "Désolé, une erreur s'est produite. Veuillez réessayer.";
     }
 };
 
 /**
  * Exécute une requête Gemini simple
- * @param prompt - La question/prompt de l'utilisateur
- * @param systemInstruction - Instructions système pour Gemini
- * @param useGrounding - Activer Google Search pour infos récentes (défaut: false)
  */
 export const runQuery = async (
     prompt: string,
     systemInstruction: string,
     useGrounding: boolean = false
 ) => {
-    try {
-        const requestConfig: any = {
-            model: model,
-            contents: prompt,
-            systemInstruction: systemInstruction,
-        };
+    let retries = 3;
+    let delay = 1000;
 
-        // Activer Google Search si demandé (pour données récentes)
-        if (useGrounding) {
-            requestConfig.tools = [groundingTool];
+    while (retries > 0) {
+        try {
+            const result = await modelInstance.generateContent({
+                contents: [{ role: 'user', parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
+            });
+            return result.response.text();
+        } catch (error: any) {
+            retries--;
+            console.error(`Gemini Query Error (${retries} left):`, error);
+            if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+                continue;
+            }
+            return "Erreur technique lors de la génération.";
         }
-
-        const response = await ai.models.generateContent(requestConfig);
-        return response.text;
-    } catch (error) {
-        console.error("Error calling Gemini API:", error);
-        return "Désolé, une erreur s'est produite. Veuillez réessayer.";
     }
+    return "Service indisponible.";
 };
 
-/**
- * Fonction spécialisée pour les questions sur la conformité réglementaire
- * Active automatiquement Google Search pour les règlements récents
- */
 export const runComplianceQuery = async (prompt: string) => {
-    const systemInstruction = `Tu es un expert en conformité européenne spécialisé dans :
-- RGPD (Règlement Général sur la Protection des Données)
-- AI Act (Règlement sur l'Intelligence Artificielle)
-- Data Act (Règlement sur les données)
-- Cyber Resilience Act
-- Et autres règlements européens récents
-
-Utilise Google Search pour trouver les informations les plus récentes.
-Cite toujours tes sources avec les numéros de règlement exacts et les dates.
-Si un règlement n'existe pas, indique-le clairement.`;
-
-    return runQuery(prompt, systemInstruction, true); // Active grounding
+    const systemInstruction = `Tu es un expert en conformité européenne (RGPD, AI Act, ESPR).
+    Réponds de manière précise, structurée et cite les articles de loi pertinents.`;
+    return runQuery(prompt, systemInstruction);
 };

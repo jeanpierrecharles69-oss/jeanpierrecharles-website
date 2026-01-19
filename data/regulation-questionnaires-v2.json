@@ -1,0 +1,147 @@
+{
+    "ai_act": {
+        "id": "2024/1689",
+        "fr": {
+            "titre": "AI Act - Règlement sur l'Intelligence Artificielle",
+            "emoji": "🤖",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Classification par niveau de risque (inacceptable, élevé, limité, minimal)",
+                    "Pratiques IA interdites : manipulation cognitive, scoring social",
+                    "Systèmes à haut risque : documentation, transparence, surveillance humaine",
+                    "Transparence pour IA générative (GPAI) et deepfakes",
+                    "Sanctions jusqu'à 7% du CA ou 35M€"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit/système utilise-t-il de l'intelligence artificielle ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, système IA intégré",
+                        "Oui, IA comme service",
+                        "Non, pas d'IA",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Dans quel secteur industriel opérez-vous ?",
+                    "type": "choice",
+                    "options": [
+                        "Fabrication/Manufacturing",
+                        "Santé/Medical",
+                        "Transport/Mobilité",
+                        "Services/Logiciels",
+                        "Énergie",
+                        "Autre",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Votre système IA prend-il des décisions impactant directement les personnes ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, décisions automatiques",
+                        "Oui, avec validation humaine",
+                        "Non, seulement aide à la décision",
+                        "Non applicable",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Types d'application IA concernés ?",
+                    "type": "multiple",
+                    "options": [
+                        "Vision par ordinateur",
+                        "Traitement langage naturel",
+                        "Prédiction/Analytics",
+                        "Robotique autonome",
+                        "Reconnaissance biométrique",
+                        "Autre"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "haut_risque": "Votre système IA semble être classé **HAUT RISQUE**. Vous devez : (1) Documentation technique complète, (2) Système de gestion des risques, (3) Surveillance humaine, (4) Traçabilité, (5) Marquage CE.",
+                "risque_limite": "Votre système IA a un **RISQUE LIMITÉ**. Obligations de transparence : informer les utilisateurs qu'ils interagissent avec une IA.",
+                "minimal": "Votre système semble à **RISQUE MINIMAL**. Pas d'obligations contraignantes mais suivez les bonnes pratiques."
+            }
+        },
+        "en": {
+            "titre": "AI Act - Artificial Intelligence Regulation",
+            "emoji": "🤖",
+            "resume_critique": {
+                "titre": "Critical Essential Requirements",
+                "points": [
+                    "Risk-based classification (unacceptable, high, limited, minimal)",
+                    "Prohibited AI practices: cognitive manipulation, social scoring",
+                    "High-risk systems: documentation, transparency, human oversight",
+                    "Transparency for generative AI (GPAI) and deepfakes",
+                    "Penalties up to 7% of turnover or €35M"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Does your product/system use artificial intelligence?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, integrated AI system",
+                        "Yes, AI as a service",
+                        "No, no AI",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "In which industrial sector do you operate?",
+                    "type": "choice",
+                    "options": [
+                        "Manufacturing",
+                        "Health/Medical",
+                        "Transport/Mobility",
+                        "Services/Software",
+                        "Energy",
+                        "Other",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Does your AI system make decisions directly impacting individuals?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, automated decisions",
+                        "Yes, with human validation",
+                        "No, only decision support",
+                        "Not applicable",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Types of AI applications concerned?",
+                    "type": "multiple",
+                    "options": [
+                        "Computer vision",
+                        "Natural language processing",
+                        "Prediction/Analytics",
+                        "Autonomous robotics",
+                        "Biometric recognition",
+                        "Other"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "haut_risque": "Your AI system appears to be classified as **HIGH-RISK**. You must: (1) Complete technical documentation, (2) Risk management system, (3) Human oversight, (4) Traceability, (5) CE marking.",
+                "risque_limite": "Your AI system has **LIMITED RISK**. Transparency obligations: inform users that they are interacting with AI.",
+                "minimal": "Your system appears to be **MINIMAL RISK**. No binding obligations but follow best practices."
+            }
+        }
+    }
+}

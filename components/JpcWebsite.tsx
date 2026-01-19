@@ -8,6 +8,16 @@ import { PuzzlePieceIcon } from './icons/PuzzlePieceIcon';
 import { GlobeAltIcon } from './icons/GlobeAltIcon';
 import { XMarkIcon } from './icons/XMarkIcon';
 
+// Images des expériences professionnelles
+const experienceImages = [
+    '/images/experiences/ai_journey.png',
+    '/images/experiences/autoliv.png',
+    '/images/experiences/forsee.png',
+    '/images/experiences/thales.png',
+    '/images/experiences/faurecia.png',
+    '/images/experiences/branson.png'
+];
+
 interface JpcWebsiteProps {
     lang: Language;
     setLang: (lang: Language) => void;
@@ -18,6 +28,8 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
     const text = t[lang].jpc;
     const [isLegalOpen, setIsLegalOpen] = useState(false);
     const [emailCopied, setEmailCopied] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+    const [showDiagnosticForm, setShowDiagnosticForm] = useState(false);
 
     const copyEmailToClipboard = async () => {
         try {
@@ -57,7 +69,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                     </div>
                     <div>
                         <h1 className="text-lg font-bold text-slate-900 leading-none tracking-tight">Jean-Pierre Charles</h1>
-                        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Industrie 5.0</span>
+                        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">Industrie Transformation 5.0</span>
                     </div>
                 </div>
 
@@ -102,7 +114,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider mb-8">
                         <GlobeAltIcon className="h-3.5 w-3.5 mr-2 text-slate-500" />
-                        <span>Expertise Européenne</span>
+                        <span>Expertise Certifiée | Conformité UE</span>
                     </div>
                     {/* Typography reduced and lighter */}
                     <h1 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight mb-8">
@@ -112,9 +124,9 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                         {text.hero.subtitle}
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="#contact" className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-base font-bold rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto">
+                        <button onClick={() => setShowDiagnosticForm(true)} className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-base font-bold rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto">
                             {text.hero.cta_talk}
-                        </a>
+                        </button>
                         <button onClick={onEnterApp} className="px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 text-base font-bold rounded-full shadow-sm hover:shadow-md transition-all w-full sm:w-auto flex items-center justify-center">
                             <SparklesIcon className="h-4 w-4 mr-2 text-slate-600" />
                             {text.hero.cta_app}
@@ -160,7 +172,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             </p>
                             <div className="mt-8 grid grid-cols-2 gap-4">
                                 <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">Empowerment</h4>
+                                    <h4 className="font-bold text-slate-900 text-base mb-1">Autonomie</h4>
                                     <p className="text-sm text-slate-600 font-medium tracking-tight">Redonner le pouvoir aux équipes par l'intelligence collective.</p>
                                 </div>
                                 <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
@@ -173,20 +185,28 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 </div>
             </section>
 
-            {/* Experience Section */}
             <section id="experience" className="py-24 bg-white">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row gap-12">
                         <div className="md:w-1/3">
-                            <h2 className="text-3xl font-bold text-slate-900 mb-6 sticky top-24">{text.experience.title}</h2>
-                            <p className="text-slate-600 mb-8 leading-relaxed font-medium">30 ans d'expertise technique et stratégique dans les secteurs Automobile, Énergie et Défense.</p>
+                            <h2 className="text-3xl font-bold text-slate-900 mb-4 sticky top-24">{text.experience.title}</h2>
+                            <p className="text-slate-600 mb-4 leading-relaxed font-medium text-sm italic">{text.experience.subtitle}</p>
+                            <a
+                                href={text.contact.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-all shadow-md mb-8"
+                            >
+                                <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                                Voir profil/parcours
+                            </a>
 
                             <div className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl">
                                 <h3 className="text-xl font-bold mb-4">{text.education.title}</h3>
                                 <div className="space-y-6">
                                     {text.education.items.map((item, idx) => (
-                                        <div key={idx} className="border-l-2 border-blue-500 pl-4">
-                                            <p className="text-xs font-bold text-blue-400 uppercase mb-1">{item.year}</p>
+                                        <div key={idx} className="border-l-2 border-blue-400 pl-4">
+                                            <p className="text-xs font-bold text-blue-300 uppercase mb-1">{item.year}</p>
                                             <p className="text-sm font-bold leading-tight mb-1">{item.school}</p>
                                             <p className="text-xs text-slate-400">{item.degree}</p>
                                         </div>
@@ -199,10 +219,25 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             {text.experience.items.map((item, idx) => (
                                 <div key={idx} className="relative pl-8 border-l border-slate-200 group">
                                     <div className="absolute left-[-1px] top-0 h-4 w-4 bg-white border-2 border-slate-900 rounded-full group-hover:bg-slate-900 transition-colors"></div>
-                                    <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
-                                        <h3 className="text-xl font-bold text-slate-900">{item.company}</h3>
-                                        <span className="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{item.period}</span>
+
+                                    {/* Image Badge + Titre */}
+                                    <div className="flex items-center gap-4 mb-2">
+                                        <img
+                                            src={experienceImages[idx]}
+                                            alt={item.company}
+                                            className="h-14 w-14 rounded-full object-cover border-2 border-blue-400 shadow-md hover:scale-110 transition-transform cursor-pointer"
+                                            onClick={() => setSelectedImage({ src: experienceImages[idx], alt: item.company })}
+                                            title="Cliquez pour agrandir"
+                                        />
+                                        <div className="flex-1 flex flex-col sm:flex-row sm:items-baseline justify-between">
+                                            <h3 className="text-xl font-bold text-slate-900">{item.company}</h3>
+                                            <span className="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{item.period}</span>
+                                        </div>
                                     </div>
+
+                                    {item.project && (
+                                        <p className="text-sm font-semibold text-blue-600 mb-2 italic">{item.project}</p>
+                                    )}
                                     <p className="text-lg font-bold text-blue-900 mb-3">{item.role}</p>
                                     <p className="text-slate-600 leading-relaxed font-medium">{item.desc}</p>
                                 </div>
@@ -245,8 +280,8 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
 
                             {/* Development Badge */}
                             <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
-                                <div className="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full border border-blue-400 shadow-lg">
-                                    v2.4.0-EU
+                                <div className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full border border-blue-300 shadow-lg">
+                                    v2.5.0-EU
                                 </div>
                                 <div className="px-3 py-1 bg-amber-500 text-slate-900 text-xs font-bold rounded-full animate-pulse">
                                     🚧 En développement
@@ -300,7 +335,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                                 {emailCopied ? '✓ Copié !' : '📋 Copier'}
                             </button>
 
-                            <a href={text.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile" title="Visitez mon profil LinkedIn" className="inline-flex items-center justify-center px-5 py-4 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all shadow-lg">
+                            <a href={text.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile" title="Visitez mon profil LinkedIn" className="inline-flex items-center justify-center px-5 py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-lg">
                                 <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                             </a>
                         </div>
@@ -375,8 +410,88 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                     </div>
                 </div>
             )}
+
+            {/* Modal Agrandissement Image */}
+            {selectedImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-4"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <button
+                        onClick={() => setSelectedImage(null)}
+                        className="absolute top-4 right-4 text-white hover:text-slate-300 transition-colors"
+                        aria-label="Fermer"
+                    >
+                        <XMarkIcon className="h-10 w-10" />
+                    </button>
+                    <img
+                        src={selectedImage.src}
+                        alt={selectedImage.alt}
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="absolute bottom-4 left-0 right-0 text-center text-white text-sm font-medium">
+                        {selectedImage.alt}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Formulaire Diagnostic */}
+            {showDiagnosticForm && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
+                    onClick={() => setShowDiagnosticForm(false)}
+                >
+                    <div
+                        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowDiagnosticForm(false)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                            aria-label="Fermer"
+                        >
+                            <XMarkIcon className="h-6 w-6" />
+                        </button>
+
+                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                            {lang === 'fr' ? 'Demande de Diagnostic Transformation Industrie 5.0' : 'Industry 5.0 Transformation Diagnostic Request'}
+                        </h2>
+                        <p className="text-slate-600 mb-6">
+                            {lang === 'fr'
+                                ? 'Cliquez sur le bouton ci-dessous pour envoyer votre demande par email. Le formulaire sera pré-rempli avec l\'objet.'
+                                : 'Click the button below to send your request by email. The form will be pre-filled with the subject.'}
+                        </p>
+
+                        <div className="bg-slate-50 rounded-lg p-6 mb-6 border border-slate-200">
+                            <p className="text-sm font-semibold text-slate-700 mb-3">
+                                {lang === 'fr' ? 'Informations pré-remplies :' : 'Pre-filled information:'}
+                            </p>
+                            <div className="space-y-2 text-sm text-slate-600">
+                                <p><strong>{lang === 'fr' ? 'À :' : 'To:'}</strong> contact@jeanpierrecharles.com</p>
+                                <p><strong>{lang === 'fr' ? 'Objet :' : 'Subject:'}</strong> Demande de Diagnostic Transformation Industrie 5.0</p>
+                            </div>
+                        </div>
+
+                        <a
+                            href={`mailto:contact@jeanpierrecharles.com?subject=${encodeURIComponent('Demande de Diagnostic Transformation Industrie 5.0')}&body=${encodeURIComponent('Bonjour,\n\nJe souhaiterais obtenir un diagnostic pour la transformation Industrie 5.0 de mon organisation.\n\nNom de l\'entreprise :\nSecteur d\'activité :\nPrincipaux enjeux :\n\nCordialement,')}`}
+                            className="w-full px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white text-base font-bold rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+                        >
+                            <DocumentTextIcon className="h-5 w-5 mr-2" />
+                            {lang === 'fr' ? 'Ouvrir Mon Client Email' : 'Open My Email Client'}
+                        </a>
+
+                        <p className="text-xs text-slate-500 text-center mt-4">
+                            {lang === 'fr'
+                                ? 'Votre client email par défaut sera ouvert avec le formulaire pré-rempli'
+                                : 'Your default email client will open with the pre-filled form'}
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default JpcWebsite;
+
