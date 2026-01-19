@@ -69,7 +69,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                     </div>
                     <div>
                         <h1 className="text-lg font-bold text-slate-900 leading-none tracking-tight">Jean-Pierre Charles</h1>
-                        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">Industrie Transformation 5.0</span>
+                        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">{lang === 'fr' ? 'Industrie Transformation 5.0' : 'Industrial Transformation 5.0'}</span>
                     </div>
                 </div>
 
@@ -114,7 +114,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider mb-8">
                         <GlobeAltIcon className="h-3.5 w-3.5 mr-2 text-slate-500" />
-                        <span>Expertise Certifiée | Conformité UE</span>
+                        <span>{lang === 'fr' ? 'Expertise Certifiée | Conformité UE' : 'Certified Expert | EU Compliance'}</span>
                     </div>
                     {/* Typography reduced and lighter */}
                     <h1 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight mb-8">
@@ -172,12 +172,12 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             </p>
                             <div className="mt-8 grid grid-cols-2 gap-4">
                                 <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">Autonomie</h4>
-                                    <p className="text-sm text-slate-600 font-medium tracking-tight">Redonner le pouvoir aux équipes par l'intelligence collective.</p>
+                                    <h4 className="font-bold text-slate-900 text-base mb-1">{lang === 'fr' ? 'Autonomie' : 'Empowerment'}</h4>
+                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? "Redonner le pouvoir aux équipes par l'intelligence collective." : "Empowering teams through collective intelligence."}</p>
                                 </div>
                                 <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">Robustesse</h4>
-                                    <p className="text-sm text-slate-600 font-medium tracking-tight">Des systèmes mécatroniques fiables et durables (Standard VDA/IATF).</p>
+                                    <h4 className="font-bold text-slate-900 text-base mb-1">{lang === 'fr' ? 'Robustesse' : 'Reliability'}</h4>
+                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? 'Des systèmes mécatroniques fiables et durables (Standard VDA/IATF).' : 'Reliable and sustainable mechatronic systems (VDA/IATF Standard).'}</p>
                                 </div>
                             </div>
                         </div>

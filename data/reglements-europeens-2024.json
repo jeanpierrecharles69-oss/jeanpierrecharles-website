@@ -153,7 +153,32 @@
                 "privacy"
             ],
             "source": "Journal officiel de l'Union européenne, L 4 mai 2016"
+        },
+        {
+            "numero": "305/2011",
+            "nom_complet": "Règlement (UE) n° 305/2011 du Parlement européen et du Conseil du 9 mars 2011",
+            "nom_court": "CPR - Construction Products Regulation",
+            "nom_francais": "Règlement sur les produits de construction",
+            "date_adoption": "2011-03-09",
+            "date_publication": "2011-04-04",
+            "date_entree_vigueur": "2013-07-01",
+            "sujet": "Marquage CE, Déclaration des Performances, Produits de construction",
+            "description": "Fixe les conditions harmonisées de commercialisation pour les produits de construction. Établit des règles sur l'expression des performances et sur l'utilisation du marquage CE. Définit 7 exigences fondamentales (résistance mécanique, sécurité incendie, hygiène, sécurité d'utilisation, isolation acoustique, économie d'énergie, utilisation durable des ressources). Version consolidée au 17 novembre 2024, incluant modifications par règlement délégué (UE) 2024/2769.",
+            "champ_application": "Produits de construction : tout produit ou kit fabriqué et mis sur le marché en vue d'être incorporé de façon durable dans des ouvrages de construction (bâtiments et ouvrages de génie civil)",
+            "mots_cles": [
+                "construction",
+                "marquage CE",
+                "DoP",
+                "Déclaration des Performances",
+                "bâtiment",
+                "génie civil",
+                "normes harmonisées",
+                "ETA",
+                "traçabilité",
+                "performance"
+            ],
+            "source": "Journal officiel de l'Union européenne, L 88, 4 avril 2011 (consolidé au 17 novembre 2024)"
         }
     ],
-    "derniere_mise_a_jour": "2026-01-17"
+    "derniere_mise_a_jour": "2026-01-19"
 }

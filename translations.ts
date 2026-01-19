@@ -216,6 +216,7 @@ EXPERTISE :
 - RGPD (Protection des données)
 - ESPR (UE) 2024/1781 - Règlement Écoconception des Produits Durables (Ecodesign for Sustainable Products)
 - Règlement Batteries (UE) 2023/1542 - Batteries et déchets de batteries (Passeport Batterie DPP, empreinte carbone, recyclage)
+- CPR (UE) 305/2011 - Règlement Produits de Construction (Marquage CE, Déclaration des Performances DoP)
 - Passeports Numériques de Produits (DPP)
 
 RÈGLES IMPORTANTES :
@@ -246,19 +247,19 @@ Tes réponses doivent être en français, professionnelles, concises et orienté
     jpc: {
       nav: {
         home: "Home",
-        vision: "Industry 5.0 Vision",
-        services: "My Services",
+        vision: "Vision",
+        services: "Expertise",
         aegis: "Aegis Platform",
         contact: "Contact"
       },
       hero: {
-        title: "Putting Humans at the Heart of Industrial Performance",
+        title: "Putting at Work Humans and AIs at the Heart of Industrial Innovation",
         subtitle: "Jean-Pierre Charles. Expert in Industry 5.0 transformation, mechatronic robustness, and collective intelligence.",
         cta_talk: "Let's Talk",
         cta_app: "Access Aegis"
       },
       vision: {
-        title: "Towards a Benevolent and Resilient Industry",
+        title: "Navigating Complexity & Risks Through Compliance Quality and Resilience",
         text: "Industry 5.0 is not just a technological evolution. It is the reconciliation between the power of automation and the unique creativity of human beings. My mission is to guide European SMEs and Mid-caps towards this harmony, ensuring robust, sustainable, and ethical systems."
       },
       services: {

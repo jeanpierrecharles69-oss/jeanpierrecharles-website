@@ -264,6 +264,12 @@ RÈGLES STRICTES :
         >
           🔋 Batteries
         </button>
+        <button
+          onClick={() => handleQuickQuestion(lang === 'fr' ? 'Quelles sont les exigences du CPR 305/2011 pour les produits de construction ?' : 'What are the CPR 305/2011 requirements for construction products?')}
+          className="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer transform hover:scale-105"
+        >
+          🏗️ CPR
+        </button>
       </div>
 
       {/* Suggestions de questions */}
