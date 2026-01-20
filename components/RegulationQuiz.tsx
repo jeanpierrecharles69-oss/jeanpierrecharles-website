@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
 import questionnaires from '../data/regulation-questionnaires.json';
+import { Language } from '../translations';
 
 interface RegulationQuizProps {
-    regulationKey: 'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries';
+    regulationKey: 'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries' | 'cpr';
     onSubmit: (responses: Record<string, string | string[]>, context: string) => void;
     onClose: () => void;
+    lang: Language;
 }
 
-const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit, onClose }) => {
-    const config = questionnaires[regulationKey];
+const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit, onClose, lang }) => {
+    // @ts-ignore - Dynamic key access with lang
+    const config = questionnaires[regulationKey][lang];
+    const text = lang === 'fr' ? {
+        close: 'Fermer',
+        nextStep: 'Prochaine étape :',
+        nextStepDesc: 'Répondez à 3-5 questions rapides pour obtenir une analyse personnalisée de votre situation.',
+        startQuiz: 'Commencer le questionnaire →',
+        back: '← Retour',
+        generate: 'Générer l\'analyse →',
+        analyzing: 'Analyse de votre situation en cours...'
+    } : {
+        close: 'Close',
+        nextStep: 'Next step:',
+        nextStepDesc: 'Answer 3-5 quick questions to get a personalized analysis of your situation.',
+        startQuiz: 'Start Quiz →',
+        back: '← Back',
+        generate: 'Generate Analysis →',
+        analyzing: 'Analyzing your situation...'
+    };
     const [responses, setResponses] = useState<Record<string, string | string[]>>({});
     const [currentStep, setCurrentStep] = useState<'resume' | 'questions' | 'generating'>('resume');
 
@@ -20,9 +40,12 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
         setCurrentStep('generating');
 
         // Générer le contexte enrichi
+        const regulationLabel = lang === 'fr' ? 'Règlement' : 'Regulation';
+        const contextLabel = lang === 'fr' ? 'Secteur/Contexte utilisateur :' : 'Sector/User Context:';
+
         const contextLines = [
-            `Règlement : ${config.titre}`,
-            `Secteur/Contexte utilisateur :`
+            `${regulationLabel}: ${config.titre}`,
+            contextLabel
         ];
 
         config.questions.forEach((q, idx) => {
@@ -54,7 +77,7 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                         </div>
                         <button
                             onClick={onClose}
-                            aria-label="Fermer"
+                            aria-label={text.close}
                             className="p-2 hover:bg-white/20 rounded-full transition-colors"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,8 +108,7 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
 
                             <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
                                 <p className="text-sm text-blue-900">
-                                    💡 <strong>Prochaine étape :</strong> Répondez à 3-5 questions rapides pour obtenir
-                                    une analyse personnalisée de votre situation.
+                                    💡 <strong>{text.nextStep}</strong> {text.nextStepDesc}
                                 </p>
                             </div>
 
@@ -94,7 +116,7 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                 onClick={() => setCurrentStep('questions')}
                                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                             >
-                                Commencer le questionnaire →
+                                {text.startQuiz}
                             </button>
                         </div>
                     )}
@@ -175,26 +197,48 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                     onClick={() => setCurrentStep('resume')}
                                     className="flex-1 border-2 border-slate-300 text-slate-700 py-3 px-6 rounded-xl font-semibold hover:bg-slate-50 transition-all"
                                 >
-                                    ← Retour
+                                    {text.back}
                                 </button>
                                 <button
                                     onClick={handleSubmit}
                                     disabled={Object.keys(responses).length === 0}
                                     className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Générer l'analyse →
+                                    {text.generate}
                                 </button>
                             </div>
                         </div>
                     )}
 
                     {currentStep === 'generating' && (
-                        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                        <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                            {/* Animated loader */}
                             <div className="relative">
-                                <div className="w-16 h-16 border-4 border-blue-200 rounded-full"></div>
-                                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                                <div className="w-20 h-20 border-4 border-blue-200 rounded-full"></div>
+                                <div className="absolute top-0 left-0 w-20 h-20 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                                {/* Pulse effect */}
+                                <div className="absolute top-0 left-0 w-20 h-20 border-4 border-blue-400 rounded-full border-t-transparent animate-ping opacity-20"></div>
                             </div>
-                            <p className="text-slate-600 font-medium">Analyse de votre situation en cours...</p>
+
+                            {/* Main message */}
+                            <div className="text-center space-y-2">
+                                <p className="text-lg text-slate-800 font-semibold">{text.analyzing}</p>
+                                <p className="text-sm text-slate-500">
+                                    {lang === 'fr'
+                                        ? '⏱️ Temps estimé : 5-10 secondes'
+                                        : '⏱️ Estimated time: 5-10 seconds'}
+                                </p>
+                            </div>
+
+                            {/* Progress hint */}
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                <span>
+                                    {lang === 'fr'
+                                        ? 'Analyse approfondie en cours...'
+                                        : 'In-depth analysis in progress...'}
+                                </span>
+                            </div>
                         </div>
                     )}
                 </div>

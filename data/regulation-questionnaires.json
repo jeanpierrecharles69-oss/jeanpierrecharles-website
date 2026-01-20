@@ -1,421 +1,1114 @@
 {
     "ai_act": {
-        "id": "2024/1689",
-        "titre": "AI Act - Règlement sur l'Intelligence Artificielle",
-        "emoji": "🤖",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Classification par niveau de risque (inacceptable, élevé, limité, minimal)",
-                "Pratiques IA interdites : manipulation cognitive, scoring social",
-                "Systèmes à haut risque : documentation, transparence, surveillance humaine",
-                "Transparence pour IA générative (GPAI) et deepfakes",
-                "Sanctions jusqu'à 7% du CA ou 35M€"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Votre produit/système utilise-t-il de l'intelligence artificielle ?",
-                "type": "choice",
-                "options": [
-                    "Oui, système IA intégré",
-                    "Oui, IA comme service",
-                    "Non, pas d'IA",
-                    "Je ne sais pas"
+        "fr": {
+            "id": "2024/1689",
+            "titre": "AI Act - Règlement sur l'Intelligence Artificielle",
+            "emoji": "🤖",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Classification par niveau de risque (inacceptable, élevé, limité, minimal)",
+                    "Pratiques IA interdites : manipulation cognitive, scoring social",
+                    "Systèmes à haut risque : documentation, transparence, surveillance humaine",
+                    "Transparence pour IA générative (GPAI) et deepfakes",
+                    "Sanctions jusqu'à 7% du CA ou 35M€"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Dans quel secteur industriel opérez-vous ?",
-                "type": "choice",
-                "options": [
-                    "Fabrication/Manufacturing",
-                    "Santé/Medical",
-                    "Transport/Mobilité",
-                    "Services/Logiciels",
-                    "Énergie",
-                    "Autre",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "Votre système IA prend-il des décisions impactant directement les personnes ?",
-                "type": "choice",
-                "options": [
-                    "Oui, décisions automatiques",
-                    "Oui, avec validation humaine",
-                    "Non, seulement aide à la décision",
-                    "Non applicable",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Types d'application IA concernés ?",
-                "type": "multiple",
-                "options": [
-                    "Vision par ordinateur",
-                    "Traitement langage naturel",
-                    "Prédiction/Analytics",
-                    "Robotique autonome",
-                    "Reconnaissance biométrique",
-                    "Autre"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit/système utilise-t-il de l'intelligence artificielle ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, système IA intégré",
+                        "Oui, IA comme service",
+                        "Non, pas d'IA",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Dans quel secteur industriel opérez-vous ?",
+                    "type": "choice",
+                    "options": [
+                        "Fabrication/Manufacturing",
+                        "Santé/Medical",
+                        "Transport/Mobilité",
+                        "Services/Logiciels",
+                        "Énergie",
+                        "Autre",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Votre système IA prend-il des décisions impactant directement les personnes ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, décisions automatiques",
+                        "Oui, avec validation humaine",
+                        "Non, seulement aide à la décision",
+                        "Non applicable",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Types d'application IA concernés ?",
+                    "type": "multiple",
+                    "options": [
+                        "Vision par ordinateur",
+                        "Traitement langage naturel",
+                        "Prédiction/Analytics",
+                        "Robotique autonome",
+                        "Reconnaissance biométrique",
+                        "Autre"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "haut_risque": "Votre système IA semble être classé **HAUT RISQUE**. Vous devez : (1) Documentation technique complète, (2) Système de gestion des risques, (3) Surveillance humaine, (4) Traçabilité, (5) Marquage CE.",
+                "risque_limite": "Votre système IA a un **RISQUE LIMITÉ**. Obligations de transparence : informer les utilisateurs qu'ils interagissent avec une IA.",
+                "minimal": "Votre système semble à **RISQUE MINIMAL**. Pas d'obligations contraignantes mais suivez les bonnes pratiques."
             }
-        ],
-        "templates_reponse": {
-            "haut_risque": "Votre système IA semble être classé **HAUT RISQUE**. Vous devez : (1) Documentation technique complète, (2) Système de gestion des risques, (3) Surveillance humaine, (4) Traçabilité, (5) Marquage CE.",
-            "risque_limite": "Votre système IA a un **RISQUE LIMITÉ**. Obligations de transparence : informer les utilisateurs qu'ils interagissent avec une IA.",
-            "minimal": "Votre système semble à **RISQUE MINIMAL**. Pas d'obligations contraignantes mais suivez les bonnes pratiques."
+        },
+        "en": {
+            "id": "2024/1689",
+            "titre": "AI Act - Artificial Intelligence Regulation",
+            "emoji": "🤖",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Risk-based classification (unacceptable, high, limited, minimal)",
+                    "Prohibited AI practices: cognitive manipulation, social scoring",
+                    "High-risk systems: documentation, transparency, human oversight",
+                    "Transparency for General Purpose AI (GPAI) and deepfakes",
+                    "Fines up to 7% of global turnover or €35M"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Does your product/system use artificial intelligence?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, embedded AI system",
+                        "Yes, AI as a Service",
+                        "No, no AI",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "In which industrial sector do you operate?",
+                    "type": "choice",
+                    "options": [
+                        "Manufacturing",
+                        "Healthcare/Medical",
+                        "Transport/Mobility",
+                        "Services/Software",
+                        "Energy",
+                        "Other",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Does your AI system make decisions directly impacting people?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, automated decisions",
+                        "Yes, with human validation",
+                        "No, decision support only",
+                        "Not applicable",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Types of AI applications involved?",
+                    "type": "multiple",
+                    "options": [
+                        "Computer Vision",
+                        "Natural Language Processing",
+                        "Prediction/Analytics",
+                        "Autonomous Robotics",
+                        "Biometric Recognition",
+                        "Other"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "haut_risque": "Your AI system appears to be classified as **HIGH RISK**. You must: (1) Complete technical documentation, (2) Risk management system, (3) Human oversight, (4) Traceability, (5) CE Marking.",
+                "risque_limite": "Your AI system has **LIMITED RISK**. Transparency obligations: inform users they are interacting with an AI.",
+                "minimal": "Your system appears to be **MINIMAL RISK**. No binding obligations but follow best practices."
+            }
         }
     },
     "machinery": {
-        "id": "2023/1230",
-        "titre": "Règlement Machines 2023/1230",
-        "emoji": "⚙️",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Remplace directive 2006/42/CE depuis janvier 2027",
-                "Exigences essentielles de santé et sécurité (EHSS)",
-                "Déclaration UE de conformité + marquage CE obligatoire",
-                "Notice d'instructions en langue de l'utilisateur",
-                "Machines avec IA : évaluation risques spécifiques"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Quel type de machine fabriquez-vous ?",
-                "type": "choice",
-                "options": [
-                    "Machine industrielle",
-                    "Équipement de levage",
-                    "Robot collaboratif/industriel",
-                    "Composant de sécurité",
-                    "Autre équipement",
-                    "Je ne sais pas"
+        "fr": {
+            "id": "2023/1230",
+            "titre": "Règlement Machines 2023/1230",
+            "emoji": "⚙️",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Remplace directive 2006/42/CE depuis janvier 2027",
+                    "Exigences essentielles de santé et sécurité (EHSS)",
+                    "Déclaration UE de conformité + marquage CE obligatoire",
+                    "Notice d'instructions en langue de l'utilisateur",
+                    "Machines avec IA : évaluation risques spécifiques"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Votre machine intègre-t-elle de l'intelligence artificielle ?",
-                "type": "choice",
-                "options": [
-                    "Oui, IA embarquée",
-                    "Oui, connexion IA cloud",
-                    "Non",
-                    "Prévu dans le futur",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "La machine présente-t-elle des risques significatifs ?",
-                "type": "multiple",
-                "options": [
-                    "Risques mécaniques",
-                    "Risques électriques",
-                    "Risques chimiques",
-                    "Interaction homme-robot",
-                    "Pas de risque majeur"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Avez-vous déjà une déclaration CE pour une version antérieure ?",
-                "type": "choice",
-                "options": [
-                    "Oui, directive 2006/42/CE",
-                    "Oui, autre",
-                    "Non, nouveau produit",
-                    "En cours",
-                    "Je ne sais pas"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Quel type de machine fabriquez-vous ?",
+                    "type": "choice",
+                    "options": [
+                        "Machine industrielle",
+                        "Équipement de levage",
+                        "Robot collaboratif/industriel",
+                        "Composant de sécurité",
+                        "Autre équipement",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Votre machine intègre-t-elle de l'intelligence artificielle ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, IA embarquée",
+                        "Oui, connexion IA cloud",
+                        "Non",
+                        "Prévu dans le futur",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "La machine présente-t-elle des risques significatifs ?",
+                    "type": "multiple",
+                    "options": [
+                        "Risques mécaniques",
+                        "Risques électriques",
+                        "Risques chimiques",
+                        "Interaction homme-robot",
+                        "Pas de risque majeur"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Avez-vous déjà une déclaration CE pour une version antérieure ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, directive 2006/42/CE",
+                        "Oui, autre",
+                        "Non, nouveau produit",
+                        "En cours",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "avec_ia": "⚠️ Machine avec IA : vous devez faire une **évaluation des risques spécifique** pour l'IA (Art. 24). Documentation technique détaillée + analyse des limites de l'IA.",
+                "standard": "Processus standard : (1) Analyse des risques, (2) Conception selon EHSS, (3) Documentation technique, (4) Déclaration UE conformité, (5) Marquage CE."
             }
-        ],
-        "templates_reponse": {
-            "avec_ia": "⚠️ Machine avec IA : vous devez faire une **évaluation des risques spécifique** pour l'IA (Art. 24). Documentation technique détaillée + analyse des limites de l'IA.",
-            "standard": "Processus standard : (1) Analyse des risques, (2) Conception selon EHSS, (3) Documentation technique, (4) Déclaration UE conformité, (5) Marquage CE."
+        },
+        "en": {
+            "id": "2023/1230",
+            "titre": "Machinery Regulation 2023/1230",
+            "emoji": "⚙️",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Replaces Directive 2006/42/EC from January 2027",
+                    "Essential Health and Safety Requirements (EHSR)",
+                    "EU Declaration of Conformity + mandatory CE marking",
+                    "Instructions in user's language",
+                    "Machines with AI: specific risk assessment"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "What type of machine do you manufacture?",
+                    "type": "choice",
+                    "options": [
+                        "Industrial Machine",
+                        "Lifting Equipment",
+                        "Collaborative/Industrial Robot",
+                        "Safety Component",
+                        "Other Equipment",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Does your machine integrate artificial intelligence?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, embedded AI",
+                        "Yes, cloud AI connection",
+                        "No",
+                        "Planned in future",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Does the machine present significant risks?",
+                    "type": "multiple",
+                    "options": [
+                        "Mechanical risks",
+                        "Electrical risks",
+                        "Chemical risks",
+                        "Human-Robot Interaction",
+                        "No major risk"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Do you already have a CE declaration for a previous version?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, Directive 2006/42/EC",
+                        "Yes, other",
+                        "No, new product",
+                        "In progress",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "avec_ia": "⚠️ Machine with AI: you must perform a **specific risk assessment** for AI (Art. 24). Detailed technical documentation + analysis of AI limits.",
+                "standard": "Standard process: (1) Risk analysis, (2) Design according to EHSR, (3) Technical documentation, (4) EU Declaration of Conformity, (5) CE Marking."
+            }
         }
     },
     "gdpr": {
-        "id": "2016/679",
-        "titre": "RGPD - Protection des Données",
-        "emoji": "🔒",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Traitement licite : base légale (consentement, contrat, intérêt légitime...)",
-                "Droits des personnes : accès, rectification, effacement, portabilité",
-                "Privacy by design et by default obligatoire",
-                "Analyse d'Impact (AIPD) pour risques élevés",
-                "Sanctions jusqu'à 4% CA ou 20M€"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Votre produit/service collecte-t-il des données personnelles ?",
-                "type": "choice",
-                "options": [
-                    "Oui, données identifiantes",
-                    "Oui, données sensibles (santé, biométrie...)",
-                    "Oui, données comportementales",
-                    "Non",
-                    "Je ne sais pas"
+        "fr": {
+            "id": "2016/679",
+            "titre": "RGPD - Protection des Données",
+            "emoji": "🔒",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Traitement licite : base légale (consentement, contrat, intérêt légitime...)",
+                    "Droits des personnes : accès, rectification, effacement, portabilité",
+                    "Privacy by design et by default obligatoire",
+                    "Analyse d'Impact (AIPD) pour risques élevés",
+                    "Sanctions jusqu'à 4% CA ou 20M€"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Quel est le volume approximatif de personnes concernées ?",
-                "type": "choice",
-                "options": [
-                    "< 100",
-                    "100 - 1000",
-                    "1000 - 10 000",
-                    "> 10 000",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "Traitez-vous des données sensibles ?",
-                "type": "multiple",
-                "options": [
-                    "Santé",
-                    "Données biométriques",
-                    "Données raciales/ethniques",
-                    "Opinions politiques",
-                    "Non"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Faites-vous appel à des sous-traitants pour traiter les données ?",
-                "type": "choice",
-                "options": [
-                    "Oui, cloud/hébergement",
-                    "Oui, analytics/marketing",
-                    "Oui, autre",
-                    "Non, tout interne",
-                    "Je ne sais pas"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit/service collecte-t-il des données personnelles ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, données identifiantes",
+                        "Oui, données sensibles (santé, biométrie...)",
+                        "Oui, données comportementales",
+                        "Non",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Quel est le volume approximatif de personnes concernées ?",
+                    "type": "choice",
+                    "options": [
+                        "< 100",
+                        "100 - 1000",
+                        "1000 - 10 000",
+                        "> 10 000",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Traitez-vous des données sensibles ?",
+                    "type": "multiple",
+                    "options": [
+                        "Santé",
+                        "Données biométriques",
+                        "Données raciales/ethniques",
+                        "Opinions politiques",
+                        "Non"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Faites-vous appel à des sous-traitants pour traiter les données ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, cloud/hébergement",
+                        "Oui, analytics/marketing",
+                        "Oui, autre",
+                        "Non, tout interne",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "risque_eleve": "⚠️ **AIPD requise** (Analyse d'Impact Protection Données). Vous devez : (1) Nommer un DPO, (2) Registre des traitements, (3) Clauses contractuelles sous-traitants.",
+                "standard": "Actions : (1) Registre des traitements, (2) Politique de confidentialité, (3) Procédures droits personnes, (4) Sécurité données (chiffrement, accès)."
             }
-        ],
-        "templates_reponse": {
-            "risque_eleve": "⚠️ **AIPD requise** (Analyse d'Impact Protection Données). Vous devez : (1) Nommer un DPO, (2) Registre des traitements, (3) Clauses contractuelles sous-traitants.",
-            "standard": "Actions : (1) Registre des traitements, (2) Politique de confidentialité, (3) Procédures droits personnes, (4) Sécurité données (chiffrement, accès)."
+        },
+        "en": {
+            "id": "2016/679",
+            "titre": "GDPR - General Data Protection Regulation",
+            "emoji": "🔒",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Lawful processing: legal basis (consent, contract, legitimate interest...)",
+                    "Data subject rights: access, rectification, erasure, portability",
+                    "Privacy by design and by default mandatory",
+                    "Data Protection Impact Assessment (DPIA) for high risks",
+                    "Fines up to 4% of global turnover or €20M"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Does your product/service collect personal data?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, identifying data",
+                        "Yes, sensitive data (health, biometrics...)",
+                        "Yes, behavioral data",
+                        "No",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "What is the approximate volume of data subjects?",
+                    "type": "choice",
+                    "options": [
+                        "< 100",
+                        "100 - 1000",
+                        "1000 - 10 000",
+                        "> 10 000",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Do you process sensitive data?",
+                    "type": "multiple",
+                    "options": [
+                        "Health",
+                        "Biometric data",
+                        "Racial/Ethnic data",
+                        "Political opinions",
+                        "No"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Do you use processors (subcontractors) to process data?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, cloud/hosting",
+                        "Yes, analytics/marketing",
+                        "Yes, other",
+                        "No, all internal",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "risque_eleve": "⚠️ **DPIA Required** (Data Protection Impact Assessment). You must: (1) Appoint a DPO, (2) Record of processing activities, (3) Processor contractual clauses.",
+                "standard": "Actions: (1) Record of processing activities, (2) Privacy policy, (3) Data subject rights procedures, (4) Data security (encryption, access)."
+            }
         }
     },
     "cra": {
-        "id": "2024/2847",
-        "titre": "CRA - Cyber Resilience Act",
-        "emoji": "🛡️",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Sécurité by design pour produits numériques",
-                "Gestion vulnérabilités pendant cycle de vie (min 5 ans)",
-                "Déclaration exploitée activement sous 24h",
-                "Mises à jour sécurité automatiques ou notifiées",
-                "Marquage CE pour produits critiques classe I/II"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Votre produit comporte-t-il des éléments numériques ?",
-                "type": "multiple",
-                "options": [
-                    "Logiciel embarqué",
-                    "Firmware",
-                    "Application cloud/SaaS",
-                    "Appareil IoT/connecté",
-                    "Non"
+        "fr": {
+            "id": "2024/2847",
+            "titre": "CRA - Cyber Resilience Act",
+            "emoji": "🛡️",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Sécurité by design pour produits numériques",
+                    "Gestion vulnérabilités pendant cycle de vie (min 5 ans)",
+                    "Déclaration exploitée activement sous 24h",
+                    "Mises à jour sécurité automatiques ou notifiées",
+                    "Marquage CE pour produits critiques classe I/II"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Le produit peut-il se connecter à Internet ou un réseau ?",
-                "type": "choice",
-                "options": [
-                    "Oui, connexion permanente",
-                    "Oui, connexion occasionnelle",
-                    "Non, autonome",
-                    "Via un intermédiaire",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "Le produit traite-t-il des données sensibles ou critiques ?",
-                "type": "choice",
-                "options": [
-                    "Oui, santé/sécurité",
-                    "Oui, industriel critique",
-                    "Oui, données personnelles",
-                    "Non",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Prévoyez-vous des mises à jour de sécurité ?",
-                "type": "choice",
-                "options": [
-                    "Oui, automatiques",
-                    "Oui, manuelles utilisateur",
-                    "Non, produit figé",
-                    "Pas encore défini",
-                    "Je ne sais pas"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit comporte-t-il des éléments numériques ?",
+                    "type": "multiple",
+                    "options": [
+                        "Logiciel embarqué",
+                        "Firmware",
+                        "Application cloud/SaaS",
+                        "Appareil IoT/connecté",
+                        "Non"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Le produit peut-il se connecter à Internet ou un réseau ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, connexion permanente",
+                        "Oui, connexion occasionnelle",
+                        "Non, autonome",
+                        "Via un intermédiaire",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Le produit traite-t-il des données sensibles ou critiques ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, santé/sécurité",
+                        "Oui, industriel critique",
+                        "Oui, données personnelles",
+                        "Non",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Prévoyez-vous des mises à jour de sécurité ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, automatiques",
+                        "Oui, manuelles utilisateur",
+                        "Non, produit figé",
+                        "Pas encore défini",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "classe_i_ii": "⚠️ **Produit critique** (Classe I ou II). Exigences renforcées : (1) Évaluation tierce partie, (2) Marquage CE, (3) SBOM (Software Bill of Materials).",
+                "standard": "Actions : (1) Secure by design, (2) Procédure gestion vulnérabilités, (3) Plan mises à jour sécurité, (4) Documentation technique."
             }
-        ],
-        "templates_reponse": {
-            "classe_i_ii": "⚠️ **Produit critique** (Classe I ou II). Exigences renforcées : (1) Évaluation tierce partie, (2) Marquage CE, (3) SBOM (Software Bill of Materials).",
-            "standard": "Actions : (1) Secure by design, (2) Procédure gestion vulnérabilités, (3) Plan mises à jour sécurité, (4) Documentation technique."
+        },
+        "en": {
+            "id": "2024/2847",
+            "titre": "CRA - Cyber Resilience Act",
+            "emoji": "🛡️",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Security by design for digital products",
+                    "Vulnerability management during lifecycle (min 5 years)",
+                    "Reporting of actively exploited vulnerabilities within 24h",
+                    "Automatic or notified security updates",
+                    "CE Marking for Class I/II critical products"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Does your product contain digital elements?",
+                    "type": "multiple",
+                    "options": [
+                        "Embedded software",
+                        "Firmware",
+                        "Cloud/SaaS Application",
+                        "IoT/Connected Device",
+                        "No"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Can the product connect to the Internet or a network?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, permanent connection",
+                        "Yes, occasional connection",
+                        "No, standalone",
+                        "Via an intermediary",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Does the product process sensitive or critical data?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, health/safety",
+                        "Yes, critical industrial",
+                        "Yes, personal data",
+                        "No",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Do you plan for security updates?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, automatic",
+                        "Yes, manual user action",
+                        "No, frozen product",
+                        "Not defined yet",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "classe_i_ii": "⚠️ **Critical Product** (Class I or II). Enhanced requirements: (1) Third-party assessment, (2) CE Marking, (3) SBOM (Software Bill of Materials).",
+                "standard": "Actions: (1) Secure by design, (2) Vulnerability management procedure, (3) Security update plan, (4) Technical documentation."
+            }
         }
     },
     "espr": {
-        "id": "2024/1781",
-        "titre": "ESPR - Écoconception Produits Durables",
-        "emoji": "♻️",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Passeport Numérique Produit (DPP) obligatoire (calendrier par secteur)",
-                "Exigences écoconception : durabilité, réparabilité, recyclabilité",
-                "Traçabilité : empreinte carbone, matériaux, origine",
-                "Interdiction destruction invendus (textiles, électronique...)",
-                "Application progressive : textiles 2026, électronique 2027"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Dans quelle catégorie de produits êtes-vous ?",
-                "type": "choice",
-                "options": [
-                    "Électronique/Électrique",
-                    "Textile/Habillement",
-                    "Mobilier",
-                    "Biens industriels",
-                    "Autre",
-                    "Je ne sais pas"
+        "fr": {
+            "id": "2024/1781",
+            "titre": "ESPR - Écoconception Produits Durables",
+            "emoji": "♻️",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Passeport Numérique Produit (DPP) obligatoire (calendrier par secteur)",
+                    "Exigences écoconception : durabilité, réparabilité, recyclabilité",
+                    "Traçabilité : empreinte carbone, matériaux, origine",
+                    "Interdiction destruction invendus (textiles, électronique...)",
+                    "Application progressive : textiles 2026, électronique 2027"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Connaissez-vous l'empreinte carbone de votre produit ?",
-                "type": "choice",
-                "options": [
-                    "Oui, calculée (cradle-to-gate)",
-                    "Oui, estimée",
-                    "Non, pas encore",
-                    "En cours de calcul",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "Votre produit est-il conçu pour la réparabilité ?",
-                "type": "choice",
-                "options": [
-                    "Oui, pièces détachées disponibles",
-                    "Partiellement",
-                    "Non",
-                    "En amélioration",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Utilisez-vous des matériaux recyclés ?",
-                "type": "choice",
-                "options": [
-                    "Oui, > 50%",
-                    "Oui, < 50%",
-                    "Non",
-                    "Prévu",
-                    "Je ne sais pas"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Dans quelle catégorie de produits êtes-vous ?",
+                    "type": "choice",
+                    "options": [
+                        "Électronique/Électrique",
+                        "Textile/Habillement",
+                        "Mobilier",
+                        "Biens industriels",
+                        "Autre",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Connaissez-vous l'empreinte carbone de votre produit ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, calculée (cradle-to-gate)",
+                        "Oui, estimée",
+                        "Non, pas encore",
+                        "En cours de calcul",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Votre produit est-il conçu pour la réparabilité ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, pièces détachées disponibles",
+                        "Partiellement",
+                        "Non",
+                        "En amélioration",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Utilisez-vous des matériaux recyclés ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, > 50%",
+                        "Oui, < 50%",
+                        "Non",
+                        "Prévu",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "prioritaire": "⚠️ **Secteur prioritaire** : DPP requis à court terme. Actions : (1) Calculer empreinte carbone, (2) Préparer données DPP, (3) Score réparabilité.",
+                "standard": "Actions : (1) Évaluation cycle de vie, (2) Design for circularity, (3) Documentation matériaux, (4) Anticiper DPP."
             }
-        ],
-        "templates_reponse": {
-            "prioritaire": "⚠️ **Secteur prioritaire** : DPP requis à court terme. Actions : (1) Calculer empreinte carbone, (2) Préparer données DPP, (3) Score réparabilité.",
-            "standard": "Actions : (1) Évaluation cycle de vie, (2) Design for circularity, (3) Documentation matériaux, (4) Anticiper DPP."
+        },
+        "en": {
+            "id": "2024/1781",
+            "titre": "ESPR - Ecodesign for Sustainable Products",
+            "emoji": "♻️",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Digital Product Passport (DPP) mandatory (timeline by sector)",
+                    "Ecodesign requirements: durability, reparability, recyclability",
+                    "Traceability: carbon footprint, materials, origin",
+                    "Ban on destruction of unsold goods (textiles, electronics...)",
+                    "Progressive application: textiles 2026, electronics 2027"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Which product category do you belong to?",
+                    "type": "choice",
+                    "options": [
+                        "Electronics/Electrical",
+                        "Textiles/Apparel",
+                        "Furniture",
+                        "Industrial Goods",
+                        "Other",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Do you know your product's carbon footprint?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, calculated (cradle-to-gate)",
+                        "Yes, estimated",
+                        "No, not yet",
+                        "Calculation in progress",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Is your product designed for reparability?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, spare parts available",
+                        "Partially",
+                        "No",
+                        "Improving",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Do you use recycled materials?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, > 50%",
+                        "Yes, < 50%",
+                        "No",
+                        "Planned",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "prioritaire": "⚠️ **Priority Sector**: DPP required in short term. Actions: (1) Calculate carbon footprint, (2) Prepare DPP data, (3) Reparability score.",
+                "standard": "Actions: (1) Life Cycle Assessment, (2) Design for circularity, (3) Material documentation, (4) Anticipate DPP."
+            }
         }
     },
     "data_act": {
-        "id": "2023/2854",
-        "titre": "Data Act - Règlement sur les Données",
-        "emoji": "📊",
-        "resume_critique": {
-            "titre": "Exigences Critiques Essentielles",
-            "points": [
-                "Droit d'accès utilisateur aux données générées par produits connectés",
-                "Partage de données avec tiers de leur choix",
-                "Portabilité cloud facilitée (switch provider)",
-                "Partage B2B équitable et B2G (intérêt public)",
-                "Application septembre 2025"
-            ]
-        },
-        "questions": [
-            {
-                "id": "q1",
-                "question": "Votre produit génère-t-il des données d'usage ?",
-                "type": "choice",
-                "options": [
-                    "Oui, données capteurs IoT",
-                    "Oui, données comportementales",
-                    "Oui, données performance",
-                    "Non",
-                    "Je ne sais pas"
+        "fr": {
+            "id": "2023/2854",
+            "titre": "Data Act - Règlement sur les Données",
+            "emoji": "📊",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Droit d'accès utilisateur aux données générées par produits connectés",
+                    "Partage de données avec tiers de leur choix",
+                    "Portabilité cloud facilitée (switch provider)",
+                    "Partage B2B équitable et B2G (intérêt public)",
+                    "Application septembre 2025"
                 ]
             },
-            {
-                "id": "q2",
-                "question": "Ces données sont-elles accessibles aux utilisateurs ?",
-                "type": "choice",
-                "options": [
-                    "Oui, interface dédiée",
-                    "Partiellement",
-                    "Non, propriétaires",
-                    "Pas encore implémenté",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q3",
-                "question": "Utilisez-vous des services cloud pour stocker les données ?",
-                "type": "choice",
-                "options": [
-                    "Oui, cloud public",
-                    "Oui, cloud privé",
-                    "Oui, hybride",
-                    "Non, on-premise",
-                    "Je ne sais pas"
-                ]
-            },
-            {
-                "id": "q4",
-                "question": "Partagez-vous déjà des données avec des partenaires ?",
-                "type": "choice",
-                "options": [
-                    "Oui, B2B contractuel",
-                    "Oui, API ouvertes",
-                    "Non",
-                    "Prévu",
-                    "Je ne sais pas"
-                ]
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit génère-t-il des données d'usage ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, données capteurs IoT",
+                        "Oui, données comportementales",
+                        "Oui, données performance",
+                        "Non",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Ces données sont-elles accessibles aux utilisateurs ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, interface dédiée",
+                        "Partiellement",
+                        "Non, propriétaires",
+                        "Pas encore implémenté",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Utilisez-vous des services cloud pour stocker les données ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, cloud public",
+                        "Oui, cloud privé",
+                        "Oui, hybride",
+                        "Non, on-premise",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Partagez-vous déjà des données avec des partenaires ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, B2B contractuel",
+                        "Oui, API ouvertes",
+                        "Non",
+                        "Prévu",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "iot_connecte": "Actions : (1) API d'accès données utilisateur, (2) Format exportable (JSON, CSV), (3) Conditions partage tiers équitables, (4) Portabilité cloud.",
+                "standard": "Actions : (1) Inventaire données générées, (2) Droits accès utilisateurs, (3) Documentation API, (4) Politique partage."
             }
-        ],
-        "templates_reponse": {
-            "iot_connecte": "Actions : (1) API d'accès données utilisateur, (2) Format exportable (JSON, CSV), (3) Conditions partage tiers équitables, (4) Portabilité cloud.",
-            "standard": "Actions : (1) Inventaire données générées, (2) Droits accès utilisateurs, (3) Documentation API, (4) Politique partage."
+        },
+        "en": {
+            "id": "2023/2854",
+            "titre": "Data Act - Data Regulation",
+            "emoji": "📊",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "User right of access to data generated by connected products",
+                    "Data sharing with third parties of their choice",
+                    "Facilitated cloud portability (switching providers)",
+                    "Fair B2B sharing and B2G (public interest)",
+                    "Application September 2025"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Does your product generate usage data?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, IoT sensor data",
+                        "Yes, behavioral data",
+                        "Yes, performance data",
+                        "No",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Are these data accessible to users?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, dedicated interface",
+                        "Partially",
+                        "No, proprietary",
+                        "Not yet implemented",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Do you use cloud services to store data?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, public cloud",
+                        "Yes, private cloud",
+                        "Yes, hybrid",
+                        "No, on-premise",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Do you already share data with partners?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, B2B contractual",
+                        "Yes, open APIs",
+                        "No",
+                        "Planned",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "iot_connecte": "Actions: (1) User data access API, (2) Exportable format (JSON, CSV), (3) Fair third-party sharing terms, (4) Cloud portability.",
+                "standard": "Actions: (1) Inventory of generated data, (2) User access rights, (3) API documentation, (4) Sharing policy."
+            }
+        }
+    },
+    "batteries": {
+        "fr": {
+            "id": "2023/1542",
+            "titre": "Batteries Regulation - Règlement Batteries",
+            "emoji": "🔋",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Passeport Batterie obligatoire pour batteries EV, LMT et industrielles > 2kWh",
+                    "Déclaration empreinte carbone obligatoire",
+                    "Contenu recyclé minimum (cobalt, plomb, lithium, nickel)",
+                    "Devoir de diligence chaîne d'approvisionnement",
+                    "Politique de gestion des déchets et reprise"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "De quel type de batteries s'agit-il ?",
+                    "type": "choice",
+                    "options": [
+                        "Batterie portable (grand public)",
+                        "Batterie industrielle",
+                        "Batterie véhicule électrique (EV)",
+                        "Batterie moyen de transport léger (LMT)",
+                        "Batterie de démarrage (SLI)"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Quelle est la capacité de la batterie ?",
+                    "type": "choice",
+                    "options": [
+                        "Moins de 2 kWh",
+                        "Plus de 2 kWh",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Intégrez-vous des matériaux recyclés ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, certifié",
+                        "Oui, non certifié",
+                        "Non",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Avez-vous tracé l'origine des matières premières ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, traçabilité complète",
+                        "Partiellement (rang 1)",
+                        "Non",
+                        "En cours"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "passport_requis": "⚠️ **Passeport Batterie REQUIS**. Votre batterie (EV, LMT ou Indus > 2kWh) nécessite un passeport numérique complet avec déclaration Carbone et traçabilité supply chain.",
+                "standard": "Actions : (1) Marquage CE, (2) Déclaration conformité, (3) Documentation substances dangereuses, (4) Étiquetage et QR code."
+            }
+        },
+        "en": {
+            "id": "2023/1542",
+            "titre": "Batteries Regulation (EU)",
+            "emoji": "🔋",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Battery Passport mandatory for EV, LMT, and industrial batteries > 2kWh",
+                    "Mandatory carbon footprint declaration",
+                    "Minimum recycled content (cobalt, lead, lithium, nickel)",
+                    "Supply chain due diligence",
+                    "Waste management and take-back policy"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "What type of battery is it?",
+                    "type": "choice",
+                    "options": [
+                        "Portable battery (consumer)",
+                        "Industrial battery",
+                        "Electric vehicle battery (EV)",
+                        "Light means of transport battery (LMT)",
+                        "Starting, lighting, ignition battery (SLI)"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "What is the battery capacity?",
+                    "type": "choice",
+                    "options": [
+                        "Less than 2 kWh",
+                        "More than 2 kWh",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Do you incorporate recycled materials?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, certified",
+                        "Yes, uncertified",
+                        "No",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Have you traced the origin of raw materials?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, full traceability",
+                        "Partially (Tier 1)",
+                        "No",
+                        "In progress"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "passport_requis": "⚠️ **Battery Passport REQUIRED**. Your battery (EV, LMT or Indus > 2kWh) requires a full digital passport with Carbon declaration and supply chain traceability.",
+                "standard": "Actions: (1) CE Marking, (2) Declaration of conformity, (3) Hazardous substances documentation, (4) Labeling and QR code."
+            }
+        }
+    },
+    "cpr": {
+        "fr": {
+            "id": "305/2011",
+            "titre": "CPR - Produits de Construction",
+            "emoji": "🏗️",
+            "resume_critique": {
+                "titre": "Exigences Critiques Essentielles",
+                "points": [
+                    "Déclaration des Performances (DoP) obligatoire",
+                    "Marquage CE basé sur la DoP",
+                    "Respect des normes harmonisées (hEN)",
+                    "Futur Passeport Numérique Construction (révision CPR)",
+                    "Exigences durabilité et substances dangereuses"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Votre produit est-il destiné à être incorporé durablement dans un ouvrage ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, bâtiment",
+                        "Oui, génie civil",
+                        "Non, amovible/temporaire",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Existe-t-il une norme harmonisée pour votre produit ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, je connais la norme",
+                        "Probablement",
+                        "Non, produit innovant",
+                        "Je ne sais pas"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Avez-vous une Déclaration des Performances (DoP) ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui, complète",
+                        "En cours",
+                        "Non",
+                        "Je ne sais pas ce que c'est"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Votre produit contient-il des substances dangereuses (REACH) ?",
+                    "type": "choice",
+                    "options": [
+                        "Oui",
+                        "Non",
+                        "Je ne sais pas"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "dop_requise": "⚠️ **DoP et Marquage CE obligatoires**. Vous ne pouvez pas vendre sans Déclaration des Performances. (1) Identifier norme, (2) Tests, (3) Rédiger DoP.",
+                "standard": "Actions : (1) Veille normes harmonisées, (2) Documentation substances (REACH), (3) Préparation futur passeport numérique."
+            }
+        },
+        "en": {
+            "id": "305/2011",
+            "titre": "CPR - Construction Products Regulation",
+            "emoji": "🏗️",
+            "resume_critique": {
+                "titre": "Critical Requirements",
+                "points": [
+                    "Declaration of Performance (DoP) mandatory",
+                    "CE Marking based on DoP",
+                    "Compliance with harmonized standards (hEN)",
+                    "Future Digital Construction Passport (CPR revision)",
+                    "Sustainability and hazardous substances requirements"
+                ]
+            },
+            "questions": [
+                {
+                    "id": "q1",
+                    "question": "Is your product intended to be permanently incorporated in construction works?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, buildings",
+                        "Yes, civil engineering",
+                        "No, removable/temporary",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q2",
+                    "question": "Is there a harmonized standard for your product?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, I know the standard",
+                        "Probably",
+                        "No, innovative product",
+                        "I don't know"
+                    ]
+                },
+                {
+                    "id": "q3",
+                    "question": "Do you have a Declaration of Performance (DoP)?",
+                    "type": "choice",
+                    "options": [
+                        "Yes, complete",
+                        "In progress",
+                        "No",
+                        "I don't know what it is"
+                    ]
+                },
+                {
+                    "id": "q4",
+                    "question": "Does your product contain hazardous substances (REACH)?",
+                    "type": "choice",
+                    "options": [
+                        "Yes",
+                        "No",
+                        "I don't know"
+                    ]
+                }
+            ],
+            "templates_reponse": {
+                "dop_requise": "⚠️ **DoP and CE Marking mandatory**. You cannot sell without a Declaration of Performance. (1) Identify standard, (2) Tests, (3) Draft DoP.",
+                "standard": "Actions: (1) Monitor harmonized standards, (2) Substances documentation (REACH), (3) Prepare for future digital passport."
+            }
         }
     }
 }

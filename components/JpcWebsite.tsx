@@ -177,7 +177,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                                 </div>
                                 <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
                                     <h4 className="font-bold text-slate-900 text-base mb-1">{lang === 'fr' ? 'Robustesse' : 'Reliability'}</h4>
-                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? 'Des systèmes mécatroniques fiables et durables (Standard VDA/IATF).' : 'Reliable and sustainable mechatronic systems (VDA/IATF Standard).'}</p>
+                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? 'Des systèmes mécatroniques fiables et durables.' : 'Reliable and sustainable mechatronic systems.'}</p>
                                 </div>
                             </div>
                         </div>
@@ -284,7 +284,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                                     v2.5.0-EU
                                 </div>
                                 <div className="px-3 py-1 bg-amber-500 text-slate-900 text-xs font-bold rounded-full animate-pulse">
-                                    🚧 En développement
+                                    {lang === 'fr' ? '🚧 En développement' : '🚧 Work in Progress'}
                                 </div>
                             </div>
 
@@ -332,7 +332,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                                 aria-label="Copier l'email dans le presse-papier"
                                 className="inline-flex items-center justify-center px-6 py-4 bg-slate-800 text-white text-base font-bold rounded-full hover:bg-slate-700 transition-all shadow-lg"
                             >
-                                {emailCopied ? '✓ Copié !' : '📋 Copier'}
+                                {emailCopied ? (lang === 'fr' ? '✓ Copié !' : '✓ Copied!') : (lang === 'fr' ? '📋 Copier' : '📋 Copy')}
                             </button>
 
                             <a href={text.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile" title="Visitez mon profil LinkedIn" className="inline-flex items-center justify-center px-5 py-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-lg">

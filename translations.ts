@@ -50,10 +50,10 @@ export const t = {
         items: [
           {
             company: "jeanpierrecharles.com",
-            role: "Ingénierie Conversationnelle Dynamique & Modélisation Systèmes Complexes",
-            period: "2023 - Présent",
-            project: "Applications des Modèles LLM/ML dans le Cadre de la Transformation Industrielle 5.0",
-            desc: "Recherche et maîtrise approfondie des modèles LLM/ML pour applications industrielles. Développement d'une méthodologie scientifique de vérification des sources, forensique des données contextuelles et herméneutique des systèmes de valeur. Modélisation des causalités et risques existentiels. Aboutissement : Conception et lancement de la plateforme Aegis et du projet jeanpierrecharles.com en janvier 2026."
+            role: "Fondateur & Expert Transformation Industrielle 5.0",
+            period: "Janvier 2025 - Présent",
+            project: "Plateforme Aegis & Conformité Réglementaire (AI Act, ESPR, CRA, CPR)",
+            desc: "Direction du projet Aegis Circular pour simplifier la conformité réglementaire européenne et les passeports numériques de produits (DPP). Expertise en intégration d’IA industrielle, management des risques critiques et maîtrise des cadres législatifs complexes (Machine, IA Act, Écoconception). Lancement de la plateforme en janvier 2026."
           },
           {
             company: "Autoliv Group (via I-Smart Design)",
@@ -291,10 +291,10 @@ Tes réponses doivent être en français, professionnelles, concises et orienté
         items: [
           {
             company: "jeanpierrecharles.com",
-            role: "Dynamic Conversational Engineering & Complex Systems Modeling",
-            period: "2023 - Present",
-            project: "LLM/ML Models Applications in Industry 5.0 Transformation Framework",
-            desc: "In-depth research and mastery of LLM/ML models for industrial applications. Development of scientific methodology for source verification, digital forensics, and value systems hermeneutics. Causality modeling and existential risk analysis. Result: Design and launch of Aegis platform and jeanpierrecharles.com project in January 2026."
+            role: "Founder & Industrial Transformation 5.0 Expert",
+            period: "January 2025 - Present",
+            project: "Aegis Platform & Regulatory Compliance (AI Act, ESPR, CRA, CPR)",
+            desc: "Leading the Aegis Circular project to streamline European regulatory compliance and Digital Product Passports (DPP). Expertise in industrial AI integration, critical risk management, and clinical mastery of complex legislative frameworks (AI Act, ESPR, Machine). Platform launched in January 2026."
           },
           {
             company: "Autoliv Group (via I-Smart Design)",

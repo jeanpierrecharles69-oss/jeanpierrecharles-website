@@ -57,28 +57,28 @@ const App: React.FC = () => {
     <div className="flex h-screen bg-slate-50 font-sans text-slate-900 relative">
       {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/50 z-20 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      <Sidebar 
-        activeView={activeView} 
+      <Sidebar
+        activeView={activeView}
         setActiveView={(view) => {
           setActiveView(view);
           setIsMobileMenuOpen(false);
-        }} 
-        lang={lang} 
-        modules={modules} 
+        }}
+        lang={lang}
+        modules={modules}
         isOpen={isMobileMenuOpen}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
-          title={getHeaderTitle()} 
-          lang={lang} 
-          setLang={setLang} 
+        <Header
+          title={getHeaderTitle()}
+          lang={lang}
+          setLang={setLang}
           onOpenMenu={() => setIsMobileMenuOpen(true)}
           onBackToSite={() => setViewState('website')}
         />
@@ -88,13 +88,24 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
-      <button
-        onClick={() => setIsAssistantOpen(true)}
-        className="fixed bottom-8 right-8 bg-slate-900 text-white p-4 rounded-full shadow-lg hover:bg-slate-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 z-40"
-        aria-label={t[lang].assistant.title}
-      >
-        <SparklesIcon className="h-6 w-6" />
-      </button>
+      {/* AI Assistant Floating Button with Engagement Bubble */}
+      <div className="fixed bottom-8 right-8 z-40 flex items-center gap-3">
+        {/* Engagement Message Bubble */}
+        <div className="hidden sm:block bg-slate-900/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full shadow-lg border border-slate-600/50 animate-pulse">
+          <p className="text-xs font-medium whitespace-nowrap">
+            {lang === 'fr' ? 'Demandez à Aegis' : 'Ask Aegis'}
+          </p>
+        </div>
+
+        {/* Floating Button */}
+        <button
+          onClick={() => setIsAssistantOpen(true)}
+          className="bg-slate-900 text-white p-4 rounded-full shadow-lg hover:bg-slate-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+          aria-label={t[lang].assistant.title}
+        >
+          <SparklesIcon className="h-6 w-6" />
+        </button>
+      </div>
       {isAssistantOpen && <AiAssistant onClose={() => setIsAssistantOpen(false)} lang={lang} />}
     </div>
   );

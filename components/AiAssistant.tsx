@@ -18,7 +18,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onClose, lang }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeQuiz, setActiveQuiz] = useState<'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries' | null>(null);
+  const [activeQuiz, setActiveQuiz] = useState<'ai_act' | 'machinery' | 'gdpr' | 'cra' | 'espr' | 'data_act' | 'batteries' | 'cpr' | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const text = t[lang].assistant;
 
@@ -83,7 +83,8 @@ RÈGLE STRICTE : Ne jamais inventer d'informations. Utilise UNIQUEMENT le contex
 
     // Créer le prompt enrichi avec le contexte du questionnaire
     // FORMAT COMPACT PROFESSIONNEL (250 mots MAX)
-    const enrichedPrompt = `${context}
+    const enrichedPrompt = lang === 'fr'
+      ? `${context}
 
 FORMAT PROFESSIONNEL COMPACT (250 mots MAXIMUM) :
 
@@ -120,7 +121,45 @@ RÈGLES STRICTES :
 - PAS de sous-bullets (●, -, 1., 2., 3.)
 - PAS de phrases "creuses" style consulting
 - Démarches en 1 phrase compacte, pas liste numérotée
-- Émojis simples : ✅ ❌ ⚠️ uniquement`;
+- Émojis simples : ✅ ❌ ⚠️ uniquement`
+      : `${context}
+
+PROFESSIONAL COMPACT FORMAT (250 words MAXIMUM):
+
+**🎯 [PRIORITY LEVEL + Emoji]**
+[2 direct diagnostic sentences - no empty corporate phrases]
+
+**📊 SITUATION:**
+- ❌ [Missing point 1]
+- ❌ [Missing point 2]
+- ✅ [Positive point if applicable]
+- ⚠️ [Main risk]
+
+**📋 ACTION PLAN (TOP 3):**
+
+**1. [Action #1 in 3-4 words]**
+Objective: [1 sentence]. Approach: [2-3 steps in 1 compact sentence]. Result: [1 sentence].
+
+**2. [Action #2 in 3-4 words]**
+Objective: [1 sentence]. Approach: [2-3 steps in 1 compact sentence]. Result: [1 sentence].
+
+**3. [Action #3 in 3-4 words]**  
+Objective: [1 sentence]. Approach: [2-3 steps in 1 compact sentence]. Result: [1 sentence].
+
+**⏰ TIMELINE:**
+Urgent (< 6 months): [Actions]
+Short term (6-18 months): [Actions]
+
+**💡 TIP:**
+[1-2 concrete sentences to get started quickly]
+
+STRICT RULES:
+- MAXIMUM 250 words (not 300, not 370)
+- DIRECT and factual tone
+- NO sub-bullets (●, -, 1., 2., 3.)
+- NO "empty" consulting phrases
+- Approaches in 1 compact sentence, not numbered list
+- Simple emojis only: ✅ ❌ ⚠️`;
 
 
 
@@ -128,7 +167,9 @@ RÈGLES STRICTES :
     // Ajouter le message utilisateur
     const userMessage: ChatMessage = {
       role: 'user',
-      text: `Analyse personnalisée pour ${activeQuiz?.replace('_', ' ').toUpperCase()}`
+      text: lang === 'fr'
+        ? `Analyse personnalisée pour ${activeQuiz?.replace('_', ' ').toUpperCase()}`
+        : `Personalized analysis for ${activeQuiz?.replace('_', ' ').toUpperCase()}`
     };
     setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
 
@@ -253,23 +294,23 @@ RÈGLES STRICTES :
           ♻️ ESPR
         </button>
         <button
-          onClick={() => setActiveQuiz('data_act')}
           className="px-3 py-1.5 bg-pink-50 text-pink-700 text-xs font-semibold rounded-full border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-all cursor-pointer transform hover:scale-105"
         >
           📊 Data Act
         </button>
         <button
-          onClick={() => handleQuickQuestion(lang === 'fr' ? 'Quelles sont les obligations du règlement batteries 2023/1542 ?' : 'What are the Battery Regulation 2023/1542 obligations?')}
-          className="px-3 py-1.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-all cursor-pointer transform hover:scale-105"
+          onClick={() => setActiveQuiz('batteries')}
+          className="px-3 py-1.5 bg-lime-50 text-lime-700 text-xs font-semibold rounded-full border border-lime-200 hover:bg-lime-100 hover:border-lime-300 transition-all cursor-pointer transform hover:scale-105"
         >
           🔋 Batteries
         </button>
         <button
-          onClick={() => handleQuickQuestion(lang === 'fr' ? 'Quelles sont les exigences du CPR 305/2011 pour les produits de construction ?' : 'What are the CPR 305/2011 requirements for construction products?')}
-          className="px-3 py-1.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-all cursor-pointer transform hover:scale-105"
+          onClick={() => setActiveQuiz('cpr')}
+          className="px-3 py-1.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-all cursor-pointer transform hover:scale-105"
         >
           🏗️ CPR
         </button>
+
       </div>
 
       {/* Suggestions de questions */}
@@ -351,11 +392,31 @@ RÈGLES STRICTES :
 
           {isLoading && messages[messages.length - 1]?.text === '' && (
             <div className="flex justify-start">
-              <div className="p-4 rounded-2xl bg-white text-slate-800 rounded-bl-sm border border-slate-200 shadow-md">
-                <div className="flex items-center space-x-2">
-                  <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 text-slate-800 rounded-bl-sm border border-blue-200 shadow-md max-w-sm">
+                <div className="space-y-3">
+                  {/* Animated dots */}
+                  <div className="flex items-center space-x-2">
+                    <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="h-2.5 w-2.5 bg-blue-500 rounded-full animate-bounce"></div>
+                  </div>
+
+                  {/* Time estimation */}
+                  <p className="text-xs text-slate-600 font-medium">
+                    {lang === 'fr'
+                      ? '⏱️ Temps estimé : 5-10 secondes'
+                      : '⏱️ Estimated time: 5-10 seconds'}
+                  </p>
+
+                  {/* Progress hint */}
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="italic">
+                      {lang === 'fr'
+                        ? 'Analyse approfondie...'
+                        : 'In-depth analysis...'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -408,6 +469,7 @@ RÈGLES STRICTES :
           regulationKey={activeQuiz}
           onSubmit={handleQuizSubmit}
           onClose={() => setActiveQuiz(null)}
+          lang={lang}
         />
       )}
     </div>
