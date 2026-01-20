@@ -4,6 +4,7 @@
             "id": "2024/1689",
             "titre": "AI Act - Règlement sur l'Intelligence Artificielle",
             "emoji": "🤖",
+            "dateApplication": "Application progressive : 2 août 2026 - 2 août 2027",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -76,6 +77,7 @@
             "id": "2024/1689",
             "titre": "AI Act - Artificial Intelligence Regulation",
             "emoji": "🤖",
+            "dateApplication": "Progressive application: August 2, 2026 - August 2, 2027",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -150,6 +152,7 @@
             "id": "2023/1230",
             "titre": "Règlement Machines 2023/1230",
             "emoji": "⚙️",
+            "dateApplication": "Application : 20 janvier 2027",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -220,6 +223,7 @@
             "id": "2023/1230",
             "titre": "Machinery Regulation 2023/1230",
             "emoji": "⚙️",
+            "dateApplication": "Application: January 20, 2027",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -292,6 +296,7 @@
             "id": "2016/679",
             "titre": "RGPD - Protection des Données",
             "emoji": "🔒",
+            "dateApplication": "En vigueur depuis : 25 mai 2018",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -361,6 +366,7 @@
             "id": "2016/679",
             "titre": "GDPR - General Data Protection Regulation",
             "emoji": "🔒",
+            "dateApplication": "In force since: May 25, 2018",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -432,6 +438,7 @@
             "id": "2024/2847",
             "titre": "CRA - Cyber Resilience Act",
             "emoji": "🛡️",
+            "dateApplication": "Application progressive : 11 décembre 2027",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -501,6 +508,7 @@
             "id": "2024/2847",
             "titre": "CRA - Cyber Resilience Act",
             "emoji": "🛡️",
+            "dateApplication": "Progressive application: December 11, 2027",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -572,6 +580,7 @@
             "id": "2024/1781",
             "titre": "ESPR - Écoconception Produits Durables",
             "emoji": "♻️",
+            "dateApplication": "Application : 18 juillet 2024",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -642,6 +651,7 @@
             "id": "2024/1781",
             "titre": "ESPR - Ecodesign for Sustainable Products",
             "emoji": "♻️",
+            "dateApplication": "Application: July 18, 2024",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -714,6 +724,7 @@
             "id": "2023/2854",
             "titre": "Data Act - Règlement sur les Données",
             "emoji": "📊",
+            "dateApplication": "Application : 12 septembre 2025",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -783,6 +794,7 @@
             "id": "2023/2854",
             "titre": "Data Act - Data Regulation",
             "emoji": "📊",
+            "dateApplication": "Application: September 12, 2025",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -854,6 +866,7 @@
             "id": "2023/1542",
             "titre": "Batteries Regulation - Règlement Batteries",
             "emoji": "🔋",
+            "dateApplication": "Application progressive : 18 février 2024 - 18 août 2025",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -919,6 +932,7 @@
             "id": "2023/1542",
             "titre": "Batteries Regulation (EU)",
             "emoji": "🔋",
+            "dateApplication": "Progressive application: February 18, 2024 - August 18, 2025",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [
@@ -986,6 +1000,7 @@
             "id": "305/2011",
             "titre": "CPR - Produits de Construction",
             "emoji": "🏗️",
+            "dateApplication": "En vigueur depuis : 1er juillet 2013",
             "resume_critique": {
                 "titre": "Exigences Critiques Essentielles",
                 "points": [
@@ -1050,6 +1065,7 @@
             "id": "305/2011",
             "titre": "CPR - Construction Products Regulation",
             "emoji": "🏗️",
+            "dateApplication": "In force since: July 1, 2013",
             "resume_critique": {
                 "titre": "Critical Requirements",
                 "points": [

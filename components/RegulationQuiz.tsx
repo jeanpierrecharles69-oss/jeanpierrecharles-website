@@ -71,7 +71,13 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                             <div>
                                 <h2 className="text-xl font-bold">{config.titre}</h2>
                                 <p className="text-sm text-blue-100">
-                                    Règlement (UE) {config.id} • <span className="text-xs">JOE UE</span>
+                                    {lang === 'fr' ? 'Règlement' : 'Regulation'} (UE) {config.id} • <span className="text-xs">JOE UE</span>
+                                    {config.dateApplication && (
+                                        <>
+                                            <span className="mx-1">•</span>
+                                            <span className="text-xs">{config.dateApplication}</span>
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         </div>

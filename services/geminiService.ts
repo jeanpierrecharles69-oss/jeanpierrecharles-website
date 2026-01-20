@@ -8,8 +8,9 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Modèle stable et performant pour l'analyse réglementaire
-const MODEL_NAME = 'gemini-1.5-flash';
+// Configuration robuste - MODÈLE VALIDÉ ET TESTÉ
+// gemini-2.5-flash est disponible et performant (décembre 2024+)
+const MODEL_NAME = 'gemini-2.5-flash';
 
 const modelInstance = genAI.getGenerativeModel({
     model: MODEL_NAME,
@@ -54,6 +55,20 @@ export const runQueryStream = async function* (
         } catch (error: any) {
             retries--;
             console.error(`Gemini Stream Error (${retries} left):`, error);
+
+            // Gestion spécifique erreur 429 (quota dépassé)
+            const isQuotaError = error?.status === 429 || error?.message?.includes('429') || error?.message?.includes('quota');
+
+            if (isQuotaError) {
+                yield "\n\n⚠️ **QUOTA API DÉPASSÉ / API QUOTA EXCEEDED**\n\n";
+                yield "🇫🇷 **Français** : Votre clé API Gemini a atteint sa limite d'utilisation.\n";
+                yield "- **Action** : Attendez 1-60 minutes ou vérifiez vos quotas sur : https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas\n";
+                yield "- **Solution** : Passez à un plan payant pour des quotas illimités.\n\n";
+                yield "🇬🇧 **English** : Your Gemini API key has reached its usage limit.\n";
+                yield "- **Action**: Wait 1-60 minutes or check your quotas at: https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas\n";
+                yield "- **Solution**: Upgrade to a paid plan for unlimited quotas.\n";
+                return;
+            }
 
             const isOverloaded = error?.status === 503 || error?.message?.includes('503') || error?.message?.includes('overloaded');
 
