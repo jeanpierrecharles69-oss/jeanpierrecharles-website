@@ -48,11 +48,11 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
             contextLabel
         ];
 
-        config.questions.forEach((q, idx) => {
+        config.questions.forEach((q: any, idx: number) => {
             const response = responses[q.id];
             if (response) {
                 const responseText = Array.isArray(response) ? response.join(', ') : response;
-                contextLines.push(`- ${q.question} → ${responseText}`);
+                contextLines.push(`- ${q.question} -> ${responseText}`);
             }
         });
 

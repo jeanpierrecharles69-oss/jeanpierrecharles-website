@@ -8,9 +8,8 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Configuration robuste
-// Testé et validé: gemini-2.5-flash est disponible et performant.
-const MODEL_NAME = 'gemini-2.5-flash';
+// Modèle stable et performant pour l'analyse réglementaire
+const MODEL_NAME = 'gemini-1.5-flash';
 
 const modelInstance = genAI.getGenerativeModel({
     model: MODEL_NAME,
