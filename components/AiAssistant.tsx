@@ -294,6 +294,7 @@ STRICT RULES:
           ♻️ ESPR
         </button>
         <button
+          onClick={() => setActiveQuiz('data_act')}
           className="px-3 py-1.5 bg-pink-50 text-pink-700 text-xs font-semibold rounded-full border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-all cursor-pointer transform hover:scale-105"
         >
           📊 Data Act
