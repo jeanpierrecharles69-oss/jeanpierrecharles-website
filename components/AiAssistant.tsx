@@ -81,11 +81,14 @@ RÈGLE STRICTE : Ne jamais inventer d'informations. Utilise UNIQUEMENT le contex
     // Fermer le quiz
     setActiveQuiz(null);
 
-    // Créer le prompt enrichi avec le contexte du questionnaire
-    // FORMAT COMPACT PROFESSIONNEL (250 mots MAX)
+    // Créer le prompt enrichi avec le contexte du questionnaire - STRUCTURE ROBUSTE XML
     const enrichedPrompt = lang === 'fr'
-      ? `${context}
+      ? `<USER_RESPONSES>
+${context}
+</USER_RESPONSES>
 
+<INSTRUCTIONS>
+Tu dois générer un diagnostic de conformité basé UNIQUEMENT sur les réponses ci-dessus.
 FORMAT PROFESSIONNEL COMPACT (250 mots MAXIMUM) :
 
 **🎯 [NIVEAU PRIORITÉ + Emoji]**
@@ -116,14 +119,19 @@ Court terme (6-18 mois) : [Actions]
 [1-2 phrases concrètes pour démarrer rapidement]
 
 RÈGLES STRICTES :
-- MAXIMUM 250 mots (pas 300, pas 370)
+- MAXIMUM 250 mots
 - Ton DIRECT et factuel
 - PAS de sous-bullets (●, -, 1., 2., 3.)
-- PAS de phrases "creuses" style consulting
-- Démarches en 1 phrase compacte, pas liste numérotée
-- Émojis simples : ✅ ❌ ⚠️ uniquement`
-      : `${context}
+- PAS de phrases "creuses"
+- Démarches en 1 phrase compacte
+- Émojis simples : ✅ ❌ ⚠️ uniquement
+</INSTRUCTIONS>`
+      : `<USER_RESPONSES>
+${context}
+</USER_RESPONSES>
 
+<INSTRUCTIONS>
+You must generate a compliance diagnostic based ONLY on the responses above.
 PROFESSIONAL COMPACT FORMAT (250 words MAXIMUM):
 
 **🎯 [PRIORITY LEVEL + Emoji]**
@@ -154,12 +162,13 @@ Short term (6-18 months): [Actions]
 [1-2 concrete sentences to get started quickly]
 
 STRICT RULES:
-- MAXIMUM 250 words (not 300, not 370)
+- MAXIMUM 250 words
 - DIRECT and factual tone
 - NO sub-bullets (●, -, 1., 2., 3.)
 - NO "empty" consulting phrases
-- Approaches in 1 compact sentence, not numbered list
-- Simple emojis only: ✅ ❌ ⚠️`;
+- Approaches in 1 compact sentence
+- Simple emojis only: ✅ ❌ ⚠️
+</INSTRUCTIONS>`;
 
 
 

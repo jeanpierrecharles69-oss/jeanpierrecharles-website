@@ -9,8 +9,7 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // Configuration robuste - MODÈLE VALIDÉ ET TESTÉ
-// gemini-2.5-flash est disponible et performant (décembre 2024+)
-const MODEL_NAME = 'gemini-2.5-flash';
+const MODEL_NAME = 'gemini-1.5-flash';
 
 const modelInstance = genAI.getGenerativeModel({
     model: MODEL_NAME,
@@ -20,6 +19,12 @@ const modelInstance = genAI.getGenerativeModel({
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
         },
     ],
+    generationConfig: {
+        temperature: 0.1, // Basse température pour la répétabilité et la précision (Conformité)
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 2048,
+    }
 });
 
 /**
@@ -33,17 +38,18 @@ export const runQueryStream = async function* (
     let retries = 3;
     let delay = 1000;
 
-    // Simulation tool grounding si supporté par le modèle (sinon ignoré par SDK std)
-    // Note: Le SDK @google/generative-ai gère les tools différemment.
-    // Pour l'instant on se concentre sur le texte pur pour la stabilité.
+    // Utilisation des instructions système natives si supportées
+    const modelWithSystem = genAI.getGenerativeModel({
+        model: MODEL_NAME,
+        systemInstruction: systemInstruction,
+        generationConfig: {
+            temperature: 0.1,
+        }
+    });
 
     while (retries > 0) {
         try {
-            const result = await modelInstance.generateContentStream({
-                contents: [{ role: 'user', parts: [{ text: systemInstruction + "\n\n" + prompt }] }],
-                // Note: systemInstruction natif est supporté dans les modèles récents,
-                // mais l'injecter dans le prompt est souvent plus robuste cross-version.
-            });
+            const result = await modelWithSystem.generateContentStream(prompt);
 
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
@@ -97,11 +103,17 @@ export const runQuery = async (
     let retries = 3;
     let delay = 1000;
 
+    const modelWithSystem = genAI.getGenerativeModel({
+        model: MODEL_NAME,
+        systemInstruction: systemInstruction,
+        generationConfig: {
+            temperature: 0.1,
+        }
+    });
+
     while (retries > 0) {
         try {
-            const result = await modelInstance.generateContent({
-                contents: [{ role: 'user', parts: [{ text: systemInstruction + "\n\n" + prompt }] }]
-            });
+            const result = await modelWithSystem.generateContent(prompt);
             return result.response.text();
         } catch (error: any) {
             retries--;
