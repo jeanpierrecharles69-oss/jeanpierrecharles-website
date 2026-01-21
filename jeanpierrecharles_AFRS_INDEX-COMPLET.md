@@ -10,7 +10,7 @@
 
 Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jour suite à l'introduction du **Systeme d'Exploitation de Connaissances IA** (Phase 17).
 
-**Total documents** : 15 documents AFRS
+**Total documents** : 17 documents AFRS
 **Status** : ✅ v2.1 DÉPLOYÉ
 
 ---
@@ -74,16 +74,16 @@ Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jo
 
 ## 📙 Documents de Projet (Archives & Références)
 
-### 10. **jeanpierrecharles_AFRS_DEPLOIEMENT-RECAP.md**
+### 12. **jeanpierrecharles_AFRS_DEPLOIEMENT-RECAP.md**
 
 - **Statut** : 🗄️ **ARCHIVÉ (Mergé)**
 - **Note** : Le contenu a été intégré dans `Methodology_Guide.md`.
 
-### 11. **jeanpierrecharles_AFRS_journal-de-bord-specifications.md**
+### 13. **jeanpierrecharles_AFRS_journal-de-bord-specifications.md**
 
 - **Statut** : ✔️ **STABLE**
 
-### 12. **jeanpierrecharles_AFRS_SOLUTION-Cloud-Sync-Issue.md**
+### 14. **jeanpierrecharles_AFRS_SOLUTION-Cloud-Sync-Issue.md**
 
 - **Statut** : ✔️ **STABLE**
 

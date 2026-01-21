@@ -1,7 +1,78 @@
 # AFRS - Historique des Versions (Changelog)
 
-**Dernière mise à jour**: 19 janvier 2026  
+**Dernière mise à jour**: 21 janvier 2026  
 **Auteur**: Jean-Pierre Charles avec Antigravity AI
+
+---
+
+## Version 2.1 (21 janvier 2026)
+
+### 🚀 Ajouts Majeurs
+
+#### Nouvelle Phase 17: AI Knowledge OS
+
+- **Transition stratégique**: De "Digital Twin" passif vers système de production active de contenu
+- **Staff of Agents**: Architecture multi-agents (Knowledge Miner, Content Architect, Editor-in-Chief, Revenue Manager, Distribution Manager)
+- **Orchestrateur**: Coordination intelligente des agents pour génération de contenu monétisable
+- **Référence**: `jeanpierrecharles_STRATEGIE-CONTENU-MONETISATION.md`
+
+#### Standard Qualité & CI/CD
+
+- **Renommage**: `GUIDE-LINTING.md` → `STANDARD-QUALITE-CICD.md`
+- **Statut**: De "Guide" optionnel à **Standard impératif**
+- **Intégration**: Procédures de linting automatisées dans pipeline CI/CD
+- **Exigence**: 0 erreur Markdown avant tout commit
+
+#### Fiabilisation IA
+
+- **Document**: `jeanpierrecharles_AFRS_PLAN-FIABILISATION-AEGIS.md` (NOUVEAU)
+- **Problème résolu**: Hallucinations IA sur module ESPR (divergences multi-plateformes)
+- **Correctifs**:
+  - Migration modèle: `gemini-2.5-flash` → `gemini-1.5-flash` (stable)
+  - Température: 0.1 (déterminisme forcé)
+  - Prompts système: Synchronisation FR/EN complète
+  - Structured Prompting: XML tagging (`<USER_RESPONSES>`, `<INSTRUCTIONS>`)
+
+#### Accès Mobile Développement
+
+- **Document**: `jeanpierrecharles_AFRS_ACCES-MOBILE.md` (NOUVEAU)
+- **Contenu**: Guide technique accès au serveur Vite depuis smartphones/tablettes
+- **Cas d'usage**: Tests responsive design sur vrais appareils (iOS/Android)
+
+### 🔄 Modifications
+
+#### Méthodologie
+
+- **Intégration déploiement**: Leçons de `DEPLOIEMENT-RECAP.md` fusionnées dans `Methodology_Guide.md`
+- **Sections ajoutées**:
+  - Cloud Sync Issues (EBADF, EPERM errors)
+  - DNS Propagation (délais 24-48h)
+  - SSL Auto-provisioning Vercel
+  - Monitoring production (Sentry, UptimeRobot)
+
+#### Master Document Part 3
+
+- **Phase 16 Enrichie**: Ajout protocole anti-hallucination (Section 10.4, 13.6)
+- **Phase 17 Ajoutée**: Knowledge OS complet avec métriques et KPIs
+- **Linting**: Correction de tous les duplicates, tables, code blocks
+
+#### Index & Navigation
+
+- **INDEX-COMPLET.md**: Mise à jour avec nouveaux documents v2.1 (17 documents)
+- **ENSEMBLE-DOCUMENTAIRE.md**: Réorganisation catégories + liens stratégie
+
+### 📊 Métriques
+
+- **Documents ajoutés**: 3 (STRATEGIE-CONTENU, PLAN-FIABILISATION, ACCES-MOBILE)
+- **Documents renommés**: 1 (STANDARD-QUALITE-CICD)
+- **Documents mis à jour**: 8 (README, Master Part 3, Methodology, INDEX, ENSEMBLE, TABLEAU-BORD, CHANGELOG)
+- **Erreurs Markdown corrigées**: 100% (0 erreur restante)
+
+### 🎯 Impact Business
+
+- **Monétisation**: Introduction architecture Paywall 3 niveaux (Free/Premium/Services)
+- **Fiabilité IA**: Réduction hallucinations <2% (objectif atteint)
+- **Production**: Système Knowledge OS prêt pour génération contenu LinkedIn/Blog
 
 ---
 
@@ -38,7 +109,7 @@ Cette version documente le déploiement réussi du **premier projet complet** ut
 #### Métriques de Déploiement Réelles
 
 | Métrique | Résultat | Phase AFRS |
-| -------- | -------- | ---------- |
+| :--- | :--- | :--- |
 | Temps développement local | 2 semaines | Phases 1-13 |
 | Temps déploiement Vercel | ~3 minutes | Phase 14 |
 | Configuration DNS complète | 48 heures (propagation) | Phase 14 |
@@ -231,7 +302,7 @@ Lors des tests de l'assistant IA d'Aegis, une requête concernant le règlement 
 - **Section V** : Analyse coût-bénéfice
 - **Section VI-IX** : Recommandations et actions immédiates
 
-### 6. AFRS_EU_Compliance_Matrix.md ✅
+### 6. AF RS_EU_Compliance_Matrix.md ✅
 
 **Statut** : Aucune modification requise
 
@@ -265,7 +336,7 @@ Lors des tests de l'assistant IA d'Aegis, une requête concernant le règlement 
 ## Métriques de Succès (6 mois après déploiement RAG)
 
 | Métrique | Avant (v2.0) | Cible (v2.0.1) |
-| -------- | ------------ | -------------- |
+| :--- | :--- | :--- |
 | Taux hallucination | ~15% | < 2% |
 | Citation sources | ~40% | 100% |
 | Confiance utilisateur (NPS) | N/A | > 70 |
@@ -275,10 +346,11 @@ Lors des tests de l'assistant IA d'Aegis, une requête concernant le règlement 
 
 ## Roadmap Post-2.0.1
 
-### Version 2.1 (Q2 2026)
+### Version 2.1 (Q1 2026)
 
-- Exemples multi-secteurs (automotive, aerospace, medical)
-- Templates RAG pré-configurés par secteur
+- AI Knowledge OS (Staff of Agents)
+- Paywall Architecture
+- Linting Standards
 
 ### Version 2.2 (Q3 2026)
 
@@ -319,5 +391,5 @@ Lors des tests de l'assistant IA d'Aegis, une requête concernant le règlement 
 
 ---
 
-**Document généré** : 17 janvier 2026  
-**Prochaine révision** : Lors de la sortie de la version 2.1 (Q2 2026)
+**Document généré** : 21 janvier 2026  
+**Prochaine révision** : Lors de la sortie de la version 2.2 (Q3 2026)
