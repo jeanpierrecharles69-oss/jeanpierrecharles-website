@@ -8,7 +8,7 @@
 
 ## 📋 Vue d'Ensemble
 
-Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jour suite à l'introduction du **Systeme d'Exploitation de Connaissances IA** (Phase 17).
+Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jour suite à l'introduction du **Système d'Exploitation de Connaissances IA** (Phase 17).
 
 **Total documents** : 17 documents AFRS
 **Status** : ✅ v2.1 DÉPLOYÉ
@@ -22,7 +22,7 @@ Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jo
 - **Statut** : 🔄 **MIS À JOUR** (v2.1)
 - **Usage** : Point d'entrée principal.
 
-### 2. ✅ **jeanpierrecharles_AFRS_STRATEGIE-CONTENU-MONETISATION.md**
+### 2. ✅ **jeanpierrecharles_STRATEGIE-CONTENU-MONETISATION.md**
 
 - **Statut** : ✨ **NOUVEAU** (v2.1)
 - **Contenu** : Stratégie "Staff of Agents" & Paywall (Phase 17).
@@ -70,6 +70,16 @@ Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jo
 
 - **Statut** : ✔️ **STABLE** (v2.0)
 
+### 10. ✅ **jeanpierrecharles_AFRS_ACCES-MOBILE.md**
+
+- **Statut** : ✨ **NOUVEAU** (v2.1)
+- **Contenu** : Guide technique accès serveur Vite depuis mobile (iOS/Android).
+
+### 11. ✅ **jeanpierrecharles_AFRS_PLAN-FIABILISATION-AEGIS.md**
+
+- **Statut** : ✨ **NOUVEAU** (v2.1)
+- **Contenu** : Plan correctif anti-hallucinations IA (température 0.1, modèle stable).
+
 ---
 
 ## 📙 Documents de Projet (Archives & Références)
@@ -87,6 +97,19 @@ Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jo
 
 - **Statut** : ✔️ **STABLE**
 
+### 15. **jeanpierrecharles_AFRS_INDEX-COMPLET.md** (ce document)
+
+- **Statut** : 🔄 **MIS À JOUR** (v2.1)
+
+### 16. **jeanpierrecharles_AFRS_CHANGELOG_v2.0.1.md**
+
+- **Statut** : 🔄 **MIS À JOUR** (v2.1)
+- **Contient** : Historique complet jusqu'à v2.1.
+
+### 17. **jeanpierrecharles_AFRS_ENSEMBLE-DOCUMENTAIRE.md**
+
+- **Statut** : 🔄 **MIS À JOUR** (v2.1)
+
 ---
 
 ## 📊 Changements Majeurs v2.1
@@ -94,6 +117,7 @@ Cet index répertorie **tous les documents AFRS** avec leur statut de mise à jo
 1. **Phase 17 (Staff of Agents)** : Transition vers un modèle de production active de contenu monétisable.
 2. **Qualité Standardisée** : Le Linting n'est plus une option, c'est un standard (`STANDARD-QUALITE-CICD`).
 3. **Consolidation** : Les retours d'expérience du déploiement sont maintenant dans la méthodologie centrale.
+4. **Fiabilisation IA** : Plan d'action documenté pour hallucinations IA.
 
 ---
 
