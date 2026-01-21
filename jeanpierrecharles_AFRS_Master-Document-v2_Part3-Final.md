@@ -4,7 +4,8 @@
 
 ## Phase 8: Fixer un Objectif de Projet Strict
 
-### Objectif
+### Objectif - Phase 8
+
 Définir des objectifs SMART et des métriques de succès mesurables.
 
 ### OKRs (Objectives & Key Results)
@@ -33,7 +34,7 @@ Définir des objectifs SMART et des métriques de succès mesurables.
 ### Métriques de Succès (V&V Criteria)
 
 | Métrique | Baseline | Objectif | Méthode Mesure |
-|----------|----------|----------|----------------|
+| :--- | :--- | :--- | :--- |
 | Performance (LCP) | N/A | <2.5s | Lighthouse CI |
 | Accessibilité (WCAG) | N/A | AA (4.5:1 contraste) | axe DevTools |
 | SEO Score | N/A | ≥90/100 | Google Search Console |
@@ -52,7 +53,7 @@ Définir des objectifs SMART et des métriques de succès mesurables.
 
 ## Phase 9: Organiser les Clés API et Suivre l'Utilisation
 
-### Objectif
+### Objectif - Phase 9
 Sécuriser la gestion des secrets (API keys) et implémenter du monitoring.
 
 ### Gestion des Secrets
@@ -124,6 +125,7 @@ async function checkGeminiQuota() {
 Générer SBOM: `npx @cyclonedx/cyclonedx-npm --output-file sbom.json`
 
 ### V&V Gate 9: Sécurité API
+
 - [x] Tous secrets externalisés (.env, Vault)
 - [x] Plan rotation automatique documenté
 - [x] Monitoring utilisation actif (alertes si >80% quota)
@@ -133,7 +135,8 @@ Générer SBOM: `npx @cyclonedx/cyclonedx-npm --output-file sbom.json`
 
 ## Phase 10: Utiliser des Invites Structurées
 
-### Objectif
+### Objectif - Phase 10
+
 Créer des templates de prompts pour interactions IA cohérentes et conformeà l'AI Act.
 
 ### Prompt Engineering
@@ -141,7 +144,7 @@ Créer des templates de prompts pour interactions IA cohérentes et conformeà l
 ```markdown
 ## Prompts Templates - Phase 10
 
-### Template 1: Assistant Conformité
+### Template 1: Assistant Conformité (YAML)
 
 ```yaml
 role: system
@@ -168,7 +171,7 @@ content: |
   "Je suis un assistant virtuel alimenté par l'IA. Mes réponses peuvent contenir des erreurs."
 ```
 
-### Template 2: Génération Synthèse Réglementaire
+### Template 2: Génération Synthèse Réglementaire (YAML)
 
 ```yaml
 role: user
@@ -202,6 +205,7 @@ function getComplianceAdvice(query: string) {
 ```
 
 ### V&V Gate 10: Prompts Testés
+
 - [x] Templates de prompts validés (≥3 use cases)
 - [x] Tests avec cas limites (ambiguïtés, langue non-FR, etc.)
 - [x] Fallback implémenté pour échec IA
@@ -213,7 +217,7 @@ Pour tout assistant IA gérant des questions réglementaires :
 
 1. **Extraction de Faits** : Analyser la requête pour identifier les numéros de règlements, dates et articles.
 2. **Détection de Limite de Connaissance** : Si le fait n'est pas explicitement dans le prompt système ou la base RAG → Déclencher une demande de vérification.
-3. **Demande de Confirmation** : 
+3. **Demande de Confirmation** :
    "📋 Avant de répondre, j'ai besoin de vérifier : Vous mentionnez [FAIT]. S'agit-il bien de [CONTEXTE] ? Avez-vous une source officielle (lien EUR-Lex) ?"
 4. **Réponse Ancrée (Grounded)** : N'utiliser que des faits vérifiés et citer systématiquement les sources.
 
@@ -221,7 +225,8 @@ Pour tout assistant IA gérant des questions réglementaires :
 
 ## Phase 11: Changer une Chose par Itération
 
-### Objectif
+### Objectif - Phase 11
+
 Implémenter une stratégie de changement contrôlé pour limiter les régressions.
 
 ### Stratégie Feature Flags
@@ -281,6 +286,7 @@ npx pa11y-ci
 ```
 
 ### V&V Gate 11: Change Control
+
 - [x] Feature flags implémentés
 - [x] Rollback procedure documentée et testée
 - [x] Suite de tests de régression automatisée
@@ -290,7 +296,8 @@ npx pa11y-ci
 
 ## Phase 12: Déclarer ce qui ne Doit pas Changer
 
-### Objectif
+### Objectif - Phase 12
+
 Documenter les invariants système (propriétés qui doivent TOUJOURS être vraies).
 
 ### Invariants Système
@@ -330,8 +337,8 @@ Documenter les invariants système (propriétés qui doivent TOUJOURS être vrai
 // Assertion runtime
 function assertInvariant(condition: boolean, invariant_id: string) {
   if (!condition) {
-    logger.error(\u0084Invariant violated: ${invariant_id}\`);
-    alertAdmin(\`CRITICAL: Invariant ${invariant_id} violated\`);
+    logger.error(`Invariant violated: ${invariant_id}`);
+    alertAdmin(`CRITICAL: Invariant ${invariant_id} violated`);
     throw new InvariantViolationError(invariant_id);
   }
 }
@@ -344,6 +351,7 @@ assertInvariant(
 ```
 
 ### V&V Gate 12: Invariants Documentés
+
 - [x] Liste complète invariants formalisés (≥10)
 - [x] Contraintes DB/code implémentées
 - [x] Monitoring alertes sur violations
@@ -353,7 +361,8 @@ assertInvariant(
 
 ## Phase 13: Définir les Agents avec Logs
 
-### Objectif
+### Objectif - Phase 13
+
 Architecturer les agents IA et implémenter observabilité complète (logs, traces, explainability).
 
 ### Architecture Agents IA
@@ -479,6 +488,7 @@ Si votre IA est **haut risque**:
 ```
 
 ### V&V Gate 13: Agents Observables
+
 - [x] Logging structuré (JSON, timestamps)
 - [x] Distributed tracing (OpenTelemetry)
 - [x] Documentation IA complète (si haut risque)
@@ -487,6 +497,7 @@ Si votre IA est **haut risque**:
 ### 13.6 Surveillance de l'Exactitude et Feedback Loop
 
 Chaque interaction IA doit enregistrer :
+
 - Les faits extraits de la requête utilisateur.
 - Si une vérification a été déclenchée.
 - Les sources citées dans la réponse.
@@ -494,6 +505,7 @@ Chaque interaction IA doit enregistrer :
 - Le feedback utilisateur (Précis / Imprécis / Erreur).
 
 **Dashboard d'Exactitude** :
+
 - Taux de d'hallucination (inférieur à 2% visé).
 - Taux de citation de sources (100% visé).
 - Alertes si le taux d'erreur rapporté dépasse 5%.
@@ -502,7 +514,8 @@ Chaque interaction IA doit enregistrer :
 
 ## Phase 14: Retarder GitHub jusqu'à Stabilisation MVP
 
-### Objectif
+### Objectif - Phase 14
+
 Initialiser Git au bon moment (après expérimentation initiale) et configurer CI/CD.
 
 ### Quand Initialiser Git?
@@ -512,16 +525,18 @@ Initialiser Git au bon moment (après expérimentation initiale) et configurer C
 
 > [!CAUTION]
 > **RÈGLE CRITIQUE: Ne JAMAIS développer de projets Node.js dans des dossiers cloud-synchronisés**
-> 
+>
 > **Interdit**:
+>
 > - ❌ Google Drive
 > - ❌ OneDrive  
 > - ❌ Dropbox
 > - ❌ iCloud Drive
-> 
+>
 > **Raison**: `npm install` écrit des milliers de petits fichiers rapidement, causant des conflits de synchronisation (erreurs `EBADF`, `EPERM`, `ENOTEMPTY`).
 >
 > **Solution Définitive**:
+>
 > 1. **Code source** → Cloud (backup/versioning)
 > 2. **Développement** → Local disk (C:\Projects\, ~/projects/)
 > 3. **Sync** → Git (GitHub, GitLab) OU script robocopy/rsync
@@ -582,7 +597,7 @@ git push -u origin main
 
 ### Branch Strategy
 
-```
+```text
 main (protected)
 ├── develop
 │   ├── feature/user-auth
@@ -592,6 +607,7 @@ main (protected)
 ```
 
 **Protection main**:
+
 - Require pull request reviews (≥1)
 - Require status checks (CI pass)
 - No force push
@@ -642,6 +658,7 @@ jobs:
 ```
 
 ### V&V Gate 14: Repo Prêt
+
 - [x] Git initialisé avec .gitignore complet
 - [x] CI/CD configuré (tests automatiques)
 - [x] Branch protection rules actives
@@ -651,7 +668,8 @@ jobs:
 
 ## Phase 15: Checklist Finale Avant Lancement
 
-### Objectif
+### Objectif - Phase 15
+
 Vérifier exhaustivement la production readiness avant déploiement public.
 
 ### Checklist Lancement
@@ -772,16 +790,19 @@ Vérifier exhaustivement la production readiness avant déploiement public.
 ### Post-Lancement
 
 **Semaine 1**:
+
 - Monitoring intensif 24/7
 - Hotfix prêt si incidents
 - Support réactif
 
 **Mois 1**:
+
 - Collecte feedback utilisateurs
 - Analyse métriques vs objectifs
 - Itérations rapides
 
 **Trimestre 1**:
+
 - Retrospective équipe
 - Roadmap v1.1 basée sur data
 
@@ -789,18 +810,21 @@ Vérifier exhaustivement la production readiness avant déploiement public.
 
 ---
 
-## Phase 16: Amélioration Continue de l'Exactitude IA post-lancement
+## Phase 16: Amélioration Continue de l'Exactitude IA
 
-### Objectif
-S'assurer que l'IA reste précise et à jour au fil du temps par un cycle de révision itératif.
+### Objectif - Phase 16
+
+Garantir que la fiabilité de l'IA augmente avec l'usage. et à jour au fil du temps par un cycle de révision itératif.
 
 ### Cycle de Révision Mensuel
+
 1. **Analyse des Incidents** : Passer en revue toutes les hallucinations signalées.
 2. **Mise à jour RAG** : Ingestion des nouveaux règlements et amendements publiés au JOE.
 3. **Optimisation des Prompts** : Ajuster les instructions système basées sur les retours utilisateurs.
 4. **Mesure des KPIs** : Suivre l'évolution du taux d'hallucination et de la confiance utilisateur.
 
 ### Actions Trimestrielles
+
 - Audit complet de la base de connaissances RAG.
 - Recalibrage des modèles (si possible) ou changement de version de modèle (ex: passer à une version plus récente de Gemini).
 
@@ -882,6 +906,9 @@ Les templates suivants sont disponibles dans le dossier `templates/`:
 
 ### Utilisation de ce Template
 
+### Conclusion Partie II
+
+L'application rigoureuse mais pragmatique de ce guide assure une conformité "by design".
 Ce document **AFRS Master Template v2.0** est conçu pour être **générique et réutilisable** pour tout projet d'application industrielle conforme aux réglementations européennes.
 
 **Comment l'utiliser**:

@@ -17,11 +17,13 @@ Ce guide explique **comment utiliser** le framework AFRS Master Document v2.0 po
 ### Conditions Préalables
 
 **Compétences requises**:
+
 - Compréhension basique de votre domaine métier
 - Pas besoin d'être développeur (framework adapté aux ingénieurs non-programmeurs)
 - Capacité à documenter et structurer l'information
 
 **Temps estimé**:
+
 - Petite application (MVP simple): 2-4 semaines
 - Application moyenne: 2-3 mois
 - Application complexe multi-réglementations: 4-6 mois
@@ -31,6 +33,7 @@ Ce guide explique **comment utiliser** le framework AFRS Master Document v2.0 po
 Nous utiliserons le projet **Aegis** (plateforme de gestion de conformité EU pour PME manufacturières) comme exemple tout au long de ce guide.
 
 **Contexte Aegis**:
+
 - Secteur: Compliance réglementaire EU
 - Utilisateurs: PME manufacturières françaises
 - Règlements: ERSP, Machine, CRA  
@@ -49,9 +52,11 @@ Nous utiliserons le projet **Aegis** (plateforme de gestion de conformité EU po
 ## Analyse Herméneutique - Phase 1 Aegis
 
 ### Le Tout (Vision Globale)
+
 **Description**: Écosystème complet de gestion de la compliance [stratégie opérationnelle ses processus et ses trajectoires d'exécution] et la conformité [certification des produits et des systèmes cyberphysiques] pour les TPE, PME, ETI des industries manufacturières et de la construction en Europe, en France et dans les Régions Européennes Ultrapériphériques d'Outre-Mer.
 
 **Objectifs principaux**:
+
 - Aider les entreprises à naviguer la complexité réglementaire et à mieux comprendre les exigences critiques des réglementations de l'Union Européenne et des pays membres.
 - Offrir des services d'expertise technique et d'ingénierie en R&D innovation V&V, transformation digitale industrielle et décarbonation de la production des produits et des systèmes cyberphysiques.
 - Collaborer avec les experts en conformité pour fournir des services d'expertise, de conseil et de formation.
@@ -59,12 +64,14 @@ Nous utiliserons le projet **Aegis** (plateforme de gestion de conformité EU po
 - Accélérer la commercialisation produits industriels sur le marché Européen.
 
 **Contraintes globales**:
+
 - Respect des exigences des réglementations européennes pour la gestion du cycle de vie des données (RGPD, Data Act, AI Act, CRA)
 - Hébergement sécurisé en France ou en Europe (RGPD)
 - Interface ultra-simple pour une expérience utilisateur optimale
 - Budget limité (PME = petits moyens)
 
 ### Les Parties (Composants)  
+
 1. **Acceuil Expert**
    - Rôle: Établir confiance, crédibilité
    - Contrainte: Concis (temps attention <30s)
@@ -81,19 +88,24 @@ Nous utiliserons le projet **Aegis** (plateforme de gestion de conformité EU po
    - Dépendance: Service email (SMTP)
 
 ### Relations Tout ↔ Parties
+
 **Du tout vers les parties**:
+
 - Vision "conformité accessible PME" → Chaque composant doit être simple
 - Contrainte budget → Pas de features complexes en MVP
 
 **Des parties vers le tout**:
+
 - Si espace collectif nécessite backend lourd → Augmente coût infrastructure
 - Si formulaire contact ne convertit pas → Tout (modèle business) échoue
 
 ### Incohérences Détectées
+
 - ❌ Initialement prévu "dashboard compliance personnalisé" en Must-Have
   → Résolution: Descendre en "Later" (trop complexe pour MVP, pas cohérent avec contrainte budget)
 
 ### Synthèse
+
 Le MVP Aegis se concentre sur **2 parties essentielles** (Accueil + Info collective) qui suffisent à délivrer valeur initiale ("découvrir expert + comprendre réglementations"). Dashboard personnalisé reporté post-MVP.
 
 ---
@@ -108,7 +120,7 @@ La "connaissance coupée" (knowledge cutoff) de l'IA était antérieure à la pu
 
 **Résolution (Méthodologie AFRS v2.0)**:
 
-1. **Protocole de Vérification (Phase 10)**: 
+1. **Protocole de Vérification (Phase 10)**:
    L'IA doit désormais extraire les faits clés et demander confirmation à l'utilisateur si elle n'a pas la source exacte dans ses instructions.
    *Exemple*: "📋 Je vois que vous mentionnez le règlement 2024/1781. Pouvez-vous confirmer qu'il s'agit bien du règlement sur l'écoconception (ERSP) ?"
 

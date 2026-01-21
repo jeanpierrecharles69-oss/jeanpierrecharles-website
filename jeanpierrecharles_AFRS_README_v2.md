@@ -1,8 +1,10 @@
-# AFRS Master Document v2.0 - Index & Navigation
+# AFRS Master Document v2.1 - Index & Navigation
 
 ## Vue d'Ensemble
 
-Ce répertoire contient le **Application Foundations Requirements & Specifications (AFRS) Master Document Template v2.0** - un framework complet pour la conception, vérification, optimisation et production d'applications industrielles conformes aux réglementations européennes.
+Ce répertoire contient le **Application Foundations Requirements & Specifications (AFRS) Master Document Template v2.1** - un framework complet pour la conception, vérification, optimisation et production d'applications industrielles conformes aux réglementations européennes.
+
+**Nouveauté v2.1** : Intégration de la stratégie "Knowledge OS" (Staff of Agents) et standards qualité CI/CD.
 
 ---
 
@@ -17,7 +19,7 @@ Ce répertoire contient le **Application Foundations Requirements & Specificatio
 - Standards et références normatives
   - ISO/IEC/IEEE 29148 (Requirements Engineering)
   - ISO/IEC 42001 (AI Management & V&V)
-  - Les 6 réglementations européennes (RGPD, Data Act, AI Act, ERSP, Machine, CRA)
+  - Les 6 réglementations européennes (RGPD, Data Act, AI Act, ESPR, Machine, CRA)
 - Méthodologie d'analyse rationnelle
   - Analyse herméneutique (tout ↔ parties)
   - Hiérarchie causale de Judea Pearl (3 niveaux)
