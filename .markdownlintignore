@@ -1,0 +1,7 @@
+# Fichiers à ignorer lors du linting
+backup-avant-lint/
+*.tmp.md
+*.bak.md
+ARCHIVE_*.md
+lint-*.log
+lint-*.txt
