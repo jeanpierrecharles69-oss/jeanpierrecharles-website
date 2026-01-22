@@ -138,33 +138,62 @@ Voir [AFRS_AI_Accuracy_Framework.md](./AFRS_AI_Accuracy_Framework.md) pour les d
 
 ### 3.1 Règles de Nomenclature Strictes
 
-**Standard Obligatoire AFRS**:
+**RÈGLE ABSOLUE v2.1** (appliquée à 100% des fichiers):
 
 ```text
-Format: jeanpierrecharles_AFRS_[NOM-DESCRIPTIF]_v[VERSION].md
+Format OBLIGATOIRE: jeanpierrecharles_AFRS_[CATEGORIE]-[NOM].md
 
-Exemples valides:
+Exemples Master Documents:
 ✅ jeanpierrecharles_AFRS_README_v2.1.md
 ✅ jeanpierrecharles_AFRS_Master-Document-v2_Part3-Final.md
 ✅ jeanpierrecharles_AFRS_CHANGELOG_v2.1.md
+
+Exemples Guides:
+✅ jeanpierrecharles_AFRS_GUIDE-GANDI-VERCEL-DNS.md
+✅ jeanpierrecharles_AFRS_GUIDE-OAUTH-2.0-COMPLET.md
+✅ jeanpierrecharles_AFRS_GUIDE-DEMARRAGE.md
+
+Exemples Stratégies:
+✅ jeanpierrecharles_AFRS_STRATEGIE-OUTREMERS.md
+✅ jeanpierrecharles_AFRS_STRATEGIE-COMMUNICATION-RESEAUX.md
+✅ jeanpierrecharles_AFRS_STRATEGIE-SECTEUR-CONSTRUCTION.md
+
+Exemples Rapports:
+✅ jeanpierrecharles_AFRS_RAPPORT-FINAL-v2.1.md
+✅ jeanpierrecharles_AFRS_RAPPORT-ANALYSE-v2.1.md
+✅ jeanpierrecharles_AFRS_SESSION-RECAP-17JAN2026.md
 ```
 
-**Exceptions** (documents non-AFRS):
+**❌ INTERDIT** (nomenclature non-conforme):
 
 ```text
-Format: jeanpierrecharles_[CATEGORIE]-[NOM].md
-
-Exemples:
-✅ jeanpierrecharles_STRATEGIE-OUTREMERS.md
-✅ jeanpierrecharles_GUIDE-GANDI-VERCEL-DNS.md
+❌ jeanpierrecharles_STRATEGIE-OUTREMERS.md (manque AFRS_)
+❌ jeanpierrecharles_GUIDE-DEMARRAGE.md (manque AFRS_)
+❌ RAPPORT-FINAL-v2.1.md (manque préfixe complet)
+❌ plateforme_industry_5.md (préfixe incorrect)
 ```
 
-**Bénéfices**:
+**Bénéfices de la Règle Stricte**:
 
-- ✅ Traçabilité totale (git log, recherches)
-- ✅ Conformité ISO 9001 (gestion documentaire)
-- ✅ Recherche simplifiée (préfixe unique)
-- ✅ Versioning explicite
+- ✅ **Traçabilité totale**: Git log, recherches Windows, backups
+- ✅ **Conformité ISO 9001**: Gestion documentaire industrielle
+- ✅ **Recherche ultra-simplifiée**: `jeanpierrecharles_AFRS_*` trouve TOUT
+- ✅ **Versioning explicite**: `_v2.1` dans le nom
+- ✅ **Évite doublons**: Préfixe unique garantit unicité
+- ✅ **Compatible cloud**: Google Drive, OneDrive searches
+
+**Script de Vérification**:
+
+```powershell
+# Vérifier conformité nomenclature
+Get-ChildItem -Filter "*.md" | Where-Object {
+    $_.Name -notmatch "^jeanpierrecharles_AFRS_" -and
+    $_.Name -notmatch "^README.md$" -and
+    $_.Name -notmatch "^node_modules"
+} | Select-Object Name
+
+# Si résultat non-vide → fichiers non-conformes détectés
+```
 
 ### 3.2 Processus de Versioning
 
