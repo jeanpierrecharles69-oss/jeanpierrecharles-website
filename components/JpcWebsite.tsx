@@ -58,7 +58,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-900 flex flex-col selection:bg-blue-100">
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col selection:bg-blue-100">
 
             {/* Navigation */}
             <nav className="w-full bg-white/95 backdrop-blur-md border-b border-slate-100 px-6 py-3 flex justify-between items-center z-50 sticky top-0 transition-all">
@@ -68,36 +68,36 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                         JPC
                     </div>
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 leading-none tracking-tight">Jean-Pierre Charles</h1>
-                        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">{lang === 'fr' ? 'Industrie Transformation 5.0' : 'Industrial Transformation 5.0'}</span>
+                        <h1 className="text-lg font-medium text-slate-800 leading-none tracking-tight">Jean-Pierre Charles</h1>
+                        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{lang === 'fr' ? 'Industrie Transformation 5.0' : 'Industrial Transformation 5.0'}</span>
                     </div>
                 </div>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
-                    <a href="#vision" className="hover:text-blue-900 transition-colors">{text.nav.vision}</a>
-                    <a href="#services" className="hover:text-blue-900 transition-colors">{text.nav.services}</a>
-                    <a href="#contact" className="hover:text-blue-900 transition-colors">{text.nav.contact}</a>
+                <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-500">
+                    <a href="#vision" className="hover:text-slate-800 transition-colors">{text.nav.vision}</a>
+                    <a href="#services" className="hover:text-slate-800 transition-colors">{text.nav.services}</a>
+                    <a href="#contact" className="hover:text-slate-800 transition-colors">{text.nav.contact}</a>
                 </div>
 
                 <div className="flex items-center space-x-4">
                     <div className="flex bg-slate-100 rounded-full p-1 border border-slate-200">
                         <button
                             onClick={() => setLang('fr')}
-                            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${lang === 'fr' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${lang === 'fr' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             FR
                         </button>
                         <button
                             onClick={() => setLang('en')}
-                            className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${lang === 'en' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             EN
                         </button>
                     </div>
                     <button
                         onClick={onEnterApp}
-                        className="hidden sm:flex items-center px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-full transition-all shadow-md hover:shadow-lg"
+                        className="hidden sm:flex items-center px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-full transition-all shadow-md hover:shadow-lg"
                     >
                         <SparklesIcon className="h-4 w-4 mr-2 text-blue-200" />
                         {text.nav.aegis}
@@ -106,29 +106,29 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
             </nav>
 
             {/* Hero Section */}
-            <header className="relative pt-20 pb-32 px-6 overflow-hidden bg-white">
+            <header className="relative pt-20 pb-32 px-6 overflow-hidden bg-slate-50">
                 {/* Subtle background blobs */}
                 <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-slate-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
                 <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider mb-8">
+                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-500 text-xs font-medium uppercase tracking-wider mb-8">
                         <GlobeAltIcon className="h-3.5 w-3.5 mr-2 text-slate-500" />
                         <span>{lang === 'fr' ? 'Expertise Certifiée | Conformité UE' : 'Certified Expert | EU Compliance'}</span>
                     </div>
                     {/* Typography reduced and lighter */}
-                    <h1 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight mb-8">
+                    <h1 className="text-3xl md:text-5xl font-medium text-slate-800 tracking-tight leading-tight mb-8">
                         {text.hero.title}
                     </h1>
-                    <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+                    <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
                         {text.hero.subtitle}
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button onClick={() => setShowDiagnosticForm(true)} className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-base font-bold rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto">
+                        <button onClick={() => setShowDiagnosticForm(true)} className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-base font-medium rounded-full shadow-lg hover:shadow-xl transition-all w-full sm:w-auto">
                             {text.hero.cta_talk}
                         </button>
-                        <button onClick={onEnterApp} className="px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 text-base font-bold rounded-full shadow-sm hover:shadow-md transition-all w-full sm:w-auto flex items-center justify-center">
-                            <SparklesIcon className="h-4 w-4 mr-2 text-slate-600" />
+                        <button onClick={onEnterApp} className="px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 hover:border-blue-300 text-base font-medium rounded-full shadow-sm hover:shadow-md transition-all w-full sm:w-auto flex items-center justify-center">
+                            <SparklesIcon className="h-4 w-4 mr-2 text-slate-500" />
                             {text.hero.cta_app}
                         </button>
                     </div>
@@ -144,21 +144,21 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             <div className="relative bg-white rounded-3xl p-6 h-auto flex flex-col items-center justify-center border border-slate-100 shadow-lg overflow-hidden group">
                                 <div className="text-center w-full">
                                     {/* Profile Image Main */}
-                                    <div className="h-48 w-48 mx-auto shadow-2xl flex items-center justify-center mb-6 border-4 border-white transition-transform duration-500 hover:scale-105 rounded-2xl overflow-hidden bg-slate-100">
+                                    <div className="h-64 w-64 mx-auto shadow-2xl flex items-center justify-center mb-6 border-4 border-white transition-transform duration-500 hover:scale-105 rounded-2xl overflow-hidden bg-slate-100">
                                         <img
                                             src="https://lh3.googleusercontent.com/d/1-H4v59SyTkKOpX7UdUMUVHuwpLpLUF8x"
                                             alt="Jean-Pierre Charles"
                                             className="h-full w-full object-cover"
                                         />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Jean-Pierre Charles</h3>
+                                    <h3 className="text-2xl font-medium text-slate-800 mb-2">Jean-Pierre Charles</h3>
                                     <p className="font-serif italic text-lg text-slate-500 mb-6 font-medium">"L'excellence par l'humain"</p>
 
                                     <div className="flex justify-center space-x-4 mb-2">
-                                        <a href={text.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile" title="Visitez mon profil LinkedIn" className="p-3 bg-slate-100 text-slate-600 rounded-full hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                                        <a href={text.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile" title="Visitez mon profil LinkedIn" className="p-3 bg-white text-slate-500 rounded-full hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-200">
                                             <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                                         </a>
-                                        <a href={text.contact.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Contact" title="Contactez-moi sur WhatsApp" className="p-3 bg-slate-100 text-slate-600 rounded-full hover:bg-green-600 hover:text-white transition-all shadow-sm">
+                                        <a href={text.contact.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Contact" title="Contactez-moi sur WhatsApp" className="p-3 bg-white text-slate-500 rounded-full hover:bg-green-600 hover:text-white transition-all shadow-sm border border-slate-200">
                                             <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.417-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.305 1.652zm6.599-3.835c1.52.909 3.197 1.389 4.908 1.39h.005c5.334 0 9.673-4.34 9.675-9.674.002-2.586-1.006-5.017-2.839-6.85s-4.264-2.841-6.853-2.842c-5.337 0-9.674 4.337-9.677 9.671-.001 1.841.522 3.635 1.509 5.204l-.994 3.628 3.719-.975zm11.233-7.514c-.244-.122-1.442-.712-1.666-.794-.223-.082-.387-.122-.549.122-.162.244-.63.794-.772.957-.142.163-.284.183-.528.061-.244-.122-1.029-.379-1.961-1.211-.724-.646-1.214-1.444-1.356-1.688-.142-.244-.015-.376.107-.497.111-.11.244-.284.366-.427.122-.142.162-.244.244-.406.082-.163.041-.305-.021-.427-.061-.122-.549-1.322-.752-1.81-.197-.474-.397-.411-.548-.418l-.466-.008c-.163 0-.427.061-.65.305-.224.244-.854.834-.854 2.035 0 1.201.874 2.36 1.057 2.053-.183.142-1.611 3.559-1.323 5.422.311-.122.183-.244.183-2.228 1.484.224.224.162.463-.224.244-.386 2.134-2.108 2.134-2.108.12 0 .15-.05.18-.08s.03-.06.05-.09c.28-.4 1.25-.4 1.25-.4z" /></svg>
                                         </a>
                                     </div>
@@ -166,18 +166,18 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             </div>
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900 mb-6">{text.vision.title}</h2>
-                            <p className="text-lg text-slate-600 leading-loose font-medium">
+                            <h2 className="text-2xl font-medium text-slate-800 mb-6">{text.vision.title}</h2>
+                            <p className="text-lg text-slate-500 leading-loose font-medium">
                                 {text.vision.text}
                             </p>
                             <div className="mt-8 grid grid-cols-2 gap-4">
-                                <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">{lang === 'fr' ? 'Autonomie' : 'Empowerment'}</h4>
-                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? "Redonner le pouvoir aux équipes par l'intelligence collective." : "Empowering teams through collective intelligence."}</p>
+                                <div className="p-5 bg-white rounded-xl border border-slate-200 hover:border-blue-300 shadow-sm transition-all hover:-translate-y-1">
+                                    <h4 className="font-medium text-slate-800 text-base mb-1">{lang === 'fr' ? 'Autonomie' : 'Empowerment'}</h4>
+                                    <p className="text-sm text-slate-500 font-medium tracking-tight">{lang === 'fr' ? "Redonner le pouvoir aux équipes par l'intelligence collective." : "Empowering teams through collective intelligence."}</p>
                                 </div>
-                                <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform hover:-translate-y-1">
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">{lang === 'fr' ? 'Robustesse' : 'Reliability'}</h4>
-                                    <p className="text-sm text-slate-600 font-medium tracking-tight">{lang === 'fr' ? 'Des systèmes mécatroniques fiables et durables.' : 'Reliable and sustainable mechatronic systems.'}</p>
+                                <div className="p-5 bg-white rounded-xl border border-slate-200 hover:border-blue-300 shadow-sm transition-all hover:-translate-y-1">
+                                    <h4 className="font-medium text-slate-800 text-base mb-1">{lang === 'fr' ? 'Robustesse' : 'Reliability'}</h4>
+                                    <p className="text-sm text-slate-500 font-medium tracking-tight">{lang === 'fr' ? 'Des systèmes mécatroniques fiables et durables.' : 'Reliable and sustainable mechatronic systems.'}</p>
                                 </div>
                             </div>
                         </div>
@@ -189,13 +189,13 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row gap-12">
                         <div className="md:w-1/3">
-                            <h2 className="text-3xl font-bold text-slate-900 mb-4 sticky top-24">{text.experience.title}</h2>
-                            <p className="text-slate-600 mb-4 leading-relaxed font-medium text-sm italic">{text.experience.subtitle}</p>
+                            <h2 className="text-3xl font-medium text-slate-800 mb-4 sticky top-24">{text.experience.title}</h2>
+                            <p className="text-slate-500 mb-4 leading-relaxed font-medium text-sm italic">{text.experience.subtitle}</p>
                             <a
                                 href={text.contact.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-all shadow-md mb-8"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-all shadow-md mb-8"
                             >
                                 <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                                 Voir profil/parcours
@@ -230,16 +230,16 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                                             title="Cliquez pour agrandir"
                                         />
                                         <div className="flex-1 flex flex-col sm:flex-row sm:items-baseline justify-between">
-                                            <h3 className="text-xl font-bold text-slate-900">{item.company}</h3>
-                                            <span className="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{item.period}</span>
+                                            <h3 className="text-xl font-medium text-slate-800">{item.company}</h3>
+                                            <span className="text-sm font-medium text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">{item.period}</span>
                                         </div>
                                     </div>
 
                                     {item.project && (
                                         <p className="text-sm font-semibold text-blue-600 mb-2 italic">{item.project}</p>
                                     )}
-                                    <p className="text-lg font-bold text-blue-900 mb-3">{item.role}</p>
-                                    <p className="text-slate-600 leading-relaxed font-medium">{item.desc}</p>
+                                    <p className="text-lg font-medium text-blue-900 mb-3">{item.role}</p>
+                                    <p className="text-slate-500 leading-relaxed font-medium">{item.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -251,27 +251,27 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
             <section id="services" className="py-24 bg-white">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-slate-900 mb-4">{text.services.title}</h2>
+                        <h2 className="text-3xl font-medium text-slate-800 mb-4">{text.services.title}</h2>
                         <div className="h-1 w-20 bg-slate-800 mx-auto rounded-full"></div>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {/* Service 1 */}
-                        <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 transition-all duration-300 hover:bg-white hover:shadow-xl hover:border-slate-300">
-                            <div className="h-14 w-14 bg-white rounded-xl flex items-center justify-center mb-6 text-slate-800 shadow-sm border border-slate-100">
+                        <div className="bg-white p-8 rounded-2xl border border-slate-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg">
+                            <div className="h-14 w-14 bg-slate-50 rounded-xl flex items-center justify-center mb-6 text-slate-800 shadow-sm border border-slate-200">
                                 <GlobeAltIcon className="h-7 w-7" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-3">{text.services.consulting.title}</h3>
-                            <p className="text-slate-600 leading-relaxed text-base mb-6 font-medium">{text.services.consulting.desc}</p>
+                            <h3 className="text-xl font-medium text-slate-800 mb-3">{text.services.consulting.title}</h3>
+                            <p className="text-slate-500 leading-relaxed text-base mb-6 font-medium">{text.services.consulting.desc}</p>
                         </div>
 
                         {/* Service 2 */}
-                        <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200 transition-all duration-300 hover:bg-white hover:shadow-xl hover:border-slate-300">
-                            <div className="h-14 w-14 bg-white rounded-xl flex items-center justify-center mb-6 text-slate-800 shadow-sm border border-slate-100">
+                        <div className="bg-white p-8 rounded-2xl border border-slate-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg">
+                            <div className="h-14 w-14 bg-slate-50 rounded-xl flex items-center justify-center mb-6 text-slate-800 shadow-sm border border-slate-200">
                                 <PuzzlePieceIcon className="h-7 w-7" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-3">{text.services.expertise.title}</h3>
-                            <p className="text-slate-600 leading-relaxed text-base mb-6 font-medium">{text.services.expertise.desc}</p>
+                            <h3 className="text-xl font-medium text-slate-800 mb-3">{text.services.expertise.title}</h3>
+                            <p className="text-slate-500 leading-relaxed text-base mb-6 font-medium">{text.services.expertise.desc}</p>
                         </div>
 
                         {/* Service 3: Aegis (Special Card) - Navy Theme */}
@@ -366,15 +366,15 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             <XMarkIcon className="h-5 w-5" />
                         </button>
                         <div className="p-8">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4">{text.legalModal.title}</h2>
-                            <div className="space-y-4 text-slate-600 text-sm leading-relaxed font-medium">
+                            <h2 className="text-2xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4">{text.legalModal.title}</h2>
+                            <div className="space-y-4 text-slate-500 text-sm leading-relaxed font-medium">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="p-4 bg-slate-50 rounded-lg">
-                                        <p className="font-bold text-slate-900 mb-1">{text.legalModal.companyName}</p>
+                                        <p className="font-bold text-slate-800 mb-1">{text.legalModal.companyName}</p>
                                         <p>{text.legalModal.status}</p>
                                     </div>
                                     <div className="p-4 bg-slate-50 rounded-lg">
-                                        <p className="font-bold text-slate-900 mb-1">{text.legalModal.commercialName}</p>
+                                        <p className="font-bold text-slate-800 mb-1">{text.legalModal.commercialName}</p>
                                         <p>{text.legalModal.director}</p>
                                     </div>
                                 </div>
@@ -454,20 +454,20 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             <XMarkIcon className="h-6 w-6" />
                         </button>
 
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">
                             {lang === 'fr' ? 'Demande de Diagnostic Transformation Industrie 5.0' : 'Industry 5.0 Transformation Diagnostic Request'}
                         </h2>
-                        <p className="text-slate-600 mb-6">
+                        <p className="text-slate-500 mb-6">
                             {lang === 'fr'
                                 ? 'Cliquez sur le bouton ci-dessous pour envoyer votre demande par email. Le formulaire sera pré-rempli avec l\'objet.'
                                 : 'Click the button below to send your request by email. The form will be pre-filled with the subject.'}
                         </p>
 
                         <div className="bg-slate-50 rounded-lg p-6 mb-6 border border-slate-200">
-                            <p className="text-sm font-semibold text-slate-700 mb-3">
+                            <p className="text-sm font-semibold text-slate-800 mb-3">
                                 {lang === 'fr' ? 'Informations pré-remplies :' : 'Pre-filled information:'}
                             </p>
-                            <div className="space-y-2 text-sm text-slate-600">
+                            <div className="space-y-2 text-sm text-slate-500">
                                 <p><strong>{lang === 'fr' ? 'À :' : 'To:'}</strong> contact@jeanpierrecharles.com</p>
                                 <p><strong>{lang === 'fr' ? 'Objet :' : 'Subject:'}</strong> Demande de Diagnostic Transformation Industrie 5.0</p>
                             </div>

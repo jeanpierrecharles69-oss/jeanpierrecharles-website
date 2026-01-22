@@ -63,19 +63,19 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
+                {/* Header aligné sur le style Dashboard */}
+                <div className="sticky top-0 bg-white border-b border-slate-200 p-6 rounded-t-2xl">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <span className="text-4xl">{config.emoji}</span>
                             <div>
-                                <h2 className="text-xl font-bold">{config.titre}</h2>
-                                <p className="text-sm text-blue-100">
+                                <h2 className="text-xl font-semibold text-slate-800">{config.titre}</h2>
+                                <p className="text-sm text-slate-500">
                                     {lang === 'fr' ? 'Règlement' : 'Regulation'} (UE) {config.id} • <span className="text-xs">JOE UE</span>
                                     {config.dateApplication && (
                                         <>
                                             <span className="mx-1">•</span>
-                                            <span className="text-xs">{config.dateApplication}</span>
+                                            <span className="text-xs">{lang === 'fr' ? 'Application : ' : 'Application: '}{config.dateApplication}</span>
                                         </>
                                     )}
                                 </p>
@@ -84,7 +84,7 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                         <button
                             onClick={onClose}
                             aria-label={text.close}
-                            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                            className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-slate-900"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -112,15 +112,15 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                 </ul>
                             </div>
 
-                            <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
-                                <p className="text-sm text-blue-900">
+                            <div className="bg-slate-50 border-l-4 border-slate-400 p-4 rounded-r-lg">
+                                <p className="text-sm text-slate-700">
                                     💡 <strong>{text.nextStep}</strong> {text.nextStepDesc}
                                 </p>
                             </div>
 
                             <button
                                 onClick={() => setCurrentStep('questions')}
-                                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                                className="w-full bg-slate-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-sm hover:shadow-md"
                             >
                                 {text.startQuiz}
                             </button>
@@ -143,8 +143,8 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                                 <label
                                                     key={option}
                                                     className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${responses[question.id] === option
-                                                        ? 'border-blue-600 bg-blue-50'
-                                                        : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                                                        ? 'border-blue-300 bg-blue-50'
+                                                        : 'border-slate-200 hover:border-blue-200 hover:bg-slate-50'
                                                         }`}
                                                 >
                                                     <input
@@ -171,8 +171,8 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                                     <label
                                                         key={option}
                                                         className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${isChecked
-                                                            ? 'border-blue-600 bg-blue-50'
-                                                            : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                                                            ? 'border-blue-300 bg-blue-50'
+                                                            : 'border-slate-200 hover:border-blue-200 hover:bg-slate-50'
                                                             }`}
                                                     >
                                                         <input
@@ -208,7 +208,7 @@ const RegulationQuiz: React.FC<RegulationQuizProps> = ({ regulationKey, onSubmit
                                 <button
                                     onClick={handleSubmit}
                                     disabled={Object.keys(responses).length === 0}
-                                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 bg-slate-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {text.generate}
                                 </button>

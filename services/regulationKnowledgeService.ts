@@ -6,19 +6,32 @@ export function enrichPromptWithRegulation(userPrompt: string): { enrichedPrompt
 
     // Détecter si la question porte sur un règlement spécifique
     // Pattern amélioré : capte aussi les numéros seuls (ex: "batteries 2023/1542")
-    const regPattern = /(?:règlement|regulation|UE|EU|batteries?|AI\s*Act|ESPR|CRA|Data\s*Act|RGPD|GDPR|machines?)?[:\s]*(?:\(UE\)|\(EU\)|UE|EU)?\s*(\d{4}\/\d+)/gi;
-    const matches = userPrompt.match(regPattern);
+    const regPattern = /(?:règlement|regulation|UE|EU|batteries?|AI\s*Act|ERSP|ESPR|CRA|Data\s*Act|RGPD|GDPR|machines?)?[:\s]*(?:\(UE\)|\(EU\)|UE|EU)?\s*(\d{4}\/\d+)/gi;
+
+    // Détection spécifique ERSP/ESPR → 2024/1781 (les deux acronymes sont acceptés)
+    const erspEsprPattern = /\b(ERSP|ESPR)\b/gi;
+    const erspEsprMatch = userPrompt.match(erspEsprPattern);
+
+    let matches = userPrompt.match(regPattern);
+
+
+    // Si ERSP ou ESPR détecté sans numéro, forcer 2024/1781
+    if (erspEsprMatch && (!matches || !matches.some(m => m.includes('2024/1781')))) {
+        console.log('🔍 [DEBUG] ERSP/ESPR détecté → forçage 2024/1781');
+        if (!matches) matches = [];
+        matches.push('2024/1781');
+    }
 
     console.log('🔍 [DEBUG] Matches trouvés:', matches);
 
     let systemAddition = '';
 
-    if (matches) {
+    if (matches && matches.length > 0) {
         // Extraire les numéros de règlements mentionnés
         const regNumbers = matches.map(m => {
             const numMatch = m.match(/(\d{4}\/\d+)/);
             return numMatch ? numMatch[1] : null;
-        }).filter(Boolean);
+        }).filter(Boolean) as string[];
 
         console.log('🔍 [DEBUG] Numéros extraits:', regNumbers);
         console.log('🔍 [DEBUG] Base de données:', reglements);

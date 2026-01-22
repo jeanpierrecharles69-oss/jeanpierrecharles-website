@@ -578,7 +578,7 @@
     "espr": {
         "fr": {
             "id": "2024/1781",
-            "titre": "ESPR - Écoconception Produits Durables",
+            "titre": "ERSP (aussi appelé ESPR) - Exigences d'Écoconception pour des Produits Durables",
             "emoji": "♻️",
             "dateApplication": "Application : 18 juillet 2024",
             "resume_critique": {
@@ -649,7 +649,7 @@
         },
         "en": {
             "id": "2024/1781",
-            "titre": "ESPR - Ecodesign for Sustainable Products",
+            "titre": "ERSP (also known as ESPR) - Ecodesign Requirements for Sustainable Products",
             "emoji": "♻️",
             "dateApplication": "Application: July 18, 2024",
             "resume_critique": {

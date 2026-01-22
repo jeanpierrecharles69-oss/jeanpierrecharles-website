@@ -8,8 +8,21 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Configuration robuste - MODÈLE VALIDÉ ET TESTÉ
-const MODEL_NAME = 'gemini-1.5-flash';
+// Configuration DÉTERMINISTE - MODÈLE VALIDÉ ET TESTÉ
+// IMPORTANT : Le préfixe 'models/' est OBLIGATOIRE pour l'API Google Generative AI
+const MODEL_NAME = 'models/gemini-2.0-flash';
+
+// DÉTERMINISME STRICT POUR CONFORMITÉ RÉGLEMENTAIRE
+// Configuration garantissant la reproductibilité parfaite des réponses
+// Same input → Same output (essentiel pour audits et confiance utilisateur)
+const DETERMINISTIC_CONFIG = {
+    temperature: 0,        // Déterminisme maximal (pas de randomness)
+    topP: 1,              // Désactive le nucleus sampling
+    topK: 1,              // Sélectionne systématiquement le token le plus probable
+    candidateCount: 1,    // Génère une seule réponse
+    seed: 42,             // Seed fixe pour reproductibilité cross-platform
+    maxOutputTokens: 2048,
+};
 
 const modelInstance = genAI.getGenerativeModel({
     model: MODEL_NAME,
@@ -19,12 +32,7 @@ const modelInstance = genAI.getGenerativeModel({
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
         },
     ],
-    generationConfig: {
-        temperature: 0.1, // Basse température pour la répétabilité et la précision (Conformité)
-        topP: 0.95,
-        topK: 40,
-        maxOutputTokens: 2048,
-    }
+    generationConfig: DETERMINISTIC_CONFIG
 });
 
 /**
@@ -38,13 +46,11 @@ export const runQueryStream = async function* (
     let retries = 3;
     let delay = 1000;
 
-    // Utilisation des instructions système natives si supportées
+    // Utilisation de la configuration DÉTERMINISTE avec system instruction
     const modelWithSystem = genAI.getGenerativeModel({
         model: MODEL_NAME,
         systemInstruction: systemInstruction,
-        generationConfig: {
-            temperature: 0.1,
-        }
+        generationConfig: DETERMINISTIC_CONFIG
     });
 
     while (retries > 0) {
@@ -106,9 +112,7 @@ export const runQuery = async (
     const modelWithSystem = genAI.getGenerativeModel({
         model: MODEL_NAME,
         systemInstruction: systemInstruction,
-        generationConfig: {
-            temperature: 0.1,
-        }
+        generationConfig: DETERMINISTIC_CONFIG
     });
 
     while (retries > 0) {

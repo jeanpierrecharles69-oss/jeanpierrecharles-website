@@ -276,49 +276,49 @@ STRICT RULES:
           onClick={() => setActiveQuiz('ai_act')}
           className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          🤖 AI Act
+          🤖 AI Act (EU) 2024/1689
         </button>
         <button
           onClick={() => setActiveQuiz('machinery')}
           className="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs font-semibold rounded-full border border-yellow-200 hover:bg-yellow-100 hover:border-yellow-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          ⚙️ Machinery
+          ⚙️ Machinery (EU) 2023/1230
         </button>
         <button
           onClick={() => setActiveQuiz('gdpr')}
           className="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200 hover:bg-green-100 hover:border-green-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          🔒 GDPR
+          🔒 GDPR (EU) 2016/679
         </button>
         <button
           onClick={() => setActiveQuiz('cra')}
           className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          🛡️ CRA
+          🛡️ CRA (EU) 2024/2847
         </button>
         <button
           onClick={() => setActiveQuiz('espr')}
           className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          ♻️ ESPR
+          ♻️ ERSP/ESPR (EU) 2024/1781
         </button>
         <button
           onClick={() => setActiveQuiz('data_act')}
           className="px-3 py-1.5 bg-pink-50 text-pink-700 text-xs font-semibold rounded-full border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          📊 Data Act
+          📊 Data Act (EU) 2023/2854
         </button>
         <button
           onClick={() => setActiveQuiz('batteries')}
           className="px-3 py-1.5 bg-lime-50 text-lime-700 text-xs font-semibold rounded-full border border-lime-200 hover:bg-lime-100 hover:border-lime-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          🔋 Batteries
+          🔋 Batteries (EU) 2023/1542
         </button>
         <button
           onClick={() => setActiveQuiz('cpr')}
           className="px-3 py-1.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-all cursor-pointer transform hover:scale-105"
         >
-          🏗️ CPR
+          🏗️ CPR (EU) 305/2011
         </button>
 
       </div>
@@ -346,8 +346,8 @@ STRICT RULES:
           <li className="flex items-start">
             <span className="mr-2">•</span>
             <span>{lang === 'fr'
-              ? "Quelle est la différence entre ESPR et RGPD ?"
-              : "What's the difference between ESPR and GDPR?"
+              ? "Quelle est la différence entre ERSP et RGPD ?"
+              : "What's the difference between ERSP and GDPR?"
             }</span>
           </li>
         </ul>
@@ -358,18 +358,15 @@ STRICT RULES:
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex justify-center items-center z-50 p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-[85vh] flex flex-col overflow-hidden border border-slate-200 animate-scale-up">
-        {/* Header avec gradient européen */}
-        <header className="relative flex items-center justify-between p-5 bg-gradient-to-r from-blue-600 via-blue-700 to-yellow-600 text-white overflow-hidden">
-          {/* Effet de fond supérieur */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
-
-          <div className="flex items-center relative z-10">
-            <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl border border-white/30 shadow-lg">
-              <SparklesIcon className="h-5 w-5 text-yellow-200" />
+        {/* Header aligné sur le style Dashboard */}
+        <header className="flex items-center justify-between p-5 bg-white border-b border-slate-200 sticky top-0 z-10">
+          <div className="flex items-center">
+            <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+              <SparklesIcon className="h-5 w-5 text-slate-700" />
             </div>
             <div className="ml-3">
-              <h2 className="text-lg font-bold">{text.title}</h2>
-              <p className="text-xs text-blue-100">
+              <h2 className="text-lg font-semibold text-slate-800 tracking-tight">{text.title}</h2>
+              <p className="text-xs text-slate-500">
                 {lang === 'fr' ? 'Expert conformité européenne' : 'European compliance expert'}
               </p>
             </div>
@@ -379,9 +376,9 @@ STRICT RULES:
             onClick={onClose}
             title={lang === 'fr' ? 'Fermer' : 'Close'}
             aria-label={lang === 'fr' ? 'Fermer' : 'Close'}
-            className="relative z-10 p-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all"
+            className="p-2 rounded-full hover:bg-slate-100 transition-all text-slate-500 hover:text-slate-900"
           >
-            <XMarkIcon className="h-6 w-6 text-white" />
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </header>
 
@@ -451,7 +448,7 @@ STRICT RULES:
               disabled={isLoading || !input.trim()}
               title={lang === 'fr' ? 'Envoyer le message' : 'Send message'}
               aria-label={lang === 'fr' ? 'Envoyer le message' : 'Send message'}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-slate-300 disabled:to-slate-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
             >
               <PaperAirplaneIcon className="h-5 w-5" />
             </button>
