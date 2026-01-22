@@ -1,7 +1,7 @@
 # AFRS Methodology Guide - How to Use the Framework
 
-**Version**: 2.0.1  
-**Date**: 17 janvier 2026  
+**Version**: 2.1  
+**Date**: 22 janvier 2026  
 **Objectif**: Guide pratique d'application du template AFRS Master Document avec exemples concrets
 
 ---
@@ -134,14 +134,226 @@ Voir [AFRS_AI_Accuracy_Framework.md](./AFRS_AI_Accuracy_Framework.md) pour les d
 
 ---
 
-## 3. Conclusion
+## 3. Gestion Documentaire v2.1
+
+### 3.1 Règles de Nomenclature Strictes
+
+**Standard Obligatoire AFRS**:
+
+```text
+Format: jeanpierrecharles_AFRS_[NOM-DESCRIPTIF]_v[VERSION].md
+
+Exemples valides:
+✅ jeanpierrecharles_AFRS_README_v2.1.md
+✅ jeanpierrecharles_AFRS_Master-Document-v2_Part3-Final.md
+✅ jeanpierrecharles_AFRS_CHANGELOG_v2.1.md
+```
+
+**Exceptions** (documents non-AFRS):
+
+```text
+Format: jeanpierrecharles_[CATEGORIE]-[NOM].md
+
+Exemples:
+✅ jeanpierrecharles_STRATEGIE-OUTREMERS.md
+✅ jeanpierrecharles_GUIDE-GANDI-VERCEL-DNS.md
+```
+
+**Bénéfices**:
+
+- ✅ Traçabilité totale (git log, recherches)
+- ✅ Conformité ISO 9001 (gestion documentaire)
+- ✅ Recherche simplifiée (préfixe unique)
+- ✅ Versioning explicite
+
+### 3.2 Processus de Versioning
+
+**Règle de Versioning Sémantique**:
+
+- **v2.0 → v2.1**: Ajout fonctionnel majeur (ex: Phase 17)
+- **v2.1 → v2.1.1**: Correction mineure (typos, clarifications)
+- **v2.x → v3.0**: Refonte architecture complète
+
+**Archivage**:
+
+- Anciennes versions: Renommer avec suffix `_ARCHIVE-v2.0.md`
+- Conserver dans dossier `archives/` (optionnel)
+
+---
+
+## 4. Architecture RAG Multi-Modèles (Phase 16+)
+
+### 4.1 Pourquoi Gemini-1.5-Flash est Obligatoire
+
+**Comparaison Modèles**:
+
+| Critère | gemini-1.5-flash (GA) | gemini-2.5-flash (Preview) |
+| :--- | :--- | :--- |
+| Statut | ✅ Stable Production | ⚠️ Expérimental |
+| Déterminisme | ✅ Élevé (temp 0.1) | ⚠️ Variable |
+| Knowledge Cutoff | ✅ Fixe documenté | ⚠️ Flottant |
+| Hallucinations | ✅ <2% (avec RAG) | ⚠️ ~15% |
+| Support Long-terme | ✅ Garanti 2+ ans | ❌ Non garanti |
+
+**Verdict**: **gemini-1.5-flash OBLIGATOIRE** pour conformité EU (zéro tolérance erreur).
+
+### 4.2 Architecture Hybride Recommandée
+
+**Pour gérer l'évolution réglementaire EU** (ESPR, AI Act, CPR 2.0...):
+
+```typescript
+const RAG_ARCHITECTURE = {
+  // Moteur PRINCIPAL (80% requêtes)
+  primary: {
+    engine: "gemini-1.5-flash",
+    temperature: 0.1,
+    usage: "Questionnaires standards, analyses simples",
+    cost: "$50/mois (100K requêtes)"
+  },
+  
+  // Moteur PREMIUM (20% requêtes critiques)
+  premium: {
+    engine: "claude-3.5-sonnet",
+    temperature: 0.0,
+    usage: "DPIA, High-Risk AI Classification, Audits",
+    cost: "$150/mois (5K requêtes)",
+    paywall: "Premium tier uniquement"
+  },
+  
+  // Base vectorielle
+  vectorDB: "Supabase pgvector",
+  
+  // Embeddings
+  embeddings: "Google text-embedding-004", // $0.00002/1K
+  
+  // 8 Modules Réglementaires
+  regulations: [
+    "AI Act (2024/1689)",
+    "GDPR (2016/679)",
+    "Data Act (2023/2854)",
+    "CRA (2024/2847)",
+    "Machines (2023/1230)",
+    "ESPR (2024/1781)",
+    "CPR (305/2011)", // NOUVEAU
+    "Batteries (2023/1542)" // NOUVEAU
+  ]
+}
+```
+
+**Coût total estimé**: $485/mois (vs $1800 avec Claude seul = **73% économie**)
+
+### 4.3 Smart Routing Logic
+
+**Règles de sélection automatique**:
+
+1. **User Free Tier** → Gemini uniquement
+2. **User Premium + Complexité Simple** → Gemini
+3. **User Premium + Complexité Élevée** → Claude
+4. **Cas spéciaux** (DPIA, Classification AI High-Risk) → Claude
+
+**Bénéfices**:
+
+- ✅ Qualité optimale (Claude pour critique)
+- ✅ Coût contrôlé (Gemini pour routine)
+- ✅ Différenciation paywall (Claude = feature premium)
+
+### 4.4 Gestion Évolution Réglementaire
+
+**Pipeline Automatique EUR-Lex**:
+
+```typescript
+// Pipeline mensuel
+async function updateRegulationsKnowledgeBase() {
+  // 1. Scrape EUR-Lex pour nouveaux textes
+  const newDocs = await scrapeEURLex([
+    "2024/1689", // AI Act
+    "2024/1781", // ESPR
+    // ... autres
+  ]);
+  
+  // 2. Chunking sémantique
+  const chunks = await semanticChunking(newDocs, {
+    chunkSize: 1000,
+    overlap: 200
+  });
+  
+  // 3. Embedding + Ingestion Supabase
+  await vectorDB.upsert(chunks);
+  
+  // 4. Version tracking
+  await logRegulationVersion({
+    regulation: "AI_ACT",
+    version: "2024/1689 (consolidée nov 2024)",
+    timestamp: new Date()
+  });
+}
+```
+
+**Traçabilité**: Chaque réponse IA cite la **version exacte** du règlement utilisé.
+
+---
+
+## 5. Leçons du Déploiement jeanpierrecharles.com
+
+### 5.1 Cloud Sync Issues (CRITIQUE)
+
+**Problème**: Développement dans dossiers cloud-synchronisés (Google Drive, OneDrive).
+
+**Impact**: `npm install` échoue avec erreurs `EBADF`, `EPERM`, `ENOTEMPTY`.
+
+**Raison**: Milliers de petits fichiers `node_modules/` conflits de synchronisation.
+
+**Solution Définitive**:
+
+```powershell
+# ❌ INTERDIT
+cd "G:\Mon Drive\projet"
+npm install # ÉCHOUE
+
+# ✅ BON WORKFLOW
+robocopy "G:\Mon Drive\projet" "C:\Projects\projet" /E /XD node_modules
+cd C:\Projects\projet
+npm install # ✅ FONCTIONNE
+npm run dev
+```
+
+### 5.2 DNS Propagation (48h)
+
+**Leçon**: Configurer DNS Gandi.net **48-72h avant lancement** prévu.
+
+**Vérification**: `nslookup jeanpierrecharles.com` + `dnschecker.org`
+
+### 5.3 SSL Auto-Provisioning Vercel
+
+**Leçon**: Vercel génère automatiquement SSL **APRÈS** propagation DNS complète.
+
+**Patience**: Attendre 24-48h, ne PAS forcer manuellement.
+
+---
+
+## 6. Conclusion
 
 Le framework AFRS n'est pas une simple checklist, c'est un système itératif. Chaque incident (comme l'hallucination Aegis) doit alimenter l'amélioration continue du document Master et des protocoles de vérification.
+
+**Nouveautés v2.1**:
+
+- ✅ Règles nomenclature strictes
+- ✅ Architecture RAG hybride (Gemini + Claude)
+- ✅ Gestion 8 modules réglementaires
+- ✅ Leçons déploiement production
 
 **Bonne conception !**
 
 ---
 
+## 📚 Références
+
+- **Architecture RAG complète**: `jeanpierrecharles_AFRS_ARCHITECTURE-RAG-MULTIMODELES-v2.1.md`
+- **AI Accuracy Framework**: `jeanpierrecharles_AFRS_AI_Accuracy_Framework.md`
+- **Analyse Nomenclature**: `jeanpierrecharles_AFRS_ANALYSE-NOMENCLATURE-v2.1.md`
+
+---
+
 **Auteur**: Jean-Pierre Charles + Antigravity AI  
-**Version**: 2.0  
-**Date**: 17 janvier 2026 (Mise à jour post-incident)
+**Version**: 2.1  
+**Date**: 22 janvier 2026
