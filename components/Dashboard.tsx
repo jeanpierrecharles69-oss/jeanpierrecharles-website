@@ -6,6 +6,8 @@ import { ExclamationTriangleIcon } from './icons/ExclamationTriangleIcon';
 import { XCircleIcon } from './icons/XCircleIcon';
 import { GlobeAltIcon } from './icons/GlobeAltIcon';
 import { Language, t } from '../translations';
+import GamificationBadges from './GamificationBadges';
+
 
 interface DashboardProps {
     setActiveView: (view: string) => void;
@@ -15,7 +17,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) => {
     const text = t[lang].dashboard;
-    
+
     // Calculate global stats
     const allItems = modules.flatMap(m => m.complianceItems);
     const compliantCount = allItems.filter(i => i.status === ComplianceStatus.Compliant).length;
@@ -60,7 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) =
                                 <p className="text-xs text-slate-500 font-mono">SN-A4B8-9Z7C</p>
                             </div>
                         </div>
-                        
+
                         {/* Status Grid */}
                         <div className="md:col-span-9 p-6">
                             <div className="flex justify-between items-start mb-6">
@@ -75,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) =
                                         {text.assetDesc}
                                     </p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setActiveView('passport')}
                                     className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
                                 >
@@ -102,11 +104,11 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) =
                                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
                                     <p className="text-xs text-slate-500 mb-1 font-medium">{text.compliance}</p>
                                     <div className="flex items-center">
-                                         {complianceScore === 100 ? (
-                                             <span className="flex items-center text-green-700 text-sm font-medium"><CheckCircleIcon className="h-4 w-4 mr-1"/> {text.validated}</span>
-                                         ) : (
-                                             <span className="flex items-center text-yellow-700 text-sm font-medium"><ExclamationTriangleIcon className="h-4 w-4 mr-1"/> {text.actionRequired}</span>
-                                         )}
+                                        {complianceScore === 100 ? (
+                                            <span className="flex items-center text-green-700 text-sm font-medium"><CheckCircleIcon className="h-4 w-4 mr-1" /> {text.validated}</span>
+                                        ) : (
+                                            <span className="flex items-center text-yellow-700 text-sm font-medium"><ExclamationTriangleIcon className="h-4 w-4 mr-1" /> {text.actionRequired}</span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -115,12 +117,22 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) =
                 </div>
             </div>
 
+            {/* Gamification Badges */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <GamificationBadges
+                    lang={lang}
+                    complianceScore={complianceScore}
+                    completedModules={modules.filter(m => m.complianceItems.every(i => i.status === ComplianceStatus.Compliant)).length}
+                    totalModules={modules.length}
+                />
+            </div>
+
             {/* Quick Actions / Modules */}
             <div>
-                 <h3 className="text-sm font-semibold text-slate-800 mb-4 px-1 uppercase tracking-wider">{text.pillars}</h3>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <h3 className="text-sm font-semibold text-slate-800 mb-4 px-1 uppercase tracking-wider">{text.pillars}</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {modules.filter(m => m.id !== '4').map(module => (
-                        <button 
+                        <button
                             key={module.id}
                             onClick={() => setActiveView(`module-${module.id}`)}
                             className="text-left p-5 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all group"
@@ -144,7 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveView, lang, modules }) =
                             </div>
                         </button>
                     ))}
-                 </div>
+                </div>
             </div>
         </div>
     );

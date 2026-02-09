@@ -1,140 +1,111 @@
+/**
+ * Service Gemini avec Proxy Sécurisé
+ * 
+ * SÉCURITÉ : Les appels passent par /api/gemini-proxy (serverless Vercel)
+ * La clé API n'est JAMAIS exposée côté client
+ * 
+ * Configuration déterministe (AI Act compliant) : Temp=0, TopK=1, Seed=42
+ */
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+const PROXY_URL = '/api/gemini-proxy';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-if (!apiKey) {
-    throw new Error("VITE_GEMINI_API_KEY environment variable not set.");
-}
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
-// Configuration DÉTERMINISTE - MODÈLE VALIDÉ ET TESTÉ
-// IMPORTANT : Le préfixe 'models/' est OBLIGATOIRE pour l'API Google Generative AI
-const MODEL_NAME = 'models/gemini-2.0-flash';
-
-// DÉTERMINISME STRICT POUR CONFORMITÉ RÉGLEMENTAIRE
-// Configuration garantissant la reproductibilité parfaite des réponses
-// Same input → Same output (essentiel pour audits et confiance utilisateur)
+// Configuration DÉTERMINISTE pour conformité réglementaire
 const DETERMINISTIC_CONFIG = {
-    temperature: 0,        // Déterminisme maximal (pas de randomness)
-    topP: 1,              // Désactive le nucleus sampling
-    topK: 1,              // Sélectionne systématiquement le token le plus probable
-    candidateCount: 1,    // Génère une seule réponse
-    seed: 42,             // Seed fixe pour reproductibilité cross-platform
+    temperature: 0,
+    topP: 1,
+    topK: 1,
+    candidateCount: 1,
+    seed: 42,
     maxOutputTokens: 2048,
 };
 
-const modelInstance = genAI.getGenerativeModel({
-    model: MODEL_NAME,
-    safetySettings: [
-        {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-    ],
-    generationConfig: DETERMINISTIC_CONFIG
-});
+/**
+ * Exécute une requête via le proxy serverless (PRODUCTION + DEV)
+ * En dev : le proxy tourne via `npx vercel dev` sur localhost:3000
+ * En prod : le proxy tourne via Vercel serverless
+ */
+async function* runQueryViaProxy(prompt: string, systemInstruction: string) {
+    try {
+        const response = await fetch(PROXY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, systemInstruction })
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ message: 'Erreur inconnue' }));
+            if (response.status === 429) {
+                yield "\n\n⚠️ **QUOTA API DÉPASSÉ**\n\n";
+                yield "Votre quota API Gemini a été atteint. Réessayez dans quelques minutes.\n";
+                return;
+            }
+            throw new Error(error.message || `API Error ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No response body');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (text) yield text;
+                    } catch {
+                        // Skip malformed chunks
+                    }
+                }
+            }
+        }
+    } catch (error: any) {
+        console.error('Proxy error:', error);
+        yield `⚠️ Service momentanément indisponible. Veuillez réessayer.\n\nDétail technique : ${error.message}`;
+    }
+}
 
 /**
- * Exécute une requête Gemini en streaming avec mécanisme de retry (Exponential Backoff)
+ * Point d'entrée principal — TOUJOURS via le proxy sécurisé
  */
 export const runQueryStream = async function* (
     prompt: string,
     systemInstruction: string,
-    useGrounding: boolean = false
+    _useGrounding: boolean = false
 ) {
-    let retries = 3;
-    let delay = 1000;
-
-    // Utilisation de la configuration DÉTERMINISTE avec system instruction
-    const modelWithSystem = genAI.getGenerativeModel({
-        model: MODEL_NAME,
-        systemInstruction: systemInstruction,
-        generationConfig: DETERMINISTIC_CONFIG
-    });
-
-    while (retries > 0) {
-        try {
-            const result = await modelWithSystem.generateContentStream(prompt);
-
-            for await (const chunk of result.stream) {
-                const chunkText = chunk.text();
-                if (chunkText) {
-                    yield chunkText;
-                }
-            }
-            return; // Success
-        } catch (error: any) {
-            retries--;
-            console.error(`Gemini Stream Error (${retries} left):`, error);
-
-            // Gestion spécifique erreur 429 (quota dépassé)
-            const isQuotaError = error?.status === 429 || error?.message?.includes('429') || error?.message?.includes('quota');
-
-            if (isQuotaError) {
-                yield "\n\n⚠️ **QUOTA API DÉPASSÉ / API QUOTA EXCEEDED**\n\n";
-                yield "🇫🇷 **Français** : Votre clé API Gemini a atteint sa limite d'utilisation.\n";
-                yield "- **Action** : Attendez 1-60 minutes ou vérifiez vos quotas sur : https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas\n";
-                yield "- **Solution** : Passez à un plan payant pour des quotas illimités.\n\n";
-                yield "🇬🇧 **English** : Your Gemini API key has reached its usage limit.\n";
-                yield "- **Action**: Wait 1-60 minutes or check your quotas at: https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas\n";
-                yield "- **Solution**: Upgrade to a paid plan for unlimited quotas.\n";
-                return;
-            }
-
-            const isOverloaded = error?.status === 503 || error?.message?.includes('503') || error?.message?.includes('overloaded');
-
-            if (isOverloaded && retries > 0) {
-                yield "⚠️ Trafic intense détecté. Reconnexion optimisée en cours...";
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-                continue;
-            }
-
-            if (retries === 0) {
-                yield "Désolé, le service est momentanément indisponible (Erreur Technique).";
-            }
-        }
-    }
+    yield* runQueryViaProxy(prompt, systemInstruction);
 };
 
 /**
- * Exécute une requête Gemini simple
+ * Requête simple (non-streaming)
  */
 export const runQuery = async (
     prompt: string,
     systemInstruction: string,
-    useGrounding: boolean = false
-) => {
-    let retries = 3;
-    let delay = 1000;
-
-    const modelWithSystem = genAI.getGenerativeModel({
-        model: MODEL_NAME,
-        systemInstruction: systemInstruction,
-        generationConfig: DETERMINISTIC_CONFIG
-    });
-
-    while (retries > 0) {
-        try {
-            const result = await modelWithSystem.generateContent(prompt);
-            return result.response.text();
-        } catch (error: any) {
-            retries--;
-            console.error(`Gemini Query Error (${retries} left):`, error);
-            if (retries > 0) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-                continue;
-            }
-            return "Erreur technique lors de la génération.";
-        }
+    _useGrounding: boolean = false
+): Promise<string> => {
+    const chunks: string[] = [];
+    for await (const chunk of runQueryStream(prompt, systemInstruction)) {
+        chunks.push(chunk);
     }
-    return "Service indisponible.";
+    return chunks.join('');
 };
 
-export const runComplianceQuery = async (prompt: string) => {
+/**
+ * Requête spécialisée conformité
+ */
+export const runComplianceQuery = async (prompt: string): Promise<string> => {
     const systemInstruction = `Tu es un expert en conformité européenne (RGPD, AI Act, ESPR).
-    Réponds de manière précise, structurée et cite les articles de loi pertinents.`;
+Réponds de manière précise, structurée et cite les articles de loi pertinents.`;
     return runQuery(prompt, systemInstruction);
 };

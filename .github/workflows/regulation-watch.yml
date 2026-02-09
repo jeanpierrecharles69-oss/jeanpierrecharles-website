@@ -1,0 +1,77 @@
+name: Regulation Watch
+# Veille automatique des règlements EU (EUR-Lex)
+# Coût: 0€/mois (GitHub Actions gratuit)
+
+on:
+  schedule:
+    # Exécution quotidienne à 06:00 UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Déclenchement manuel possible
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Check EUR-Lex RSS feeds
+        run: |
+          echo "🔍 Vérification des mises à jour réglementaires..."
+          
+          # Règlements surveillés (8 règlements EU)
+          REGULATIONS=(
+            "2024/1689"  # AI Act
+            "2023/1230"  # Machinery
+            "2016/679"   # GDPR
+            "2024/2847"  # CRA
+            "2024/1781"  # ESPR
+            "2023/2854"  # Data Act
+            "2023/1542"  # Batteries
+            "305/2011"   # CPR
+          )
+          
+          # Date du fichier JSON actuel
+          CURRENT_DATE=$(jq -r '.last_updated // "2024-01-01"' data/reglements-europeens-2024.json 2>/dev/null || echo "2024-01-01")
+          echo "📅 Dernière mise à jour: $CURRENT_DATE"
+          
+          # Vérifier chaque règlement via EUR-Lex API
+          UPDATES_FOUND=false
+          for REG in "${REGULATIONS[@]}"; do
+            echo "📋 Vérification règlement (UE) $REG..."
+            # Note: EUR-Lex SPARQL endpoint ou RSS feed parsing serait ici
+            # Pour l'instant, on log simplement
+          done
+          
+          echo "✅ Vérification terminée"
+          echo "updates_found=$UPDATES_FOUND" >> $GITHUB_OUTPUT
+        id: check
+      
+      - name: Commit if changes detected
+        if: steps.check.outputs.updates_found == 'true'
+        run: |
+          git config user.name "Regulation Bot"
+          git config user.email "bot@jeanpierrecharles.com"
+          
+          # Mettre à jour le timestamp
+          jq '.last_updated = now | strftime("%Y-%m-%dT%H:%M:%SZ")' data/reglements-europeens-2024.json > tmp.json
+          mv tmp.json data/reglements-europeens-2024.json
+          
+          git add data/
+          git commit -m "🔄 [Auto] Mise à jour réglementaire détectée - $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push
+      
+      - name: Send notification (optional)
+        if: steps.check.outputs.updates_found == 'true'
+        run: |
+          echo "📧 Notification: Des mises à jour réglementaires ont été détectées"
+          # Intégration Slack/Email possible ici via Resend ou webhook

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Language, t } from '../translations';
 import { SparklesIcon } from './icons/SparklesIcon';
@@ -7,6 +6,10 @@ import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { PuzzlePieceIcon } from './icons/PuzzlePieceIcon';
 import { GlobeAltIcon } from './icons/GlobeAltIcon';
 import { XMarkIcon } from './icons/XMarkIcon';
+import TrustSection from './TrustSection';
+import AegisInline from './AegisInline';
+import CookieBanner from './CookieBanner';
+
 
 // Images des expériences professionnelles
 const experienceImages = [
@@ -135,6 +138,9 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 </div>
             </header>
 
+            {/* Aegis Inline Section - Integrated AI Assistant */}
+            <AegisInline lang={lang} />
+
             {/* Vision Section */}
             <section id="vision" className="py-24 bg-slate-50/50">
                 <div className="max-w-6xl mx-auto px-6">
@@ -143,10 +149,10 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                             <div className="absolute inset-0 bg-gradient-to-tr from-slate-200 to-slate-100 rounded-3xl transform rotate-3 opacity-40"></div>
                             <div className="relative bg-white rounded-3xl p-6 h-auto flex flex-col items-center justify-center border border-slate-100 shadow-lg overflow-hidden group">
                                 <div className="text-center w-full">
-                                    {/* Profile Image Main */}
+                                    {/* Profile Image — photo locale */}
                                     <div className="h-64 w-64 mx-auto shadow-2xl flex items-center justify-center mb-6 border-4 border-white transition-transform duration-500 hover:scale-105 rounded-2xl overflow-hidden bg-slate-100">
                                         <img
-                                            src="https://lh3.googleusercontent.com/d/1-H4v59SyTkKOpX7UdUMUVHuwpLpLUF8x"
+                                            src="/jpc.jpg"
                                             alt="Jean-Pierre Charles"
                                             className="h-full w-full object-cover"
                                         />
@@ -247,6 +253,9 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                 </div>
             </section>
 
+            {/* Trust & Social Proof Section */}
+            <TrustSection lang={lang} />
+
             {/* Services Section */}
             <section id="services" className="py-24 bg-white">
                 <div className="max-w-6xl mx-auto px-6">
@@ -344,6 +353,7 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                     <div className="mt-16 text-center">
                         <p className="text-xs text-slate-500 mb-4">{text.footer.rights}</p>
                         <button
+                            id="legal-link"
                             onClick={() => setIsLegalOpen(true)}
                             className="text-xs text-slate-400 hover:text-white underline underline-offset-4 transition-colors font-medium"
                         >
@@ -489,9 +499,9 @@ const JpcWebsite: React.FC<JpcWebsiteProps> = ({ lang, setLang, onEnterApp }) =>
                     </div>
                 </div>
             )}
+            <CookieBanner lang={lang} />
         </div>
     );
 };
 
 export default JpcWebsite;
-
