@@ -1,13 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@source "./src";
+@source "./*.tsx";
+
 /* JeanPierreCharles.com - Global Styles */
 
 /* ===== BASE STYLES ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
 html {
   scroll-behavior: smooth;
@@ -243,14 +241,29 @@ textarea::placeholder {
 /* ===== GLASSMORPHISM UTILITIES ===== */
 .glass {
   background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .glass-dark {
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* Disable heavy glass effects on mobile for scroll performance */
+@media (max-width: 768px) {
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .glass-dark {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 
 /* ===== GRADIENT UTILITIES ===== */

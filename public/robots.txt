@@ -1,0 +1,8 @@
+# robots.txt — jeanpierrecharles.com
+# AEGIS Circular — Expert Intelligence as a Service (EISaaS)
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://jeanpierrecharles.com/sitemap.xml

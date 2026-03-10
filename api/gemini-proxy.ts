@@ -126,6 +126,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');  // Disable Nginx/proxy buffering
+        res.flushHeaders();  // ✅ FIX: Envoie immédiatement les headers SSE au client
 
         const reader = response.body?.getReader();
         if (!reader) {
@@ -140,6 +142,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             const chunk = decoder.decode(value, { stream: true });
             res.write(chunk);
+            // ✅ FIX: Force le flush après chaque chunk pour éviter le buffering Vercel
+            (res as any).flush?.();
         }
 
         res.end();

@@ -1,114 +1,47 @@
-
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Dashboard from './components/Dashboard';
-import ModuleView from './components/ModuleView';
-import CompliancePassportView from './components/CompliancePassportView';
-import AiAssistant from './components/AiAssistant';
-import JpcWebsite from './components/JpcWebsite';
-import { SparklesIcon } from './components/icons/SparklesIcon';
-import { getModules } from './constants';
-import { Language, t } from './translations';
+import React from "react";
+import { LangProvider } from "./src/components/homepage/LangContext";
+import NavBar from "./src/components/homepage/NavBar";
+import HeroSection from "./src/components/homepage/HeroSection";
+import TrustBadges from "./src/components/homepage/TrustBadges";
+import ParcoursRD from "./src/components/homepage/ParcoursRD";
+import SansAvecAegis from "./src/components/homepage/SansAvecAegis";
+import ServicesSection from "./src/components/homepage/ServicesSection";
+import PricingSection from "./src/components/homepage/PricingSection";
+import ReglementsSection from "./src/components/homepage/ReglementsSection";
+import CTASection from "./src/components/homepage/CTASection";
+import FooterSection from "./src/components/homepage/FooterSection";
+import CookieBanner from "./src/components/common/CookieBanner";
+import { C, FONT_LINK } from "./src/components/homepage/constants";
 
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState('dashboard');
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  // ViewState: 'website' (JPC Portfolio) or 'app' (Aegis Platform)
-  const [viewState, setViewState] = useState<'website' | 'app'>('website');
-  const [lang, setLang] = useState<Language>('fr');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const modules = getModules(lang);
-
-  const renderActiveView = () => {
-    if (activeView === 'dashboard') {
-      return <Dashboard setActiveView={setActiveView} lang={lang} modules={modules} />;
-    }
-    if (activeView.startsWith('module-')) {
-      const moduleId = activeView.split('-')[1];
-      const module = modules.find(m => m.id === moduleId);
-      return module ? <ModuleView module={module} lang={lang} /> : <div>{t[lang].module.moduleNotFound}</div>;
-    }
-    if (activeView === 'passport') {
-      return <CompliancePassportView lang={lang} modules={modules} />;
-    }
-    return <Dashboard setActiveView={setActiveView} lang={lang} modules={modules} />;
-  };
-
-  const getHeaderTitle = () => {
-    if (activeView === 'dashboard') return t[lang].dashboard.welcome;
-    if (activeView.startsWith('module-')) {
-      const moduleId = activeView.split('-')[1];
-      const module = modules.find(m => m.id === moduleId);
-      return module ? module.title : 'Module';
-    }
-    if (activeView === 'passport') return t[lang].passport.verified;
-    return 'Aegis Circular';
-  };
-
-  // If in Website mode, show JPC Website
-  if (viewState === 'website') {
-    return <JpcWebsite lang={lang} setLang={setLang} onEnterApp={() => setViewState('app')} />;
-  }
-
-  // Else, show Aegis App
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 relative">
-      {/* Mobile Backdrop */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/50 z-20 md:hidden backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      <Sidebar
-        activeView={activeView}
-        setActiveView={(view) => {
-          setActiveView(view);
-          setIsMobileMenuOpen(false);
+    <LangProvider>
+      <link href={FONT_LINK} rel="stylesheet" />
+      <div
+        className="min-h-screen antialiased"
+        style={{
+          backgroundColor: C.bg,
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          color: C.text,
         }}
-        lang={lang}
-        modules={modules}
-        isOpen={isMobileMenuOpen}
-      />
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          title={getHeaderTitle()}
-          lang={lang}
-          setLang={setLang}
-          onOpenMenu={() => setIsMobileMenuOpen(true)}
-          onBackToSite={() => setViewState('website')}
-        />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            {renderActiveView()}
-          </div>
+      >
+        <NavBar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <HeroSection />
+          <TrustBadges />
+          <ParcoursRD />
+          <SansAvecAegis />
+          <ServicesSection />
+          <PricingSection />
+          <ReglementsSection />
+          <CTASection />
         </main>
+        <FooterSection />
+        <CookieBanner />
       </div>
-      {/* AI Assistant Floating Button with Engagement Bubble */}
-      <div className="fixed bottom-8 right-8 z-40 flex items-center gap-3">
-        {/* Engagement Message Bubble */}
-        <div className="hidden sm:block bg-slate-900/70 backdrop-blur-sm text-white px-3 py-1.5 rounded-full shadow-lg border border-slate-600/50 animate-pulse">
-          <p className="text-xs font-medium whitespace-nowrap">
-            {lang === 'fr' ? 'Demandez à Aegis' : 'Ask Aegis'}
-          </p>
-        </div>
-
-        {/* Floating Button */}
-        <button
-          onClick={() => setIsAssistantOpen(true)}
-          className="bg-slate-900 text-white p-4 rounded-full shadow-lg hover:bg-slate-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-          aria-label={t[lang].assistant.title}
-        >
-          <SparklesIcon className="h-6 w-6" />
-        </button>
-      </div>
-      {isAssistantOpen && <AiAssistant onClose={() => setIsAssistantOpen(false)} lang={lang} />}
-    </div>
+    </LangProvider>
   );
 };
 
 export default App;
+

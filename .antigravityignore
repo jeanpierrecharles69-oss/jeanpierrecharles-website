@@ -1,1 +1,4 @@
 ﻿\_archives/
+.env*
+*.local
+.env.local
