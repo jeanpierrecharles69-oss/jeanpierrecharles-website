@@ -1,8 +1,11 @@
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLang } from "./LangContext";
 import { C } from "./constants";
 
 export default function NavBar() {
     const { lang, setLang, t } = useLang();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     return (
         <nav
@@ -41,6 +44,7 @@ export default function NavBar() {
                             "Services": "services",
                             "Tarifs": "pricing",
                             "Pricing": "pricing",
+                            "Insights": "insights",
                             "Contact": "contact",
                         };
                         const target = targetMap[item] ?? item.toLowerCase();
@@ -53,7 +57,11 @@ export default function NavBar() {
                                 aria-label={`Navigate to ${item}`}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
+                                    if (location.pathname === "/") {
+                                        document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
+                                    } else {
+                                        navigate("/", { state: { scrollTo: target } });
+                                    }
                                 }}
                             >
                                 {item}

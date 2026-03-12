@@ -10,7 +10,7 @@ export type Lang = "fr" | "en";
 export const i18n = {
     fr: {
         navSub: "R&D CyberSystèmes AI Mécatroniques · Industrie 5.0 · Compliance EU",
-        navItems: ["Expertise", "Services", "Tarifs", "Contact"],
+        navItems: ["Expertise", "Services", "Tarifs", "Insights", "Contact"],
         navCta: "Nous contacter",
         euBadge: "27 États membres UE + Régions ultrapériphériques",
         heroH1a: "L’ingénieur R&D",
@@ -245,10 +245,17 @@ export const i18n = {
         cookieAccept: "Accepter",
         cookieReject: "Refuser",
         cookieMore: "En savoir plus",
+        // Blog / Insights
+        blogSectionTitle: "Intelligence Industrielle",
+        blogSectionSubtitle: "Analyses & Decryptages",
+        blogReadMore: "Lire l'analyse",
+        blogReadingTime: "de lecture",
+        blogBackToInsights: "Retour aux analyses",
+        blogPublishedOn: "Publie le",
     },
     en: {
         navSub: "R&D AI Mechatronic CyberSystems · Industry 5.0 · EU Compliance",
-        navItems: ["Expertise", "Services", "Pricing", "Contact"],
+        navItems: ["Expertise", "Services", "Pricing", "Insights", "Contact"],
         navCta: "Contact us",
         euBadge: "27 EU Member States + Outermost Regions",
         heroH1a: "The R&D engineer",
@@ -483,6 +490,13 @@ export const i18n = {
         cookieAccept: "Accept",
         cookieReject: "Decline",
         cookieMore: "Learn more",
+        // Blog / Insights
+        blogSectionTitle: "Industrial Intelligence",
+        blogSectionSubtitle: "Analysis & Insights",
+        blogReadMore: "Read analysis",
+        blogReadingTime: "read",
+        blogBackToInsights: "Back to insights",
+        blogPublishedOn: "Published on",
     },
 };
 
