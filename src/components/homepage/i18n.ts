@@ -247,11 +247,11 @@ export const i18n = {
         cookieMore: "En savoir plus",
         // Blog / Insights
         blogSectionTitle: "Intelligence Industrielle",
-        blogSectionSubtitle: "Analyses & Decryptages",
+        blogSectionSubtitle: "Analyses & Décryptages",
         blogReadMore: "Lire l'analyse",
         blogReadingTime: "de lecture",
         blogBackToInsights: "Retour aux analyses",
-        blogPublishedOn: "Publie le",
+        blogPublishedOn: "Publié le",
     },
     en: {
         navSub: "R&D AI Mechatronic CyberSystems · Industry 5.0 · EU Compliance",

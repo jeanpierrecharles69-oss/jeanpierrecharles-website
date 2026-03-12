@@ -26,11 +26,11 @@ export const blogArticles: BlogArticle[] = [
     tags: ["AI Act", "CRA", "Industrie 5.0", "PME", "Compliance"],
     readingTime: 7,
     fr: {
-      title: "AI Act + CRA : les reglements-meres de l'Industrie 5.0",
+      title: "AI Act + CRA : les règlements-mères de l'Industrie 5.0",
       subtitle:
-        "Pourquoi la convergence reglementaire europeenne est le plus puissant levier de transformation industrielle depuis le marquage CE",
+        "Pourquoi la convergence réglementaire européenne est le plus puissant levier de transformation industrielle depuis le marquage CE",
       metaDescription:
-        "Comment l'EU AI Act et le CRA deviennent les fondations dont decoulent Machinery CE, ESPR, NIS2, Battery Reg pour les PME industrielles EU.",
+        "Comment l'EU AI Act et le CRA deviennent les fondations dont découlent Machinery CE, ESPR, NIS2, Battery Reg pour les PME industrielles EU.",
       content: "CONTENU_A_INSERER",
     },
     en: {
