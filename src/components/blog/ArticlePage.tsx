@@ -103,15 +103,60 @@ export default function ArticlePage() {
         </header>
 
         {/* Body — Markdown rendered via marked */}
+        <style>{`
+          .article-body h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.25;
+            letter-spacing: -0.025em;
+            color: ${C.text};
+          }
+          @media (min-width: 640px) {
+            .article-body h2 {
+              font-size: 1.875rem;
+            }
+          }
+          .article-body h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: ${C.text};
+          }
+          .article-body p {
+            margin-bottom: 1rem;
+            line-height: 1.75;
+          }
+          .article-body strong {
+            font-weight: 700;
+            color: ${C.text};
+          }
+          .article-body ul, .article-body ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+          }
+          .article-body li {
+            margin-bottom: 0.5rem;
+            line-height: 1.75;
+          }
+          .article-body a {
+            color: ${C.accent};
+            font-weight: 600;
+            text-decoration: none;
+          }
+          .article-body a:hover {
+            text-decoration: underline;
+          }
+          .article-body hr {
+            margin: 2.5rem 0;
+            border: none;
+            border-top: 1px solid ${C.border};
+          }
+        `}</style>
         <div
-          className="prose prose-slate max-w-none
-            prose-headings:font-bold prose-headings:tracking-tight
-            prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
-            prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
-            prose-p:leading-relaxed prose-p:mb-4
-            prose-li:leading-relaxed
-            prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
-            prose-hr:my-10 prose-hr:border-t prose-hr:border-gray-200"
+          className="article-body max-w-none"
           style={{ color: C.text }}
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
