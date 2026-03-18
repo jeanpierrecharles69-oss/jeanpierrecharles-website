@@ -110,7 +110,8 @@ export default function ArticlePage() {
             prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
             prose-p:leading-relaxed prose-p:mb-4
             prose-li:leading-relaxed
-            prose-a:font-semibold prose-a:no-underline hover:prose-a:underline"
+            prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+            prose-hr:my-10 prose-hr:border-t prose-hr:border-gray-200"
           style={{ color: C.text }}
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />

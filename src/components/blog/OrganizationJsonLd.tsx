@@ -5,7 +5,7 @@ export default function OrganizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "AEGIS Intelligence",
-    url: "https://aegis-intelligence.com",
+    url: "https://jeanpierrecharles.com",
     description:
       "Expert R&D compliance pour PME industrielles europeennes — AI Act, CRA, Machinery, ESPR, NIS2, Battery Regulation",
     founder: {

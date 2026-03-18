@@ -8,7 +8,7 @@ interface Props {
 
 export default function ArticleJsonLd({ article, lang }: Props) {
   const localized = article[lang];
-  const canonicalUrl = `https://aegis-intelligence.com/insights/${article.id}`;
+  const canonicalUrl = `https://jeanpierrecharles.com/insights/${article.id}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -32,7 +32,7 @@ export default function ArticleJsonLd({ article, lang }: Props) {
     publisher: {
       "@type": "Organization",
       name: "AEGIS Intelligence",
-      url: "https://aegis-intelligence.com",
+      url: "https://jeanpierrecharles.com",
     },
     keywords: article.tags.join(", "),
     inLanguage: lang === "fr" ? "fr-FR" : "en-US",
