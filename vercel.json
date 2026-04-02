@@ -12,7 +12,8 @@
       ],
       "destination": "/api/og-render?slug=:slug*"
     },
-    { "source": "/insights/(.*)", "destination": "/index.html" }
+    { "source": "/insights/(.*)", "destination": "/index.html" },
+    { "source": "/merci", "destination": "/index.html" }
   ],
   "headers": [
     {

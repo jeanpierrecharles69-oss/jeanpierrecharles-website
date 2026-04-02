@@ -3,10 +3,54 @@ import { useLang } from "./LangContext";
 import { C } from "./constants";
 import ContactModal from "../common/ContactModal";
 
+const MOLLIE_CHECKOUT_URL = '/api/mollie-checkout';
+
 export default function PricingSection() {
     const { t, lang } = useLang();
     const [activeTier, setActiveTier] = useState(0);
     const [showContact, setShowContact] = useState(false);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+    const handleDiagnosticCheckout = async () => {
+        if (checkoutLoading) return;
+        setCheckoutLoading(true);
+        try {
+            const response = await fetch(MOLLIE_CHECKOUT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product: 'diagnostic', lang }),
+            });
+            if (!response.ok) {
+                throw new Error(`Checkout HTTP ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.checkoutUrl) {
+                window.location.href = data.checkoutUrl;
+            } else {
+                console.error('No checkout URL returned:', data);
+                setShowContact(true);
+            }
+        } catch (err) {
+            console.error('Mollie checkout error:', err);
+            setShowContact(true);
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
+
+    const scrollToHero = () => {
+        document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const handleTierCta = (tierName: string) => {
+        if (tierName === 'PULSE') {
+            scrollToHero();
+        } else if (tierName === 'DIAGNOSTIC') {
+            handleDiagnosticCheckout();
+        } else {
+            setShowContact(true);
+        }
+    };
 
     return (
         <>
@@ -27,14 +71,14 @@ export default function PricingSection() {
                 <p className="text-sm mt-2" style={{ color: C.textMuted }}>{t.pricingSub}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch max-w-6xl mx-auto">
                 {t.tiers.map((tier, i) => {
                     const isActive = activeTier === i;
                     return (
                         <div
                             key={i}
                             onClick={() => setActiveTier(i)}
-                            className="relative rounded-2xl p-6 cursor-pointer flex flex-col transition-all"
+                            className="relative rounded-2xl p-5 cursor-pointer flex flex-col transition-all"
                             style={{
                                 backgroundColor: C.surface,
                                 border: isActive ? `2px solid ${tier.color}` : `1px solid ${C.border}`,
@@ -97,11 +141,16 @@ export default function PricingSection() {
                                     backgroundColor: isActive ? tier.color : "transparent",
                                     color: isActive ? "#fff" : tier.color,
                                     border: isActive ? "none" : `1px solid ${tier.color}30`,
+                                    opacity: (checkoutLoading && tier.name === 'DIAGNOSTIC') ? 0.6 : 1,
+                                    cursor: (checkoutLoading && tier.name === 'DIAGNOSTIC') ? 'wait' : 'pointer',
                                 }}
                                 aria-label={tier.cta}
-                                onClick={() => setShowContact(true)}
+                                disabled={checkoutLoading && tier.name === 'DIAGNOSTIC'}
+                                onClick={() => handleTierCta(tier.name)}
                             >
-                                {tier.cta}
+                                {(checkoutLoading && tier.name === 'DIAGNOSTIC')
+                                    ? (lang === 'fr' ? 'Redirection...' : 'Redirecting...')
+                                    : tier.cta}
                             </button>
                         </div>
                     );

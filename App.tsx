@@ -5,16 +5,15 @@ import { LangProvider } from "./src/components/homepage/LangContext";
 import NavBar from "./src/components/homepage/NavBar";
 import HeroSection from "./src/components/homepage/HeroSection";
 import TrustBadges from "./src/components/homepage/TrustBadges";
-import ParcoursRD from "./src/components/homepage/ParcoursRD";
-import SansAvecAegis from "./src/components/homepage/SansAvecAegis";
-import ServicesSection from "./src/components/homepage/ServicesSection";
+import ExpertiseRegSection from "./src/components/homepage/ExpertiseRegSection";
+import ProblemSolutionSection from "./src/components/homepage/ProblemSolutionSection";
 import PricingSection from "./src/components/homepage/PricingSection";
-import ReglementsSection from "./src/components/homepage/ReglementsSection";
 import CTASection from "./src/components/homepage/CTASection";
 import FooterSection from "./src/components/homepage/FooterSection";
 import CookieBanner from "./src/components/common/CookieBanner";
 import BlogSection from "./src/components/blog/BlogSection";
 import ArticlePage from "./src/components/blog/ArticlePage";
+import MerciPage from "./src/components/homepage/MerciPage";
 import OrganizationJsonLd from "./src/components/blog/OrganizationJsonLd";
 import { C, FONT_LINK } from "./src/components/homepage/constants";
 
@@ -35,15 +34,13 @@ function HomePage() {
   }, [location.state]);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main className="mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" style={{ width: '92vw', maxWidth: 1680 }}>
       <OrganizationJsonLd />
       <HeroSection />
       <TrustBadges />
-      <ParcoursRD />
-      <SansAvecAegis />
-      <ServicesSection />
+      <ExpertiseRegSection />
+      <ProblemSolutionSection />
       <PricingSection />
-      <ReglementsSection />
       <BlogSection />
       <CTASection />
     </main>
@@ -69,6 +66,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/insights/:articleId" element={<ArticlePage />} />
+              <Route path="/merci" element={<MerciPage />} />
             </Routes>
             <FooterSection />
             <CookieBanner />

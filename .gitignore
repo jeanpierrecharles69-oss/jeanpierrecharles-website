@@ -27,3 +27,9 @@ dist-ssr
 *.pdf
 .agent/
 _archives/
+
+# Bridges and operational docs - never commit
+*.md
+!README.md
+!CLAUDE.md
+!DEPLOYMENT.md

@@ -10,11 +10,18 @@ interface LangContextType {
 const LangContext = createContext<LangContextType | undefined>(undefined);
 
 export const LangProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [lang, setLang] = useState<Lang>("fr");
+    const [lang, setLangState] = useState<Lang>("fr");
+
+    const setLang = (newLang: Lang) => {
+        setLangState(newLang);
+        // BUG-02 FIX: Notify dependent components (Brain IA) of language change
+        window.dispatchEvent(new CustomEvent('langChanged', { detail: { lang: newLang } }));
+    };
 
     useEffect(() => {
         document.documentElement.lang = lang;
     }, [lang]);
+
     const value = {
         lang,
         setLang,

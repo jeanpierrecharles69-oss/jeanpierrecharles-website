@@ -36,7 +36,7 @@ export default function HeroSection() {
             }} />
 
             {/* Contenu centré */}
-            <div style={{ position: 'relative', maxWidth: 860, margin: '0 auto' }}>
+            <div style={{ position: 'relative', maxWidth: 1100, margin: '0 auto' }}>
 
                 {/* H1 compact */}
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -114,6 +114,18 @@ export default function HeroSection() {
                     </p>
                 </div>
                 {/* ========================= */}
+
+                {/* === MAIEUTIQUE INTRO === */}
+                <p style={{
+                    textAlign: 'center',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: C.accent,
+                    margin: '0 0 16px',
+                    letterSpacing: '0.02em',
+                }}>
+                    {t.maieutiqueIntro}
+                </p>
 
                 {/* AEGIS Intelligence — VUI principale */}
                 <AegisIntelligence

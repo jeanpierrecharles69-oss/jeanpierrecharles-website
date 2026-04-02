@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLang } from '../homepage/LangContext';
 import { C } from '../homepage/constants';
-import { runQueryStream } from '../../services/geminiService';
+import { runQueryStream } from '../../services/claudeService';
 import { enrichPromptWithRegulation } from '../../services/regulationKnowledgeService';
 import { hasAIConsent } from '../common/CookieBanner';
 import { ChatMessage } from '../../types';
@@ -16,12 +16,12 @@ import { SparklesIcon } from '../icons/SparklesIcon';
  * mode="mini" : intégré dans HeroSection (320px, pas de header)
  * mode="full" : pleine page (futur /platform)
  * 
- * RGPD : vérifie hasAIConsent() avant toute requête Gemini
+ * RGPD : vérifie hasAIConsent() avant toute requête Claude API
  * Streaming : utilise runQueryStream (SSE via proxy sécurisé)
  * i18n : useLang() Context (pas de prop lang)
  * Design : tokens C.* (Light/Glass, pas Tailwind)
  * 
- * REGRESSION-1 : aria-label="AEGIS Intelligence IA Preview" (pas role=presentation)
+ * Migration : Gemini 2.0 Flash → Claude Haiku 4.5 (31/03/2026)
  */
 
 interface AegisChatProps {
@@ -81,7 +81,7 @@ const AegisChat: React.FC<AegisChatProps> = ({ mode = 'mini' }) => {
 
         try {
             const { systemAddition } = enrichPromptWithRegulation(trimmed);
-            const baseSystem = SYSTEM_INSTRUCTIONS[lang] ?? SYSTEM_INSTRUCTIONS.fr;  // ✅ FIX: lang-aware
+            const baseSystem = SYSTEM_INSTRUCTIONS[lang] ?? SYSTEM_INSTRUCTIONS.fr;
             const fullSystem = systemAddition
                 ? `${baseSystem}\n\n--- REGULATORY CONTEXT ---\n${systemAddition}`
                 : baseSystem;
@@ -165,7 +165,6 @@ const AegisChat: React.FC<AegisChatProps> = ({ mode = 'mini' }) => {
                 minHeight: isMini ? 100 : 200,
             }}>
                 {messages.length === 0 ? (
-                    /* Default example when no messages */
                     <>
                         <div style={{ fontSize: 10, color: C.textMuted, marginBottom: 4 }}>{t.brainExample}</div>
                         <div style={{

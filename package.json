@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "dompurify": "^3.3.3",
     "html2pdf.js": "^0.14.0",
     "marked": "^17.0.4",
     "react": "^19.2.0",
@@ -19,10 +20,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.0",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "@vercel/node": "^5.5.30",
+    "@vercel/node": "^5.6.23",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.24",
     "dotenv": "^17.2.3",

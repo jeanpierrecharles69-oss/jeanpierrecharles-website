@@ -28,7 +28,7 @@ export default function NavBar() {
                     </div>
                     <div>
                         <span className="text-sm font-bold tracking-tight" style={{ color: C.text }}>
-                            AEGIS CIRCULAR
+                            AEGIS Intelligence
                         </span>
                         <div className="text-[9px] tracking-widest font-medium" style={{ color: C.textMuted }}>
                             {t.navSub}
@@ -40,8 +40,8 @@ export default function NavBar() {
                 <div className="hidden md:flex items-center gap-8">
                     {t.navItems.map((item) => {
                         const targetMap: Record<string, string> = {
-                            "Expertise": "expertise",
-                            "Services": "services",
+                            "Expertise": "expertise-regs",
+                            "Services": "problem-solution",
                             "Tarifs": "pricing",
                             "Pricing": "pricing",
                             "Insights": "insights",

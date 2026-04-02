@@ -1,14 +1,16 @@
 /**
  * Document Generation Service — AEGIS v3.1-alpha · Phase 4 F1
  *
- * Orchestre la génération de rapports de conformité via Gemini AI.
+ * Orchestre la génération de rapports de conformité via Claude API.
  * F1 : Rapport Écarts/Risques/Non-Conformités (tier STANDARD)
  *
  * Utilise runQuery (non-streaming) pour obtenir un rapport structuré,
  * puis parse les sections pour le rendu UI + export PDF.
+ *
+ * Migration : Gemini 2.0 Flash → Claude Haiku 4.5 (31/03/2026)
  */
 
-import { runQuery } from './geminiService';
+import { runQuery } from './claudeService';
 import { enrichPromptWithRegulation } from './regulationKnowledgeService';
 
 // ── Types ──

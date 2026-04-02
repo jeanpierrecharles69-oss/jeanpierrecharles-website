@@ -305,6 +305,49 @@ textarea::placeholder {
   }
 }
 
+/* ===== AEGIS BRAIN MARKDOWN RENDERING ===== */
+.brain-markdown p {
+  margin-bottom: 0.5rem;
+}
+.brain-markdown p:last-child {
+  margin-bottom: 0;
+}
+.brain-markdown h1,
+.brain-markdown h2,
+.brain-markdown h3 {
+  font-weight: 700;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+.brain-markdown h1 { font-size: 1.1rem; }
+.brain-markdown h2 { font-size: 1rem; }
+.brain-markdown h3 { font-size: 0.9rem; }
+.brain-markdown ul,
+.brain-markdown ol {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+.brain-markdown li {
+  margin-bottom: 0.15rem;
+}
+.brain-markdown strong {
+  font-weight: 700;
+}
+.brain-markdown em {
+  font-style: italic;
+}
+.brain-markdown code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+.brain-markdown a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
 /* ===== PRINT STYLES ===== */
 @media print {
   body {
