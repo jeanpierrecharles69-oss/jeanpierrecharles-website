@@ -164,16 +164,77 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 sector: (t.diagSectors as string[])?.[1] ?? 'Aéronautique',
                 regs: ['AI Act', 'Machines', 'CRA'],
             },
+            'fabri|produi|manufactur|usine|atelier|factory|plant': {
+                sector: (t.diagSectors as string[])?.[3] ?? 'Équipements industriels',
+                regs: ['Machines'],
+            },
+            'chauff|cheminée|insert|poêle|thermique|heating|stove|fireplace': {
+                sector: (t.diagSectors as string[])?.[3] ?? 'Équipements industriels',
+                regs: ['Machines', 'CPR'],
+            },
+            'construct|bâtiment|building|BTP|chantier|génie civil': {
+                sector: (t.diagSectors as string[])?.[3] ?? 'Équipements industriels',
+                regs: ['Machines', 'CPR'],
+            },
+            'médic|santé|health|implant|dispositif|medical|prosthes|prothès': {
+                sector: (t.diagSectors as string[])?.[5] ?? 'Dispositifs médicaux',
+                regs: ['AI Act', 'CRA'],
+            },
+            'aliment|food|agro|restauration|agroalimentaire|packaging alimentaire': {
+                sector: (t.diagSectors as string[])?.[3] ?? 'Équipements industriels',
+                regs: ['Machines'],
+            },
         };
 
         let matchedSector = '';
         let matchedRegs: string[] = [];
 
+        // Phase 1 — Static: match keywords from last user message
         for (const [pattern, mapping] of Object.entries(keywords)) {
             const regex = new RegExp(pattern, 'i');
             if (regex.test(text)) {
                 matchedSector = mapping.sector;
                 matchedRegs = [...new Set([...matchedRegs, ...mapping.regs])];
+            }
+        }
+
+        // Phase 2 — Dynamic: conversation memory (analyse ALL messages incl. Brain responses)
+        const fullConversation = messages.map(m => m.text).join(' ');
+        const regDetectors: Record<string, string> = {
+            'ai act|intelligence artificielle|2024\\/1689|high.risk': 'AI Act',
+            'machine|machinery|2023\\/1230|en iso 12100|marquage ce': 'Machines',
+            'espr|ecodesign|\u00e9coconception|passeport num\u00e9rique|digital product passport|2024\\/1781': 'ESPR',
+            'cra|cyber resilience|2024\\/2847|enisa|vuln\u00e9rabilit': 'CRA',
+            'rgpd|gdpr|2016\\/679|donn\u00e9es personnelles': 'RGPD',
+            'batter|2023\\/1542|lithium|li.ion|passeport.+batterie': 'Batteries',
+            'data act|2023\\/2854|donn\u00e9es industrielles': 'Data Act',
+            'cpr|construction product|produit.+construction|en 13229|en 13240': 'CPR',
+            'nis2|2022\\/2555|entit\u00e9s essentielles|cybersecurity directive': 'NIS2',
+            'dora|r\u00e9silience op\u00e9rationnelle|2022\\/2554': 'DORA',
+        };
+        for (const [pattern, regName] of Object.entries(regDetectors)) {
+            if (new RegExp(pattern, 'i').test(fullConversation) && !matchedRegs.includes(regName)) {
+                matchedRegs.push(regName);
+            }
+        }
+
+        // Phase 3 — Dynamic sector fallback (if static missed)
+        if (!matchedSector) {
+            const sectorFallback: [RegExp, number][] = [
+                [/automobile|automotive|v\u00e9hicule|vehicle|adas/i, 0],
+                [/a\u00e9ro|aerospace|avion|drone/i, 1],
+                [/batter|lithium|li.ion|\u00e9nergie|energy storage/i, 2],
+                [/industriel|equipment|machine|usine|factory|chauff|chemin\u00e9e|insert|po\u00eale|construct|b\u00e2timent|BTP/i, 3],
+                [/robot|automat/i, 4],
+                [/m\u00e9dic|medical|sant\u00e9|health|implant|dispositif/i, 5],
+                [/iot|\u00e9lectronique|electronic|firmware|software|connect\u00e9/i, 6],
+                [/ferroviaire|rail|train|tgv/i, 7],
+            ];
+            for (const [regex, idx] of sectorFallback) {
+                if (regex.test(fullConversation)) {
+                    matchedSector = (t.diagSectors as string[])?.[idx] ?? '';
+                    break;
+                }
             }
         }
 
@@ -519,9 +580,8 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
-                                        amount: '250.00',
-                                        description: `AEGIS DIAGNOSTIC — ${diagSector || 'Industrie'} — ${diagProduct || 'Produit'}`,
-                                        locale: lang === 'fr' ? 'fr_FR' : 'en_US',
+                                        product: 'diagnostic',
+                                        lang,
                                     }),
                                 })
                                     .then(res => {
