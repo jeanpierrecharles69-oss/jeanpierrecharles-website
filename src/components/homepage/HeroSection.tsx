@@ -2,6 +2,8 @@ import { useLang } from "./LangContext";
 import { C } from "./constants";
 import AegisIntelligence from "../brain/AegisIntelligence";
 
+const LINKEDIN_URL = "https://www.linkedin.com/in/jpcharles6918/";
+
 export default function HeroSection() {
     const { t } = useLang();
 
@@ -39,7 +41,7 @@ export default function HeroSection() {
             <div style={{ position: 'relative', maxWidth: 1100, margin: '0 auto' }}>
 
                 {/* H1 compact */}
-                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div style={{ textAlign: 'center', marginBottom: 12 }}>
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6,
                         fontSize: 11, fontWeight: 500, padding: '4px 12px',
@@ -50,7 +52,7 @@ export default function HeroSection() {
                         🇪🇺 {t.euBadge}
                     </div>
                     <h1 style={{
-                        fontSize: 'clamp(22px, 4vw, 38px)',
+                        fontSize: 'clamp(20px, 3vw, 32px)',
                         fontWeight: 800, lineHeight: 1.2,
                         color: C.text, margin: '0 0 8px',
                     }}>
@@ -68,8 +70,66 @@ export default function HeroSection() {
                     </h1>
                 </div>
 
+                {/* === HERO SUB — Capital terrain + AEGIS Intelligence === */}
+                <p style={{
+                    textAlign: 'center',
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: C.textSecondary,
+                    maxWidth: 800,
+                    margin: '0 auto 12px',
+                }}>
+                    {t.heroSub}
+                </p>
+
+                {/* === BANDEAU CTA LINKEDIN avec photo JP === */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 12,
+                    marginBottom: 24,
+                }}>
+                    <img
+                        src="/jpc.jpg"
+                        alt="Jean-Pierre Charles"
+                        style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            border: `2px solid ${C.border}`,
+                        }}
+                    />
+                    <a
+                        href={LINKEDIN_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#ffffff',
+                            background: '#0A66C2',
+                            padding: '7px 18px',
+                            borderRadius: 20,
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        {t.heroLinkedInCta}
+                    </a>
+                </div>
+
                 {/* === CONVERGENCE BLOCK v3.1 === */}
-                <div style={{ marginBottom: 28, marginTop: 28 }}>
+                <div style={{ marginBottom: 28 }}>
                     <p style={{
                         textAlign: 'center', fontSize: 11, fontWeight: 600,
                         letterSpacing: '0.08em', color: C.textMuted,
@@ -109,7 +169,7 @@ export default function HeroSection() {
                             <div style={{ fontSize: 11, color: C.textSecondary, lineHeight: 1.5 }}>{t.trinityItem3Desc}</div>
                         </div>
                     </div>
-                    <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: C.accent, marginTop: 12, maxWidth: 500, margin: '12px auto 0' }}>
+                    <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: C.accent, maxWidth: 700, margin: '12px auto 0' }}>
                         = {t.trinityResult}
                     </p>
                 </div>

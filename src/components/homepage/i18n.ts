@@ -9,14 +9,15 @@ export type Lang = "fr" | "en";
 
 export const i18n = {
     fr: {
-        navSub: "R&D CyberSystèmes AI Mécatroniques · Industrie 5.0 · Compliance EU",
+        navSub: "Expertise R&D × IA Réglementaire · Conformité Industrielle EU",
         navItems: ["Expertise", "Services", "Tarifs", "Insights", "Contact"],
         navCta: "Nous contacter",
         euBadge: "27 États membres UE + Régions ultrapériphériques",
         heroH1a: "L’ingénieur R&D",
         heroH1b: "qui a conçu vos systèmes,",
         heroH1c: "pilote votre transformation industrielle et conformité EU.",
-        heroSub: "Des volants airbag Toyota aux batteries TGV 1500V — combinés à l’intelligence artificielle réglementaire pour accompagner vos ETI industrielles de la veille normative à la mise en conformité opérationnelle.",
+        heroSub: "32 ans d’expertise R&D industrielle — de la conception à la production commerciale en série. AEGIS Intelligence transforme ce capital terrain en intelligence réglementaire actionnable pour piloter votre conformité EU.",
+        heroLinkedInCta: "Découvrir le parcours terrain sur LinkedIn →",
         heroCta1: "Nous contacter →",
         heroCta2: "Voir les tarifs",
         heroTrust: [
@@ -150,7 +151,7 @@ export const i18n = {
         tiers: [
             {
                 name: "PULSE", price: "Gratuit", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
-                tagline: "Testez votre exposition réglementaire",
+                tagline: "Découvrez ce que vous ne savez pas encore",
                 features: [
                     "Pré-diagnostic IA (Sonnet)",
                     "2 sections : BOM + exposition réglementaire",
@@ -165,7 +166,7 @@ export const i18n = {
             },
             {
                 name: "DIAGNOSTIC", price: "250\u20ac", period: "/rapport", badge: "", annual: "", color: C.emerald,
-                tagline: "Cadrage industriel et stratégique complet",
+                tagline: "La cartographie causale de votre exposition",
                 features: [
                     "Tout PULSE inclus",
                     "7 sections analyse Pearl 3 niveaux",
@@ -181,7 +182,7 @@ export const i18n = {
             },
             {
                 name: "VEILLE", price: "150\u20ac", period: "/mois", badge: "COMPLIANCE CONTINUE", annual: "", color: C.gold,
-                tagline: "Votre sentinelle réglementaire permanente",
+                tagline: "Votre vigilance réglementaire en continu",
                 features: [
                     "Alertes réglementaires personnalisées",
                     "Monitoring 5+ règlements en continu",
@@ -196,7 +197,7 @@ export const i18n = {
             },
             {
                 name: "EXPERTISE TERRAIN", price: "350\u20ac", period: "/heure", badge: "INGÉNIEUR R&D", annual: "2 500\u20ac/mois", color: C.rose,
-                tagline: "L'ingénieur qui a fait, pas le consultant qui conseille",
+                tagline: "L\u2019ingénieur qui a conçu, pas le consultant qui conseille",
                 features: [
                     "Tout DIAGNOSTIC + VEILLE inclus",
                     "Accompagnement ingénieur R&D sénior dédié",
@@ -327,7 +328,7 @@ export const i18n = {
         brainTitle: "✨ AEGIS Intelligence — Analyste Conformité UE",
         brainPlaceholder: "Posez votre question réglementaire EU…",
         brainExample: "💬 Exemple : 'Quels impacts du Règlement Batteries sur un pack Li-ion VE ?'",
-        brainResponse: "Le Règlement (UE) 2023/1542 impose un passeport numérique batterie (Art.77), une empreinte carbone déclarée dès 2025 (Art.7), et un taux de recyclage Li 80% d'ici 2031…",
+        brainResponse: "Votre produit connecté croise 3 règlements EU simultanément : CRA (cybersécurité), AI Act (composants IA) et Machinery Regulation (sécurité machines). Deadline critique : septembre 2026. Voulez-vous que j\u2019analyse votre exposition ?",
         brainRegs: ["AI Act", "Batteries", "ESPR", "CRA", "RGPD", "Machines", "Data Act", "NIS2"],
         brainStatus: "● En ligne — IA prête",
         brainCaption: "IA hébergée sur serveurs proxy sécurisés (UE) · Config déterministe",
@@ -361,7 +362,7 @@ export const i18n = {
             "Dispositifs médicaux", "Électronique / IoT",
             "Ferroviaire", "Défense", "Autre",
         ],
-        maieutiqueIntro: "Testez votre lucidité réglementaire en 4 questions :",
+        maieutiqueIntro: "Évaluez votre maturité réglementaire en 4 questions :",
         // v3.1 ROI Metrics
         roiMetrics: [
             { value: "<30s", label: "Analyse d'impact", sub: "vs 2-4 semaines consultant" },
@@ -383,7 +384,7 @@ export const i18n = {
         trinityResult: "L'ingénieur qui a conçu vos systèmes est aussi celui qui pilote votre conformité. Aucun cabinet ne peut dire ça.",
         // v3.1 Cookie Banner RGPD
         cookieTitle: "🔐 Cookies & Assistant IA",
-        cookieText: "Ce site utilise uniquement des cookies fonctionnels (aucun tracking). L'assistant IA réglementaire est hébergé sur des serveurs proxy sécurisés (UE). Votre consentement active l'IA.",
+        cookieText: "Aucun cookie tiers, aucun tracking. IA souveraine hébergée en UE, RGPD natif. Votre consentement active l\u2019assistant réglementaire.",
         cookieAccept: "Accepter",
         cookieReject: "Refuser",
         cookieMore: "En savoir plus",
@@ -396,14 +397,15 @@ export const i18n = {
         blogPublishedOn: "Publié le",
     },
     en: {
-        navSub: "R&D AI Mechatronic CyberSystems · Industry 5.0 · EU Compliance",
+        navSub: "R&D Expertise × Regulatory AI · EU Industrial Compliance",
         navItems: ["Expertise", "Services", "Pricing", "Insights", "Contact"],
         navCta: "Contact us",
         euBadge: "27 EU Member States + Outermost Regions",
         heroH1a: "The R&D engineer",
         heroH1b: "who designed your systems,",
         heroH1c: "pilots your industrial transformation and EU compliance.",
-        heroSub: "From Toyota airbag steering wheels to TGV 1500V batteries — mechatronic product development combined with regulatory AI to support your industrial mid-market companies from regulatory watch to operational compliance.",
+        heroSub: "32 years of industrial R&D expertise — from design to commercial series production. AEGIS Intelligence transforms this field capital into actionable regulatory intelligence to pilot your EU compliance.",
+        heroLinkedInCta: "Discover the field experience on LinkedIn →",
         heroCta1: "Contact us →",
         heroCta2: "View pricing",
         heroTrust: [
@@ -537,7 +539,7 @@ export const i18n = {
         tiers: [
             {
                 name: "PULSE", price: "Free", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
-                tagline: "Test your regulatory exposure",
+                tagline: "Discover what you don\u2019t know yet",
                 features: [
                     "AI pre-diagnostic (Sonnet)",
                     "2 sections: BOM + regulatory exposure",
@@ -552,7 +554,7 @@ export const i18n = {
             },
             {
                 name: "DIAGNOSTIC", price: "\u20ac250", period: "/report", badge: "", annual: "", color: C.emerald,
-                tagline: "Complete industrial & strategic assessment",
+                tagline: "The causal map of your exposure",
                 features: [
                     "Everything in PULSE",
                     "7-section Pearl 3-level analysis",
@@ -568,7 +570,7 @@ export const i18n = {
             },
             {
                 name: "WATCH", price: "\u20ac150", period: "/month", badge: "CONTINUOUS COMPLIANCE", annual: "", color: C.gold,
-                tagline: "Your permanent regulatory sentinel",
+                tagline: "Your continuous regulatory vigilance",
                 features: [
                     "Personalised regulatory alerts",
                     "Continuous monitoring of 5+ regulations",
@@ -583,7 +585,7 @@ export const i18n = {
             },
             {
                 name: "EXPERTISE TERRAIN", price: "\u20ac350", period: "/hr", badge: "R&D ENGINEER", annual: "\u20ac2,500/mo", color: C.rose,
-                tagline: "The engineer who built it, not the consultant who advises",
+                tagline: "The engineer who designed it, not the consultant who advises",
                 features: [
                     "Everything in DIAGNOSTIC + WATCH",
                     "Dedicated senior R&D engineer support",
@@ -714,7 +716,7 @@ export const i18n = {
         brainTitle: "✨ AEGIS Intelligence — EU Compliance Analyst",
         brainPlaceholder: "Ask your EU regulatory question…",
         brainExample: "💬 Example: 'What Battery Regulation impacts on an EV Li-ion pack?'",
-        brainResponse: "Regulation (EU) 2023/1542 requires a digital battery passport (Art.77), declared carbon footprint from 2025 (Art.7), and Li recycling rate of 80% by 2031…",
+        brainResponse: "Your connected product intersects 3 EU regulations simultaneously: CRA (cybersecurity), AI Act (AI components) and Machinery Regulation (machine safety). Critical deadline: September 2026. Want me to analyse your exposure?",
         brainRegs: ["AI Act", "Batteries", "ESPR", "CRA", "GDPR", "Machinery", "Data Act", "NIS2"],
         brainStatus: "● Online — AI ready",
         brainCaption: "AI hosted on secure proxy servers (EU) · Deterministic config",
@@ -748,7 +750,7 @@ export const i18n = {
             "Medical Devices", "Electronics / IoT",
             "Railway", "Defense", "Other",
         ],
-        maieutiqueIntro: "Test your regulatory awareness in 4 questions:",
+        maieutiqueIntro: "Assess your regulatory maturity in 4 questions:",
         // v3.1 ROI Metrics
         roiMetrics: [
             { value: "<30s", label: "Impact analysis", sub: "vs 2-4 weeks consultant" },
@@ -770,7 +772,7 @@ export const i18n = {
         trinityResult: "The engineer who built your systems now leads your compliance. No firm can make that claim.",
         // v3.1 Cookie Banner RGPD
         cookieTitle: "🔐 Cookies & AI Assistant",
-        cookieText: "This site uses only functional cookies (no tracking). The regulatory AI assistant is hosted on secure proxy servers (EU). Your consent activates the AI.",
+        cookieText: "No third-party cookies, no tracking. Sovereign AI hosted in the EU, GDPR native. Your consent activates the regulatory assistant.",
         cookieAccept: "Accept",
         cookieReject: "Decline",
         cookieMore: "Learn more",
