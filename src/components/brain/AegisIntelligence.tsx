@@ -9,6 +9,8 @@ import { PaperAirplaneIcon } from '../icons/PaperAirplaneIcon';
 import { SparklesIcon } from '../icons/SparklesIcon';
 import DocumentReportView from '../documents/DocumentReportView';
 import MarkdownRenderer from '../common/MarkdownRenderer';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 // ── PDF Export Icon (inline SVG) ──
 const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
@@ -18,6 +20,8 @@ const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
         <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
 );
+
+const AEGIS_VERSION = '3.3.4';
 
 // System instructions — reprises de AegisChat.tsx (coherence)
 const SYSTEM_INSTRUCTIONS: Record<'fr' | 'en', string> = {
@@ -282,6 +286,9 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             wrapper.style.color = '#1e293b';
             wrapper.style.padding = '0';
 
+            // Reference ID for traceability
+            const refId = `AEGIS-CONV-${dateStr.replace(/-/g, '')}-${timeStr.replace(/:/g, '')}`;
+
             // Header
             wrapper.innerHTML = `
                 <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid ${C.accent}">
@@ -293,6 +300,9 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                     </h3>
                     <div style="font-size:10px;color:${C.textMuted}">
                         ${dateStr} · ${timeStr} · ${messages.length} ${lang === 'fr' ? 'messages' : 'messages'}
+                    </div>
+                    <div style="font-size:9px;font-weight:600;color:${C.accent};margin-top:4px;font-family:monospace">
+                        ${refId}
                     </div>
                 </div>
             `;
@@ -313,23 +323,74 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 label.style.fontWeight = '700';
                 label.style.marginBottom = '4px';
                 label.style.color = isUser ? C.accent : C.emerald;
-                label.textContent = isUser
-                    ? (lang === 'en' ? '👤 You' : '👤 Vous')
-                    : '✨ AEGIS Intelligence';
+                if (isUser) {
+                    label.textContent = lang === 'en' ? '👤 You' : '👤 Vous';
+                } else {
+                    label.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;font-size:8px;font-weight:800;margin-right:4px;vertical-align:middle">Æ</span> AEGIS Intelligence';
+                }
                 msgDiv.appendChild(label);
 
                 const content = document.createElement('div');
                 content.style.fontSize = '11px';
                 content.style.lineHeight = '1.7';
-                content.style.whiteSpace = 'pre-wrap';
                 content.style.wordBreak = 'break-word';
-                content.textContent = msg.text;
+
+                if (isUser) {
+                    content.style.whiteSpace = 'pre-wrap';
+                    content.textContent = msg.text;
+                } else {
+                    // R1: Convert markdown → HTML for AEGIS responses (P0 fix)
+                    const rawHtml = marked.parse(msg.text) as string;
+                    content.innerHTML = DOMPurify.sanitize(rawHtml);
+                    // Inline styles for html2canvas PDF rendering
+                    content.querySelectorAll('table').forEach(tbl => {
+                        tbl.style.borderCollapse = 'collapse';
+                        tbl.style.width = '100%';
+                        tbl.style.margin = '8px 0';
+                        tbl.style.fontSize = '10px';
+                    });
+                    content.querySelectorAll('th, td').forEach(c => {
+                        (c as HTMLElement).style.border = '1px solid #cbd5e1';
+                        (c as HTMLElement).style.padding = '5px 8px';
+                        (c as HTMLElement).style.textAlign = 'left';
+                    });
+                    content.querySelectorAll('th').forEach(h => {
+                        (h as HTMLElement).style.background = '#f1f5f9';
+                        (h as HTMLElement).style.fontWeight = '700';
+                        (h as HTMLElement).style.color = '#334155';
+                    });
+                    content.querySelectorAll('ul, ol').forEach(l => {
+                        (l as HTMLElement).style.paddingLeft = '20px';
+                        (l as HTMLElement).style.margin = '4px 0';
+                    });
+                    content.querySelectorAll('blockquote').forEach(bq => {
+                        (bq as HTMLElement).style.borderLeft = `3px solid ${C.accent}`;
+                        (bq as HTMLElement).style.paddingLeft = '12px';
+                        (bq as HTMLElement).style.margin = '8px 0';
+                        (bq as HTMLElement).style.color = '#475569';
+                    });
+                }
                 msgDiv.appendChild(content);
 
                 wrapper.appendChild(msgDiv);
             });
 
-            // Footer
+            // R3: Banner "conversation en cours"
+            const banner = document.createElement('div');
+            banner.style.textAlign = 'center';
+            banner.style.fontSize = '10px';
+            banner.style.color = C.accent;
+            banner.style.marginTop = '16px';
+            banner.style.padding = '10px 16px';
+            banner.style.background = '#eff6ff';
+            banner.style.borderRadius = '8px';
+            banner.style.border = '1px solid #bfdbfe';
+            banner.textContent = lang === 'fr'
+                ? 'Analyse préliminaire — Poursuivez la conversation sur jeanpierrecharles.com'
+                : 'Preliminary analysis — Continue the conversation at jeanpierrecharles.com';
+            wrapper.appendChild(banner);
+
+            // Footer (R5: dynamic version)
             const footer = document.createElement('div');
             footer.style.textAlign = 'center';
             footer.style.fontSize = '9px';
@@ -337,7 +398,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             footer.style.marginTop = '24px';
             footer.style.paddingTop = '12px';
             footer.style.borderTop = '1px solid #e2e8f0';
-            footer.textContent = `AEGIS Intelligence v3.3 · jeanpierrecharles.com · ${lang === 'fr' ? 'Exporté le' : 'Exported on'} ${dateStr}`;
+            footer.textContent = `AEGIS Intelligence v${AEGIS_VERSION} · jeanpierrecharles.com · ${lang === 'fr' ? 'Exporté le' : 'Exported on'} ${dateStr}`;
             wrapper.appendChild(footer);
 
             const filename = `AEGIS_Conversation_${dateStr}_${timeStr.replace(/:/g, 'h')}.pdf`;
