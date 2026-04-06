@@ -174,7 +174,7 @@ Syntaxe obligatoire dans le corps du texte : au lieu d'ecrire "selon l'Article 1
 # TIMELINES ET INFOGRAPHIES -- MINI-GANTT OBLIGATOIRES
 Pour les timelines reglementaires (section 2.4) et les feuilles de route (section 6), tu DOIS produire EN PLUS du tableau textuel une representation visuelle mini-gantt en texte ASCII/Markdown. Exemple de structure :
 
-```
+\`\`\`
 TIMELINE REGLEMENTAIRE 2025-2027
                         2025          2026          2027
                         Q1 Q2 Q3 Q4 | Q1 Q2 Q3 Q4 | Q1 Q2 Q3 Q4
@@ -184,14 +184,14 @@ AI Act Haut Risque      .. .. .. .. .. .. ** ..                      (02/08/2026
 RM 2023/1230            .. .. .. .. .. .. .. .. **                   (20/01/2027)
 CRA Art.14 (24h)        .. .. .. .. .. .. .. .. .. .. **             (11/09/2027)
 CRA complet             .. .. .. .. .. .. .. .. .. .. .. **          (11/12/2027)
-```
+\`\`\`
 
 Regles mini-gantt :
 - Barre active/evenement : **
 - Periode d'attente : .. ou -- 
 - Chaque ligne = une obligation, avec date precise entre parentheses a droite
 - Largeur fixe, alignement colonnes trimestriels
-- Englober dans un bloc ``` (code fence) pour preserver le monospace au rendu HTML/PDF
+- Englober dans un bloc \`\`\` (code fence) pour preserver le monospace au rendu HTML/PDF
 
 Pour les feuilles de route Gantt de la section 6, meme principe mais avec phases (P1 immediat, P2 6 mois, P3 12 mois, P4 24 mois) comme colonnes.
 
