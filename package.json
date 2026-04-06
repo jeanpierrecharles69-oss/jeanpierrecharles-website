@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@types/qrcode": "^1.5.6",
     "dompurify": "^3.3.3",
     "html2pdf.js": "^0.14.0",
     "marked": "^17.0.4",
+    "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-helmet-async": "^3.0.0",

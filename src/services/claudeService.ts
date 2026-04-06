@@ -1,23 +1,49 @@
 /**
- * Service Claude API via Proxy Securise
+ * Service AI API via Proxy Securise (multi-provider)
  *
  * SECURITE : Les appels passent par /api/claude-proxy (serverless Vercel)
  * La cle API n'est JAMAIS exposee cote client
  *
- * Format SSE Claude Messages API :
- *   event: content_block_delta
- *   data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"..."}}
+ * Le proxy route vers Gemini (brain, pulse) ou Anthropic (diagnostic).
+ * Le client gere les deux formats SSE :
+ *   - Anthropic : event: content_block_delta / data: {"type":"content_block_delta",...}
+ *   - Gemini : data: {"candidates":[{"content":{"parts":[{"text":"..."}]}}]}
  *
- * Version : 1.0.0 -- 20260331T1200 CET
- * Remplace : geminiService.ts (Gemini 2.0 Flash deprecie, arret 01/06/2026)
+ * Version : 2.0.0 -- 20260406T1030 CET
  * Signature : identique a geminiService.ts pour compatibilite import
  */
 
 const PROXY_URL = '/api/claude-proxy';
 
 /**
- * Brain streaming (Haiku 4.5) -- parse SSE Claude format
- * Signature identique a geminiService.runQueryStream pour changement d'import 1 ligne
+ * Parse un chunk SSE data en texte -- supporte Anthropic ET Gemini
+ */
+function parseStreamChunk(jsonStr: string): string {
+    try {
+        const data = JSON.parse(jsonStr);
+
+        // Anthropic format : content_block_delta
+        if (data.type === 'content_block_delta'
+            && data.delta?.type === 'text_delta'
+            && data.delta?.text) {
+            return data.delta.text;
+        }
+
+        // Gemini format : candidates[].content.parts[].text
+        if (data.candidates?.[0]?.content?.parts) {
+            return data.candidates[0].content.parts
+                .map((p: { text?: string }) => p.text || '')
+                .join('');
+        }
+    } catch {
+        // Skip : malformed JSON, event metadata, etc.
+    }
+    return '';
+}
+
+/**
+ * Brain streaming (Gemini Flash) -- parse SSE multi-provider format
+ * Signature identique a geminiService.runQueryStream pour compatibilite import
  */
 export const runQueryStream = async function* (
     prompt: string,
@@ -61,25 +87,14 @@ export const runQueryStream = async function* (
             buffer = lines.pop() || '';
 
             for (const line of lines) {
-                // Claude SSE format : "data: {...}"
                 if (line.startsWith('data: ')) {
-                    try {
-                        const data = JSON.parse(line.slice(6));
-
-                        // Extraire le texte des content_block_delta
-                        if (data.type === 'content_block_delta'
-                            && data.delta?.type === 'text_delta'
-                            && data.delta?.text) {
-                            yield data.delta.text;
-                        }
-                    } catch {
-                        // Skip : event lines, empty data, message_start, message_stop, etc.
-                    }
+                    const text = parseStreamChunk(line.slice(6));
+                    if (text) yield text;
                 }
             }
         }
     } catch (error: any) {
-        console.error('Claude proxy error:', error);
+        console.error('AI proxy error:', error);
         yield `⚠️ Service momentanément indisponible. Veuillez réessayer.\n\nDétail technique : ${error.message}`;
     }
 };
@@ -112,6 +127,49 @@ export const runPulseQuery = async (
     }
 
     return response.json();
+};
+
+/**
+ * Requete DIAGNOSTIC (Opus 4.6, non-streaming JSON, system prompt embarque proxy)
+ * Retourne le texte + flag troncature si stop_reason === 'max_tokens'
+ */
+export const runDiagnosticQuery = async (
+    prompt: string,
+    lang: string = 'fr'
+): Promise<{
+    text: string;
+    usage?: Record<string, number>;
+    model?: string;
+    truncated: boolean;
+}> => {
+    const langInstruction = lang === 'en' ? 'Answer in English.' : 'Réponds en français.';
+    const fullPrompt = `${langInstruction}\n\nVoici la demande de diagnostic d'un client PME/ETI industrielle :\n\n---\n${prompt}\n---\n\nProduis le diagnostic complet selon le format AEGIS Intelligence (7 sections).\nSois précis sur les articles et annexes des règlements applicables.\nIdentifie les interactions croisées entre les règlements qui s'appliquent au produit/système décrit.`;
+
+    const response = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            mode: 'diagnostic',
+            prompt: fullPrompt,
+            systemInstruction: '', // system prompt embarqué dans le proxy
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Erreur' }));
+        if (response.status === 429) {
+            throw new Error('QUOTA_EXCEEDED');
+        }
+        throw new Error(error.message || `API Error ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+        text: data.text,
+        usage: data.usage,
+        model: data.model,
+        truncated: data.stop_reason === 'max_tokens',
+    };
 };
 
 /**

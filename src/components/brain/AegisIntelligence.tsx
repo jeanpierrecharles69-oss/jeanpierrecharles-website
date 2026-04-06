@@ -11,6 +11,7 @@ import DocumentReportView from '../documents/DocumentReportView';
 import MarkdownRenderer from '../common/MarkdownRenderer';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import QRCode from 'qrcode';
 
 // ── PDF Export Icon (inline SVG) ──
 const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
@@ -21,7 +22,7 @@ const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
     </svg>
 );
 
-const AEGIS_VERSION = '3.3.4';
+const AEGIS_VERSION = '3.4.0';
 
 // System instructions — reprises de AegisChat.tsx (coherence)
 const SYSTEM_INSTRUCTIONS: Record<'fr' | 'en', string> = {
@@ -276,7 +277,6 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
         try {
             const html2pdf = (await import('html2pdf.js')).default;
 
-            // Build a clean HTML version for PDF rendering
             const dateStr = new Date().toISOString().split('T')[0];
             const timeStr = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
@@ -286,22 +286,40 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             wrapper.style.color = '#1e293b';
             wrapper.style.padding = '0';
 
-            // Reference ID for traceability
+            // Reference ID for traceability (U2)
             const refId = `AEGIS-CONV-${dateStr.replace(/-/g, '')}-${timeStr.replace(/:/g, '')}`;
 
-            // Header
+            // QR code generation (U3)
+            const qrTarget = `https://jeanpierrecharles.com?src=pdf-conv&ref=${refId}`;
+            let qrDataUrl = '';
+            try {
+                qrDataUrl = await QRCode.toDataURL(qrTarget, {
+                    width: 120,
+                    margin: 1,
+                    color: { dark: '#0A3D62', light: '#ffffff' },
+                });
+            } catch {
+                // QR generation failed — continue without it
+            }
+
+            // Cover header AEGIS branded (U1 + U2 + U3)
             wrapper.innerHTML = `
-                <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid ${C.accent}">
-                    <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:${C.accent};margin-bottom:6px;text-transform:uppercase">
-                        AEGIS INTELLIGENCE · CONVERSATION EXPORT
+                <div style="position:relative;padding:20px 0 16px 0;border-bottom:2px solid #0A3D62;margin-bottom:24px">
+                    ${qrDataUrl ? `<img src="${qrDataUrl}" style="position:absolute;top:12px;right:0;width:60px;height:60px" />` : ''}
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0A3D62,#1e5a8a);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:22px">Ae</div>
+                        <div>
+                            <div style="font-size:22px;font-weight:700;color:#0A3D62;letter-spacing:0.05em">AEGIS INTELLIGENCE</div>
+                            <div style="font-size:9px;color:#5a6578;text-transform:uppercase;letter-spacing:0.08em">Compliance by Design &middot; EU Regulatory Expertise</div>
+                        </div>
                     </div>
-                    <h3 style="font-size:16px;font-weight:800;color:${C.text};margin:0 0 6px">
+                    <div style="font-size:16px;font-weight:600;color:#2c3e50;margin-top:12px">
                         ${lang === 'fr' ? 'Historique de conversation IA' : 'AI Conversation History'}
-                    </h3>
-                    <div style="font-size:10px;color:${C.textMuted}">
-                        ${dateStr} · ${timeStr} · ${messages.length} ${lang === 'fr' ? 'messages' : 'messages'}
                     </div>
-                    <div style="font-size:9px;font-weight:600;color:${C.accent};margin-top:4px;font-family:monospace">
+                    <div style="font-size:10px;color:#5a6578;margin-top:2px">
+                        ${dateStr} &middot; ${timeStr} &middot; ${messages.length} messages
+                    </div>
+                    <div style="font-family:'DejaVu Sans Mono',monospace;font-size:10px;color:#0A3D62;margin-top:6px">
                         ${refId}
                     </div>
                 </div>
@@ -326,7 +344,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 if (isUser) {
                     label.textContent = lang === 'en' ? '👤 You' : '👤 Vous';
                 } else {
-                    label.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:white;font-size:8px;font-weight:800;margin-right:4px;vertical-align:middle">Æ</span> AEGIS Intelligence';
+                    label.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#0A3D62,#1e5a8a);color:white;font-size:8px;font-weight:800;margin-right:4px;vertical-align:middle">Ae</span> AEGIS Intelligence';
                 }
                 msgDiv.appendChild(label);
 
@@ -339,7 +357,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                     content.style.whiteSpace = 'pre-wrap';
                     content.textContent = msg.text;
                 } else {
-                    // R1: Convert markdown → HTML for AEGIS responses (P0 fix)
+                    // R1: Convert markdown -> HTML for AEGIS responses (P0 fix v3.3.5)
                     const rawHtml = marked.parse(msg.text) as string;
                     content.innerHTML = DOMPurify.sanitize(rawHtml);
                     // Inline styles for html2canvas PDF rendering
@@ -364,7 +382,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                         (l as HTMLElement).style.margin = '4px 0';
                     });
                     content.querySelectorAll('blockquote').forEach(bq => {
-                        (bq as HTMLElement).style.borderLeft = `3px solid ${C.accent}`;
+                        (bq as HTMLElement).style.borderLeft = '3px solid #0A3D62';
                         (bq as HTMLElement).style.paddingLeft = '12px';
                         (bq as HTMLElement).style.margin = '8px 0';
                         (bq as HTMLElement).style.color = '#475569';
@@ -375,11 +393,11 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 wrapper.appendChild(msgDiv);
             });
 
-            // R3: Banner "conversation en cours"
+            // R3: Banner "analyse preliminaire" (conserve de v3.3.5)
             const banner = document.createElement('div');
             banner.style.textAlign = 'center';
             banner.style.fontSize = '10px';
-            banner.style.color = C.accent;
+            banner.style.color = '#0A3D62';
             banner.style.marginTop = '16px';
             banner.style.padding = '10px 16px';
             banner.style.background = '#eff6ff';
@@ -389,6 +407,33 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 ? 'Analyse préliminaire — Poursuivez la conversation sur jeanpierrecharles.com'
                 : 'Preliminary analysis — Continue the conversation at jeanpierrecharles.com';
             wrapper.appendChild(banner);
+
+            // U4: Bandeau CTA DIAGNOSTIC 250 EUR
+            const ctaBanner = document.createElement('div');
+            ctaBanner.style.marginTop = '12px';
+            ctaBanner.style.padding = '14px 18px';
+            ctaBanner.style.background = '#eef6ff';
+            ctaBanner.style.borderLeft = '4px solid #0A3D62';
+            ctaBanner.style.borderRadius = '2px';
+            ctaBanner.style.pageBreakInside = 'avoid';
+            ctaBanner.innerHTML = lang === 'fr'
+                ? `<div style="font-size:11px;color:#1a1a1a;line-height:1.5;text-align:center">
+                    <strong>Ce pre-diagnostic vous a ete utile ?</strong><br>
+                    Pour une analyse approfondie — graphe causal inter-reglements, scenarios de non-conformite chiffres, feuille de route CAPEX/OPEX, sources juridiques sourcees — passez au <strong>DIAGNOSTIC AEGIS complet, 250 EUR</strong>.
+                   </div>
+                   <div style="margin-top:10px;text-align:center">
+                    <div style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px">Demander le Diagnostic &rarr;</div>
+                    <div style="font-size:9px;color:#5a6578;margin-top:4px">jeanpierrecharles.com/#pricing</div>
+                   </div>`
+                : `<div style="font-size:11px;color:#1a1a1a;line-height:1.5;text-align:center">
+                    <strong>Was this pre-diagnosis useful?</strong><br>
+                    For a deep analysis — inter-regulation dependency graph, quantified non-compliance scenarios, CAPEX/OPEX roadmap, sourced legal references — upgrade to the <strong>full AEGIS DIAGNOSTIC, 250 EUR</strong>.
+                   </div>
+                   <div style="margin-top:10px;text-align:center">
+                    <div style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px">Request the Diagnostic &rarr;</div>
+                    <div style="font-size:9px;color:#5a6578;margin-top:4px">jeanpierrecharles.com/#pricing</div>
+                   </div>`;
+            wrapper.appendChild(ctaBanner);
 
             // Footer (R5: dynamic version)
             const footer = document.createElement('div');
