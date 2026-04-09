@@ -22,7 +22,7 @@ const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
     </svg>
 );
 
-const AEGIS_VERSION = '3.4.0';
+const AEGIS_VERSION = '3.4.2';
 
 // System instructions — reprises de AegisChat.tsx (coherence)
 const SYSTEM_INSTRUCTIONS: Record<'fr' | 'en', string> = {
@@ -478,8 +478,31 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
 
     const starters: string[] = (t.brainStarters as string[]) ?? [];
 
+    // Banniere MODE TEST visible uniquement sur Preview/Development
+    // Permet d'identifier visuellement qu'on n'est pas en production
+    const isTestMode = typeof window !== 'undefined' && !window.location.hostname.endsWith('jeanpierrecharles.com');
+
     return (
-        <div
+        <>
+            {isTestMode && (
+                <div
+                    style={{
+                        background: '#fef3c7',
+                        border: '2px solid #f59e0b',
+                        color: '#78350f',
+                        padding: '8px 16px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 9999,
+                    }}
+                >
+                    MODE TEST — environnement Preview/Development. Aucun debit carte reel. Mollie cle TEST active.
+                </div>
+            )}
+            <div
             style={{
                 background: 'rgba(255,255,255,0.97)',
                 border: '1px solid rgba(0,0,0,0.06)',
@@ -973,6 +996,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             {/* ── REPORT MODAL ── */}
             {showReport && <DocumentReportView onClose={() => setShowReport(false)} />}
         </div>
+        </>
     );
 };
 

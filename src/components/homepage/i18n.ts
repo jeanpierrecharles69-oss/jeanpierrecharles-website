@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AEGIS v3.1 · Internationalization Dictionary
  * Source of Truth: wireframe-homepage-v3-r5.jsx (R5)
  */
@@ -153,13 +153,13 @@ export const i18n = {
                 name: "PULSE", price: "Gratuit", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
                 tagline: "Découvrez ce que vous ne savez pas encore",
                 features: [
-                    "Pré-diagnostic IA (Sonnet)",
+                    "Pré-diagnostic IA instantané",
                     "2 sections : BOM + exposition réglementaire",
                     "Résultat instantané",
                     "Aucun engagement",
                 ],
                 notIncluded: [
-                    "Analyse Pearl 3 niveaux",
+                    "Analyse causale multi-niveaux",
                     "Accompagnement expert",
                 ],
                 cta: "Démarrer gratuitement",
@@ -169,7 +169,7 @@ export const i18n = {
                 tagline: "La cartographie causale de votre exposition",
                 features: [
                     "Tout PULSE inclus",
-                    "7 sections analyse Pearl 3 niveaux",
+                    "7 sections d'analyse causale multi-niveaux",
                     "Graphe causal produit/règlements",
                     "Contrefactuels chiffrés",
                     "Feuille de route Gantt PDF",
@@ -227,7 +227,7 @@ export const i18n = {
         ],
         // S4b — PROBLEME → SOLUTION (fusion Concurrents + Services)
         problemSolutionTitle: "Vos défis réglementaires. Nos réponses.",
-        problemSolutionSub: "Chaque pain point a une réponse AEGIS concrète.",
+        problemSolutionSub: "Chaque enjeu réglementaire trouve une réponse AEGIS concrète.",
         problemSolutions: [
             {
                 problem: "Veille manuelle sur +50 sources réglementaires",
@@ -541,13 +541,13 @@ export const i18n = {
                 name: "PULSE", price: "Free", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
                 tagline: "Discover what you don\u2019t know yet",
                 features: [
-                    "AI pre-diagnostic (Sonnet)",
+                    "Instant AI pre-diagnostic",
                     "2 sections: BOM + regulatory exposure",
                     "Instant results",
                     "No commitment",
                 ],
                 notIncluded: [
-                    "Pearl 3-level analysis",
+                    "Multi-level causal analysis",
                     "Expert support",
                 ],
                 cta: "Start for free",
@@ -557,7 +557,7 @@ export const i18n = {
                 tagline: "The causal map of your exposure",
                 features: [
                     "Everything in PULSE",
-                    "7-section Pearl 3-level analysis",
+                    "7-section multi-level causal analysis",
                     "Product/regulation causal graph",
                     "Quantified counterfactuals",
                     "Gantt PDF roadmap",
@@ -615,7 +615,7 @@ export const i18n = {
         ],
         // S4b — PROBLEM → SOLUTION (merge Competitors + Services)
         problemSolutionTitle: "Your regulatory challenges. Our answers.",
-        problemSolutionSub: "Every pain point has a concrete AEGIS response.",
+        problemSolutionSub: "Every regulatory challenge meets a concrete AEGIS response.",
         problemSolutions: [
             {
                 problem: "Manual monitoring of 50+ regulatory sources",

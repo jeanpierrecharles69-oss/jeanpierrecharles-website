@@ -5,10 +5,18 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
- * Version : 1.0.0 -- 20260401T1500 CET
+ * Version : 1.2.0 -- 20260409T1410 CET -- Dual-key LIVE/TEST + email self-block
  */
 
-const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
+// Selection automatique de la cle Mollie selon l'environnement Vercel
+// Production = LIVE, Preview/Development = TEST
+// Bump : 20260409T1410 - protection contre debit involontaire pendant la phase J-6 -> J0
+const VERCEL_ENV = process.env.VERCEL_ENV || 'development';
+const MOLLIE_API_KEY =
+    VERCEL_ENV === 'production'
+        ? process.env.MOLLIE_API_KEY_LIVE
+        : process.env.MOLLIE_API_KEY_TEST;
+const MOLLIE_MODE = VERCEL_ENV === 'production' ? 'LIVE' : 'TEST';
 const MOLLIE_API_URL = 'https://api.mollie.com/v2/payments';
 
 const ALLOWED_ORIGINS = [
@@ -56,12 +64,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     if (!MOLLIE_API_KEY) {
-        console.error('MOLLIE_API_KEY not configured in Vercel environment variables');
-        return res.status(500).json({ error: 'Service de paiement non configure.' });
+        console.error(`MOLLIE_API_KEY missing for VERCEL_ENV=${VERCEL_ENV}`);
+        return res.status(500).json({
+            error: 'Payment provider not configured',
+            mode: MOLLIE_MODE,
+            env: VERCEL_ENV,
+        });
+    }
+
+    // Validation defensive : si on est en production et qu'on a une cle test, REFUS
+    // Et reciproquement : si on est en preview/dev avec une cle live, REFUS
+    if (VERCEL_ENV === 'production' && !MOLLIE_API_KEY.startsWith('live_')) {
+        console.error('CRITICAL: production env with non-live Mollie key');
+        return res.status(500).json({ error: 'Payment provider misconfiguration (env mismatch)' });
+    }
+    if (VERCEL_ENV !== 'production' && !MOLLIE_API_KEY.startsWith('test_')) {
+        console.error(`CRITICAL: ${VERCEL_ENV} env with non-test Mollie key`);
+        return res.status(500).json({ error: 'Payment provider misconfiguration (env mismatch)' });
     }
 
     const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-                     || req.socket?.remoteAddress || 'unknown';
+        || req.socket?.remoteAddress || 'unknown';
     if (isRateLimited(clientIp)) {
         return res.status(429).json({ error: 'Trop de requetes. Patientez 1 minute.' });
     }
@@ -98,9 +121,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 lang: langKey,
                 email: email || 'non fourni',
                 source: 'jeanpierrecharles.com',
-                version: 'v3.3',
+                version: 'v3.4.2',
+                mode: MOLLIE_MODE,
             },
         };
+
+        // Email self-block : refus de checkout si l'email appartient au domaine jeanpierrecharles.com
+        // en mode LIVE (evite que JP teste accidentellement sur sa propre carte en production)
+        const SELF_DOMAIN = 'jeanpierrecharles.com';
+        if (MOLLIE_MODE === 'LIVE' && email && typeof email === 'string') {
+            const emailLower = email.toLowerCase();
+            if (emailLower.endsWith(`@${SELF_DOMAIN}`)) {
+                console.warn(`Self-block triggered for email ${emailLower} in LIVE mode`);
+                return res.status(403).json({
+                    error: 'Self-test blocked',
+                    message: 'Use Preview/Development environment with test Mollie key for self-tests.',
+                    mode: MOLLIE_MODE,
+                });
+            }
+        }
 
         const response = await fetch(MOLLIE_API_URL, {
             method: 'POST',
