@@ -91,7 +91,7 @@ export function CGVModal({ onClose, lang }: { onClose: () => void; lang: string 
                 Conditions G&eacute;n&eacute;rales de Vente
             </h2>
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
-                Version 1.0 — [V1 DRAFT — RELECTURE JP REQUISE]
+                Version 1.1 — En vigueur &agrave; compter du 15 avril 2026
             </div>
             {renderCGVContent()}
             <CloseBtn label="Fermer" onClick={onClose} />
@@ -104,14 +104,17 @@ function renderCGVContent() {
         <>
             <SectionTitle>Article 1 — Objet et champ d'application</SectionTitle>
             <P>
-                Les pr&eacute;sentes Conditions G&eacute;n&eacute;rales de Vente (&laquo; CGV &raquo;) r&eacute;gissent les relations contractuelles entre Jean-Pierre Charles, Entrepreneur Individuel exer&ccedil;ant sous l'enseigne &laquo; AEGIS Intelligence &raquo; (ci-apr&egrave;s &laquo; le Prestataire &raquo;), et tout client professionnel ou particulier (ci-apr&egrave;s &laquo; le Client &raquo;) souhaitant b&eacute;n&eacute;ficier des services propos&eacute;s via le site jeanpierrecharles.com.
+                Les pr&eacute;sentes Conditions G&eacute;n&eacute;rales de Vente (&laquo; CGV &raquo;) r&eacute;gissent les relations contractuelles entre Jean-Pierre Charles, Entrepreneur Individuel exer&ccedil;ant sous l'enseigne &laquo; AEGIS Intelligence &raquo; (ci-apr&egrave;s &laquo; le Prestataire &raquo;), et tout client professionnel au sens du Code de commerce, agissant dans le cadre de son activit&eacute; industrielle, commerciale ou de prestation de services (ci-apr&egrave;s &laquo; le Client &raquo;), souhaitant b&eacute;n&eacute;ficier des services propos&eacute;s via le site jeanpierrecharles.com.
+            </P>
+            <P>
+                Les services propos&eacute;s sont destin&eacute;s exclusivement aux entreprises priv&eacute;es (B2B). Ils ne sont pas destin&eacute;s aux consommateurs au sens du Code de la consommation. Toute commande &eacute;manant d'un consommateur sera refus&eacute;e et int&eacute;gralement rembours&eacute;e. L'extension aux Collectivit&eacute;s Territoriales (B2G) et aux particuliers (B2C) est pr&eacute;vue dans des conditions g&eacute;n&eacute;rales d&eacute;di&eacute;es publi&eacute;es ult&eacute;rieurement.
             </P>
             <P>
                 Toute commande pass&eacute;e implique l'acceptation sans r&eacute;serve des pr&eacute;sentes CGV. Le Client reconna&icirc;t en avoir pris connaissance pr&eacute;alablement &agrave; sa commande, conform&eacute;ment &agrave; l'article 1119 du Code civil.
             </P>
 
             <SectionTitle>Article 2 — Services propos&eacute;s</SectionTitle>
-            <P>Le Prestataire propose une gamme de services d'expertise et d'intelligence r&eacute;glementaire industrielle pour les march&eacute;s europ&eacute;ens :</P>
+            <P>Le Prestataire propose une gamme de services d'expertise et d'intelligence r&eacute;glementaire industrielle &agrave; destination des PME et ETI industrielles europ&eacute;ennes :</P>
             <ul style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
                 <li><strong>PULSE</strong> : pr&eacute;-diagnostic IA gratuit</li>
                 <li><strong>DIAGNOSTIC</strong> : rapport PDF premium d'analyse causale r&eacute;glementaire (250,00 EUR par rapport)</li>
@@ -130,19 +133,23 @@ function renderCGVContent() {
             <P>La commande s'effectue exclusivement en ligne. Le processus comprend : s&eacute;lection du service, saisie des informations d'identification, saisie des informations du diagnostic souhait&eacute;, acceptation expresse des CGV et de la Politique de Confidentialit&eacute;, paiement via Mollie. La commande est ferme et d&eacute;finitive &agrave; r&eacute;ception du paiement.</P>
 
             <SectionTitle>Article 5 — Modalit&eacute;s de paiement</SectionTitle>
-            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Paiement exigible imm&eacute;diatement. En cas de retard : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire 40,00 EUR (art. L441-10 Code de commerce).</P>
+            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Conform&eacute;ment &agrave; l'article L441-10 du Code de commerce, sauf stipulation contraire n&eacute;goci&eacute;e entre les Parties et accept&eacute;e par &eacute;crit, le paiement est exigible imm&eacute;diatement &agrave; la commande. Aucun escompte n'est accord&eacute; pour paiement anticip&eacute;.</P>
+            <P>En cas de retard ou de d&eacute;faut de paiement : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire pour frais de recouvrement de 40,00 EUR (art. L441-10 Code de commerce).</P>
 
             <SectionTitle>Article 6 — Livraison du service DIAGNOSTIC</SectionTitle>
             <P>Rapport PDF livr&eacute; par email. Paiement avant 17h CET jour ouvr&eacute; : livraison le jour m&ecirc;me avant 19h CET. Apr&egrave;s 17h / week-end / jours f&eacute;ri&eacute;s : livraison avant 12h CET le jour ouvr&eacute; suivant.</P>
 
-            <SectionTitle>Article 7 — Droit de r&eacute;tractation (B2C)</SectionTitle>
+            <SectionTitle>Article 7 — Droit de r&eacute;tractation</SectionTitle>
             <P>
-                Le Client particulier (B2C) dispose d'un d&eacute;lai de 14 jours (art. L221-18 Code consommation). Attention : conform&eacute;ment &agrave; l'article L221-28-13, le droit de r&eacute;tractation ne peut &ecirc;tre exerc&eacute; pour les contenus num&eacute;riques dont l'ex&eacute;cution a commenc&eacute; apr&egrave;s accord expr&egrave;s et renoncement expr&egrave;s du consommateur. Pour les clients B2B, le droit de r&eacute;tractation l&eacute;gal n'est pas applicable (art. L221-3).
+                Le pr&eacute;sent contrat &eacute;tant conclu entre professionnels, le droit de r&eacute;tractation pr&eacute;vu par les articles L221-18 et suivants du Code de la consommation n'est pas applicable, conform&eacute;ment &agrave; l'article L221-3 du m&ecirc;me code.
             </P>
 
             <SectionTitle>Article 8 — Obligation de moyen et responsabilit&eacute;</SectionTitle>
             <P>
-                Le Prestataire s'engage &agrave; fournir un service de qualit&eacute; professionnelle. Cette obligation est une obligation de moyen. Le rapport ne se substitue pas &agrave; une consultation juridique formelle. Responsabilit&eacute; plafonn&eacute;e au montant vers&eacute; pour la prestation concern&eacute;e.
+                Le Prestataire s'engage &agrave; fournir un service d'expertise r&eacute;glementaire de qualit&eacute; professionnelle, fond&eacute; sur 32 ann&eacute;es d'exp&eacute;rience industrielle. Cette obligation est une obligation de moyen, non de r&eacute;sultat. Le rapport DIAGNOSTIC ne se substitue pas &agrave; une consultation juridique formelle ni &agrave; un avis officiel d'une autorit&eacute; de r&eacute;gulation.
+            </P>
+            <P>
+                La responsabilit&eacute; du Prestataire est plafonn&eacute;e au montant total vers&eacute; par le Client pour la prestation concern&eacute;e. Conform&eacute;ment &agrave; l'article 1170 du Code civil, la pr&eacute;sente clause limitative ne s'applique pas en cas de faute lourde ou dolosive du Prestataire ni en cas de manquement &agrave; une obligation essentielle du contrat.
             </P>
 
             <SectionTitle>Article 9 — Propri&eacute;t&eacute; intellectuelle</SectionTitle>
@@ -151,9 +158,9 @@ function renderCGVContent() {
             <SectionTitle>Article 10 — Donn&eacute;es personnelles</SectionTitle>
             <P>Le traitement des donn&eacute;es personnelles est r&eacute;gi par la Politique de Confidentialit&eacute; du Prestataire, accessible sur le site.</P>
 
-            <SectionTitle>Article 11 — M&eacute;diation et litiges</SectionTitle>
+            <SectionTitle>Article 11 — R&egrave;glement des litiges</SectionTitle>
             <P>
-                Client B2C : recours gratuit au service de m&eacute;diation ([MEDIATEUR_A_DESIGNER]) ou plateforme europ&eacute;enne RLL (https://ec.europa.eu/consumers/odr). Tous clients : &agrave; d&eacute;faut d'accord amiable, tribunaux fran&ccedil;ais comp&eacute;tents, loi fran&ccedil;aise applicable.
+                Avant toute action contentieuse, les Parties s'engagent &agrave; rechercher une solution amiable par voie de n&eacute;gociation directe. &Agrave; d&eacute;faut d'accord amiable dans un d&eacute;lai de trente (30) jours &agrave; compter de la notification du diff&eacute;rend, tout litige relatif &agrave; la formation, l'ex&eacute;cution ou l'interpr&eacute;tation des pr&eacute;sentes CGV rel&egrave;ve de la comp&eacute;tence exclusive des tribunaux fran&ccedil;ais du ressort du si&egrave;ge du Prestataire. La loi applicable est la loi fran&ccedil;aise.
             </P>
 
             <SectionTitle>Article 12 — Modifications</SectionTitle>
@@ -190,7 +197,7 @@ export function PrivacyModal({ onClose, lang }: { onClose: () => void; lang: str
                 Politique de Confidentialit&eacute;
             </h2>
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
-                Version 1.0 — Responsable : Jean-Pierre Charles — contact@jeanpierrecharles.com — [V1 DRAFT]
+                Version 1.1 — Responsable : Jean-Pierre Charles — contact@jeanpierrecharles.com — En vigueur &agrave; compter du 15 avril 2026
             </div>
             {renderPrivacyContent()}
             <CloseBtn label="Fermer" onClick={onClose} />
@@ -202,7 +209,7 @@ function renderPrivacyContent() {
     return (
         <>
             <SectionTitle>1. Engagement RGPD</SectionTitle>
-            <P>Le Prestataire s'engage &agrave; respecter le R&egrave;glement (UE) 2016/679 (RGPD) ainsi que la loi Informatique et Libert&eacute;s du 6 janvier 1978 modifi&eacute;e.</P>
+            <P>Le Prestataire s'engage &agrave; respecter le R&egrave;glement (UE) 2016/679 du Parlement europ&eacute;en et du Conseil du 27 avril 2016 relatif &agrave; la protection des personnes physiques &agrave; l'&eacute;gard du traitement des donn&eacute;es &agrave; caract&egrave;re personnel et &agrave; la libre circulation de ces donn&eacute;es (RGPD), ainsi que la loi n&deg; 78-17 du 6 janvier 1978 modifi&eacute;e relative &agrave; l'informatique, aux fichiers et aux libert&eacute;s.</P>
 
             <SectionTitle>2. Donn&eacute;es collect&eacute;es</SectionTitle>
             <div style={{ overflowX: 'auto', margin: '8px 0' }}>
@@ -254,6 +261,7 @@ function renderPrivacyContent() {
             <P>Ex&eacute;cution du contrat, facturation, support, obligations l&eacute;gales, am&eacute;lioration des services (statistiques anonymis&eacute;es). Vos donn&eacute;es ne sont jamais utilis&eacute;es pour de la prospection commerciale tierce, vendues, lou&eacute;es ou c&eacute;d&eacute;es.</P>
 
             <SectionTitle>4. Sous-traitants et transferts</SectionTitle>
+            <P>Conform&eacute;ment aux articles 13.1.e et 28 du R&egrave;glement (UE) 2016/679 (RGPD), sont identifi&eacute;s ci-apr&egrave;s les sous-traitants techniques agissant pour le compte du Prestataire. Chacun est li&eacute; par un Contrat de Sous-Traitance (Data Processing Agreement, DPA) au sens de l'article 28 RGPD.</P>
             <div style={{ overflowX: 'auto', margin: '8px 0' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
                     <thead>
@@ -267,32 +275,32 @@ function renderPrivacyContent() {
                     <tbody>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                             <td style={{ padding: '6px' }}>Vercel Inc.</td><td style={{ padding: '6px' }}>USA / edges EU</td>
-                            <td style={{ padding: '6px' }}>H&eacute;bergement</td><td style={{ padding: '6px' }}>CCT</td>
+                            <td style={{ padding: '6px' }}>H&eacute;bergement</td><td style={{ padding: '6px' }}>CCT (UE 2021/914) + DPA art. 28 RGPD</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                             <td style={{ padding: '6px' }}>Mollie B.V.</td><td style={{ padding: '6px' }}>Pays-Bas (UE)</td>
-                            <td style={{ padding: '6px' }}>Paiements</td><td style={{ padding: '6px' }}>UE native, DPA</td>
+                            <td style={{ padding: '6px' }}>Paiements</td><td style={{ padding: '6px' }}>Conformit&eacute; UE native + DPA art. 28 RGPD</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                             <td style={{ padding: '6px' }}>Anthropic PBC</td><td style={{ padding: '6px' }}>USA</td>
-                            <td style={{ padding: '6px' }}>DIAGNOSTIC (Opus)</td><td style={{ padding: '6px' }}>CCT, 0 training</td>
+                            <td style={{ padding: '6px' }}>DIAGNOSTIC (Opus)</td><td style={{ padding: '6px' }}>CCT (UE 2021/914) + DPA + opt-out training (zero retention)</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                             <td style={{ padding: '6px' }}>Google LLC</td><td style={{ padding: '6px' }}>USA</td>
-                            <td style={{ padding: '6px' }}>Brain (Gemini)</td><td style={{ padding: '6px' }}>CCT</td>
+                            <td style={{ padding: '6px' }}>Brain (Gemini)</td><td style={{ padding: '6px' }}>CCT (UE 2021/914) + DPA art. 28 RGPD</td>
                         </tr>
                         <tr>
                             <td style={{ padding: '6px' }}>Gandi SAS</td><td style={{ padding: '6px' }}>France</td>
-                            <td style={{ padding: '6px' }}>DNS &amp; email</td><td style={{ padding: '6px' }}>UE native</td>
+                            <td style={{ padding: '6px' }}>DNS &amp; email</td><td style={{ padding: '6px' }}>Conformit&eacute; UE native + DPA art. 28 RGPD</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <P>Transferts hors UE encadr&eacute;s par les clauses contractuelles types (CCT, d&eacute;cision 2021/914), art. 44-49 RGPD.</P>
+            <P>Transferts de donn&eacute;es vers les pays tiers (&Eacute;tats-Unis pour Vercel, Anthropic et Google) encadr&eacute;s par les Clauses Contractuelles Types (CCT) adopt&eacute;es par la Commission europ&eacute;enne via la D&eacute;cision d'ex&eacute;cution (UE) 2021/914 du 4 juin 2021, conform&eacute;ment aux articles 44 &agrave; 49 du R&egrave;glement (UE) 2016/679 (RGPD).</P>
 
             <SectionTitle>5. Vos droits</SectionTitle>
             <P>
-                Conform&eacute;ment aux articles 15 &agrave; 22 RGPD : droit d'acc&egrave;s, rectification, effacement, limitation, portabilit&eacute;, opposition, retrait du consentement, r&eacute;clamation CNIL (https://www.cnil.fr). Contact : contact@jeanpierrecharles.com. R&eacute;ponse sous 30 jours.
+                Conform&eacute;ment aux articles 15 &agrave; 22 du R&egrave;glement (UE) 2016/679 (RGPD) : droit d'acc&egrave;s, droit de rectification, droit &agrave; l'effacement (droit &agrave; l'oubli), droit &agrave; la limitation du traitement, droit &agrave; la portabilit&eacute; des donn&eacute;es, droit d'opposition, droit de retirer le consentement &agrave; tout moment, et droit d'introduire une r&eacute;clamation aupr&egrave;s de la Commission Nationale de l'Informatique et des Libert&eacute;s (CNIL), autorit&eacute; de contr&ocirc;le fran&ccedil;aise d&eacute;sign&eacute;e au sens de l'article 51 RGPD (https://www.cnil.fr). Contact pour exercer vos droits : contact@jeanpierrecharles.com. R&eacute;ponse sous trente (30) jours conform&eacute;ment &agrave; l'article 12.3 RGPD.
             </P>
 
             <SectionTitle>6. Cookies</SectionTitle>
@@ -305,7 +313,7 @@ function renderPrivacyContent() {
             <P>Politique mise &agrave; jour selon &eacute;volutions r&eacute;glementaires. Version applicable : celle en vigueur &agrave; la date de votre commande.</P>
 
             <SectionTitle>9. Contact</SectionTitle>
-            <P>Email : contact@jeanpierrecharles.com — Courrier : Jean-Pierre Charles — [ADRESSE_PRO_A_INSERER]</P>
+            <P>Email : contact@jeanpierrecharles.com — Courrier : Jean-Pierre Charles, 10 La Bertini&egrave;re, 86800 Terc&eacute;, FRANCE</P>
         </>
     );
 }
@@ -343,7 +351,10 @@ export function MentionsLegalesModalV2({ onClose, lang }: { onClose: () => void;
                     </div>
                     <div style={{ fontSize: 11, color: '#64748b' }}>Jean-Pierre Charles</div>
                     <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                        {isFR ? 'T\u00e9l\u00e9phone' : 'Phone'} : [TELEPHONE_A_INSERER]
+                        {isFR ? 'Contact : par email uniquement (r\u00e9ponse sous 24h ouvr\u00e9es)' : 'Contact: by email only (response within 24 business hours)'}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, fontStyle: 'italic' }}>
+                        {isFR ? 'Cible commerciale : entreprises priv\u00e9es (B2B exclusivement)' : 'Commercial scope: private enterprises (B2B exclusively)'}
                     </div>
                 </div>
             </div>
@@ -370,6 +381,11 @@ export function MentionsLegalesModalV2({ onClose, lang }: { onClose: () => void;
 
             {/* Hebergeur */}
             <SectionTitle>{isFR ? '2. H\u00e9bergement' : '2. Hosting'}</SectionTitle>
+            <div style={{ fontSize: 10, color: '#64748b', fontStyle: 'italic', marginBottom: 8, lineHeight: 1.6 }}>
+                {isFR
+                    ? 'Information obligatoire en application de l\'article 6.III.1 de la Loi pour la Confiance dans l\'\u00c9conomie Num\u00e9rique (LCEN) n\u00b0 2004-575 du 21 juin 2004.'
+                    : 'Mandatory information pursuant to Article 6.III.1 of the French Law for Confidence in the Digital Economy (LCEN) n\u00b0 2004-575 of 21 June 2004.'}
+            </div>
             <div style={{ background: '#f0f9ff', borderRadius: 10, padding: '12px 16px', border: '1px solid #bae6fd', marginBottom: 12 }}>
                 <div style={{ fontSize: 11, color: '#475569', lineHeight: 1.8 }}>
                     <strong>{isFR ? 'H\u00e9bergeur principal' : 'Main host'} :</strong> Vercel Inc.<br />
