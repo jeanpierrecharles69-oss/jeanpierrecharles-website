@@ -57,7 +57,9 @@ export const runQueryStream = async function* (
             body: JSON.stringify({
                 mode: 'brain',
                 prompt,
-                systemInstruction,
+                // CHANGE-09: system prompt is now server-side enforced
+                // Send lang hint so server picks correct language variant
+                lang: typeof document !== 'undefined' ? document.documentElement.lang || 'fr' : 'fr',
             }),
         });
 

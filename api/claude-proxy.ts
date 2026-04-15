@@ -67,6 +67,27 @@ const DIAGNOSTIC_SYSTEM_PROMPT = (() => {
     }
 })();
 
+// System prompt BRAIN — externalise dans config/brain-system-prompt.txt
+// Version : 1.0.0 -- 20260415 CET -- CHANGE-09 securite: prompt cote serveur
+const BRAIN_SYSTEM_PROMPTS: Record<string, string> = (() => {
+    try {
+        const p = path.join(process.cwd(), 'config', 'brain-system-prompt.txt');
+        const raw = fs.readFileSync(p, 'utf-8');
+        const result: Record<string, string> = {};
+        const parts = raw.split(/===LANG:(\w+)===/);
+        for (let i = 1; i < parts.length; i += 2) {
+            result[parts[i].toLowerCase()] = parts[i + 1].trim();
+        }
+        return result;
+    } catch (e) {
+        console.error('Failed to load brain-system-prompt.txt:', e);
+        return {
+            fr: 'FALLBACK: Tu es AEGIS Intelligence, plateforme d\'expertise reglementaire EU.',
+            en: 'FALLBACK: You are AEGIS Intelligence, European regulatory expertise platform.',
+        };
+    }
+})();
+
 // System prompt PULSE — externalise dans config/pulse-system-prompt.txt
 // Version : 2.0.1 -- 20260409T1445 CET -- Externalise dans config/pulse-system-prompt.txt
 const PULSE_SYSTEM_PROMPT = (() => {
@@ -325,14 +346,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'Prompt trop long (max 10000 caracteres)' });
         }
 
-        // Resolution system prompt : embarque (PULSE, DIAGNOSTIC) ou client-fourni (brain)
+        // Resolution system prompt : TOUS les modes utilisent des prompts serveur
+        // CHANGE-09 securite : le client n'a plus le droit d'injecter un system prompt
+        const bodyLang = (req.body.lang || 'fr').toString().toLowerCase();
         let finalSystemPrompt: string | undefined;
-        if (mode === 'pulse') {
+        if (mode === 'brain') {
+            finalSystemPrompt = BRAIN_SYSTEM_PROMPTS[bodyLang] || BRAIN_SYSTEM_PROMPTS['fr'];
+            if (systemInstruction) {
+                console.warn('Brain mode: client-sent systemInstruction ignored (server-enforced)');
+            }
+        } else if (mode === 'pulse') {
             finalSystemPrompt = PULSE_SYSTEM_PROMPT;
         } else if (mode === 'diagnostic') {
             finalSystemPrompt = DIAGNOSTIC_SYSTEM_PROMPT;
-        } else if (systemInstruction && typeof systemInstruction === 'string') {
-            finalSystemPrompt = systemInstruction;
         }
 
         // Dispatch par provider

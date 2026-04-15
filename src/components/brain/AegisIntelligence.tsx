@@ -24,23 +24,10 @@ const DownloadIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
 
 const AEGIS_VERSION = '3.4.2';
 
-// System instructions — reprises de AegisChat.tsx (coherence)
-const SYSTEM_INSTRUCTIONS: Record<'fr' | 'en', string> = {
-    fr: `Tu es AEGIS Intelligence, la plateforme d'expertise et d'intelligence reglementaire industrielle europeenne.
-Tu es alimente par 32 ans d'expertise R&D terrain en conception, industrialisation et mise en conformite de produits et systemes mecatroniques complexes — automobile, batteries, ferroviaire, equipements industriels, aeronautique.
-Tu couvres 10 reglements EU cles : AI Act (2024/1689), Reglement Machines (2023/1230), ESPR (2024/1781), CRA (2024/2847), RGPD (2016/679), Batteries (2023/1542), Data Act (2023/2854), NIS2 (2022/2555), DORA (2022/2554), CPR (produits de construction).
-Reponds TOUJOURS en francais, de maniere precise et structuree, en citant les articles de loi pertinents.
-Si un reglement hors de ton perimetre semble applicable (ex: MDR 2017/745 pour dispositifs medicaux, ATEX pour atmospheres explosives, PED pour equipements sous pression), mentionne son existence et recommande un diagnostic approfondi AEGIS plutot que d'improviser. Dis ce que tu sais et ce que tu ne sais pas.
-Tu couvres tous les secteurs industriels EU : automobile, aeronautique, batteries/energie, equipements industriels, robotique, dispositifs medicaux, electronique/IoT, ferroviaire, construction/BTP, agroalimentaire, chimie, metallurgie, plasturgie, textile technique, defense.
-Si la question sort du perimetre reglementaire EU industriel, redirige poliment vers un diagnostic AEGIS.`,
-    en: `You are AEGIS Intelligence, the European industrial regulatory expertise and intelligence platform.
-You are powered by 32 years of hands-on R&D expertise in design, industrialisation, and compliance of complex mechatronic products and systems — automotive, batteries, rail, industrial equipment, aerospace.
-You cover 10 key EU regulations: AI Act (2024/1689), Machinery Regulation (2023/1230), ESPR (2024/1781), CRA (2024/2847), GDPR (2016/679), Batteries (2023/1542), Data Act (2023/2854), NIS2 (2022/2555), DORA (2022/2554), CPR (construction products).
-ALWAYS respond in English, with precision and structure, citing relevant legal articles.
-If a regulation outside your core scope appears applicable (e.g. MDR 2017/745 for medical devices, ATEX for explosive atmospheres, PED for pressure equipment), mention its existence and recommend an in-depth AEGIS diagnostic rather than improvising. State what you know and what you don't.
-You cover all EU industrial sectors: automotive, aerospace, batteries/energy, industrial equipment, robotics, medical devices, electronics/IoT, rail, construction, food processing, chemicals, metallurgy, plastics, technical textiles, defence.
-If the question falls outside EU industrial regulatory scope, politely redirect to an AEGIS diagnostic.`,
-};
+// CHANGE-09: System prompt is now server-side in config/brain-system-prompt.txt
+// The proxy enforces the prompt; client only sends lang hint.
+// Kept empty constant for backward compat if AegisChat references it.
+const SYSTEM_INSTRUCTIONS_DEPRECATED = '(server-side enforced)';
 
 interface AegisIntelligenceProps {
     mode?: 'hero' | 'full';
@@ -109,15 +96,13 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
 
         try {
             const { systemAddition } = enrichPromptWithRegulation(trimmed);
-            const baseSystem = SYSTEM_INSTRUCTIONS[lang] ?? SYSTEM_INSTRUCTIONS.fr;
-            const fullSystem = systemAddition
-                ? `${baseSystem}\n\n--- REGULATORY CONTEXT ---\n${systemAddition}`
-                : baseSystem;
+            // CHANGE-09: system prompt is server-side; only enrichment context sent
+            const contextHint = systemAddition || '';
 
             let responseText = '';
             setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
-            for await (const chunk of runQueryStream(trimmed, fullSystem)) {
+            for await (const chunk of runQueryStream(trimmed, contextHint)) {
                 responseText += chunk;
                 setMessages(prev => {
                     const updated = [...prev];

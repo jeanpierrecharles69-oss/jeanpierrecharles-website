@@ -28,19 +28,8 @@ interface AegisChatProps {
     mode?: 'mini' | 'full';
 }
 
-// ✅ FIX: System instruction i18n — répondre dans la langue de l'interface
-const SYSTEM_INSTRUCTIONS: Record<'fr' | 'en', string> = {
-    fr: `Tu es AEGIS Intelligence, l'analyste IA de conformité réglementaire de Jean-Pierre Charles.
-Tu es spécialisé dans la conformité industrielle européenne (AI Act, Règlement Machines 2023/1230, ESPR, CRA, RGPD, REACH, CSRD, Batteries 2023/1542, Data Act, CPR, NIS2, DORA, UNECE R155/R156, EN 45545).
-Réponds TOUJOURS en français, de manière précise et structurée, en citant les articles de loi pertinents.
-Tu représentes 32 ans d'expertise R&D terrain dans l'industrie européenne (Autoliv, Saft, Faurecia, Forsee Power).
-Si la question sort du périmètre réglementaire EU industriel, redirige poliment vers le périmètre couvert.`,
-    en: `You are AEGIS Intelligence, the regulatory AI compliance analyst of Jean-Pierre Charles.
-You specialize in European industrial compliance (AI Act, Machinery Regulation 2023/1230, ESPR, CRA, GDPR, REACH, CSRD, Batteries 2023/1542, Data Act, CPR, NIS2, DORA, UNECE R155/R156, EN 45545).
-ALWAYS respond in English, with precision and structure, citing relevant legal articles.
-You represent 32 years of hands-on R&D expertise in the European industry (Autoliv, Saft, Faurecia, Forsee Power).
-If the question falls outside the EU industrial regulatory scope, politely redirect to the covered perimeter.`,
-};
+// CHANGE-09: System prompt is now server-side in config/brain-system-prompt.txt
+// The proxy enforces the prompt; client only sends lang hint.
 
 const AegisChat: React.FC<AegisChatProps> = ({ mode = 'mini' }) => {
     const { t, lang } = useLang();
@@ -81,15 +70,13 @@ const AegisChat: React.FC<AegisChatProps> = ({ mode = 'mini' }) => {
 
         try {
             const { systemAddition } = enrichPromptWithRegulation(trimmed);
-            const baseSystem = SYSTEM_INSTRUCTIONS[lang] ?? SYSTEM_INSTRUCTIONS.fr;
-            const fullSystem = systemAddition
-                ? `${baseSystem}\n\n--- REGULATORY CONTEXT ---\n${systemAddition}`
-                : baseSystem;
+            // CHANGE-09: system prompt is server-side; only enrichment context sent
+            const contextHint = systemAddition || '';
 
             let responseText = '';
             setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
-            for await (const chunk of runQueryStream(trimmed, fullSystem)) {
+            for await (const chunk of runQueryStream(trimmed, contextHint)) {
                 responseText += chunk;
                 setMessages(prev => {
                     const updated = [...prev];
