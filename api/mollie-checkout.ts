@@ -116,6 +116,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             description,
             redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
+            webhookUrl: `https://jeanpierrecharles.com/api/mollie-webhook`,
             metadata: {
                 product,
                 lang: langKey,
