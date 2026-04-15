@@ -79,7 +79,13 @@ export default function NavBar() {
                         {(["fr", "en"] as const).map((l) => (
                             <button
                                 key={l}
-                                onClick={() => setLang(l)}
+                                onClick={() => {
+                                    setLang(l);
+                                    // Patch P14 (14/04 T1005) : sync URL <-> lang, mais uniquement si on est sur la homepage
+                                    if (location.pathname === "/" || location.pathname === "/en") {
+                                        navigate(l === "en" ? "/en" : "/");
+                                    }
+                                }}
                                 className="text-[10px] font-bold px-2.5 py-1.5 uppercase tracking-wide transition-all"
                                 style={{
                                     backgroundColor: lang === l ? `${C.accent}12` : "transparent",

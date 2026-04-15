@@ -9,8 +9,17 @@ interface LangContextType {
 
 const LangContext = createContext<LangContextType | undefined>(undefined);
 
+// Patch P14 (14/04 T1005) : init lang depuis URL pour supporter deep-link /en
+// Si pathname commence par /en -> lang initial 'en', sinon 'fr'
+const getInitialLang = (): Lang => {
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/en")) {
+        return "en";
+    }
+    return "fr";
+};
+
 export const LangProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [lang, setLangState] = useState<Lang>("fr");
+    const [lang, setLangState] = useState<Lang>(getInitialLang);
 
     const setLang = (newLang: Lang) => {
         setLangState(newLang);

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { LangProvider } from "./src/components/homepage/LangContext";
+import { LangProvider, useLang } from "./src/components/homepage/LangContext";
 import NavBar from "./src/components/homepage/NavBar";
 import HeroSection from "./src/components/homepage/HeroSection";
 import TrustBadges from "./src/components/homepage/TrustBadges";
@@ -16,6 +16,20 @@ import ArticlePage from "./src/components/blog/ArticlePage";
 import MerciPage from "./src/components/homepage/MerciPage";
 import OrganizationJsonLd from "./src/components/blog/OrganizationJsonLd";
 import { C, FONT_LINK } from "./src/components/homepage/constants";
+
+// Patch P14 (14/04 T1005) : synchronise lang <-> URL
+// Lit le pathname et force setLang cohérent. Evite les flashes FR->EN sur deep-link /en.
+function LangSync() {
+  const location = useLocation();
+  const { lang, setLang } = useLang();
+  useEffect(() => {
+    const urlLang = location.pathname.startsWith("/en") ? "en" : "fr";
+    if (urlLang !== lang) {
+      setLang(urlLang);
+    }
+  }, [location.pathname, lang, setLang]);
+  return null;
+}
 
 function HomePage() {
   const location = useLocation();
@@ -63,8 +77,10 @@ const App: React.FC = () => {
             }}
           >
             <NavBar />
+            <LangSync />
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/en" element={<HomePage />} />
               <Route path="/insights/:articleId" element={<ArticlePage />} />
               <Route path="/merci" element={<MerciPage />} />
             </Routes>

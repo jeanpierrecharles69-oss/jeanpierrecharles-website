@@ -174,7 +174,7 @@ export const i18n = {
                     "Contrefactuels chiffrés",
                     "Feuille de route Gantt PDF",
                     "Rapport PDF premium 40+ pages",
-                    "Livré sous 24 h ouvrées après paiement",
+                    "Livré le jour ouvré du paiement (avant 19h CET)",
                 ],
                 notIncluded: [
                     "Accompagnement expert dédié",
@@ -563,7 +563,7 @@ export const i18n = {
                     "Quantified counterfactuals",
                     "Gantt PDF roadmap",
                     "Premium PDF report 40+ pages",
-                    "Delivered within 24 working hours after payment",
+                    "Delivered same business day (before 19:00 CET)",
                 ],
                 notIncluded: [
                     "Dedicated expert support",

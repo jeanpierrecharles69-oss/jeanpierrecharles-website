@@ -36,8 +36,7 @@ const content = {
             { icon: '\u2705', text: 'Paiement re\u00e7u \u2014 confirmation envoy\u00e9e par e-mail' },
             { icon: '\ud83d\udcdd', text: 'Votre facture est disponible ci-dessous' },
             { icon: '\ud83d\udd0d', text: 'Jean-Pierre analyse votre produit et vos r\u00e9glements applicables' },
-            { icon: '\ud83d\udcc4', text: 'Rapport PDF premium livr\u00e9 sous 48h ouvr\u00e9es' },
-            { icon: '\ud83d\udcde', text: 'Un appel de restitution de 30 min est inclus' },
+            { icon: '\ud83d\udcc4', text: 'Rapport PDF premium livr\u00e9 le jour ouvr\u00e9 du paiement (avant 19h CET)' },
         ],
         invoiceBtn: 'T\u00e9l\u00e9charger ma facture PDF',
         invoiceBtnLoading: 'G\u00e9n\u00e9ration en cours...',
@@ -52,8 +51,7 @@ const content = {
             { icon: '\u2705', text: 'Payment received \u2014 confirmation sent by email' },
             { icon: '\ud83d\udcdd', text: 'Your invoice is available below' },
             { icon: '\ud83d\udd0d', text: 'Jean-Pierre analyses your product and applicable regulations' },
-            { icon: '\ud83d\udcc4', text: 'Premium PDF report delivered within 48 business hours' },
-            { icon: '\ud83d\udcde', text: 'A 30-min debrief call is included' },
+            { icon: '\ud83d\udcc4', text: 'Premium PDF report delivered same business day (before 19:00 CET)' },
         ],
         invoiceBtn: 'Download my invoice PDF',
         invoiceBtnLoading: 'Generating...',
@@ -138,8 +136,8 @@ export default function MerciPage() {
                 '    <td style="padding:12px;font-size:12px">',
                 '      <strong>' + (isFr ? 'Diagnostic Technique de Conformite Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic') + '</strong><br>',
                 '      <span style="font-size:10px;color:#64748b">' + (isFr
-                    ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages, appel restitution 30 min'
-                    : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report, 30-min debrief call') + '</span>',
+                    ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
+                    : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report') + '</span>',
                 '    </td>',
                 '    <td style="padding:12px;font-size:14px;font-weight:700;text-align:right;white-space:nowrap">250,00 EUR</td>',
                 '  </tr></tbody>',
