@@ -90,7 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { product, lang, email } = req.body;
+        const { product, lang, email, request_id, customer_name, customer_company } = req.body;
 
         // Validation produit
         const productConfig = PRODUCTS[product];
@@ -121,8 +121,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 lang: langKey,
                 email: email || 'non fourni',
                 source: 'jeanpierrecharles.com',
-                version: 'v3.4.2',
+                version: 'v3.4.4',
                 mode: MOLLIE_MODE,
+                request_id: request_id || null,
+                customer_name: customer_name || null,
+                customer_company: customer_company || null,
             },
         };
 

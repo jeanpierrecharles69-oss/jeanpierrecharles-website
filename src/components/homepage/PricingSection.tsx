@@ -2,36 +2,76 @@ import { useState } from "react";
 import { useLang } from "./LangContext";
 import { C } from "./constants";
 import ContactModal from "../common/ContactModal";
+import DiagnosticCheckoutForm from "./DiagnosticCheckoutForm";
+import type { DiagnosticFormData } from "./DiagnosticCheckoutForm";
 
 const MOLLIE_CHECKOUT_URL = '/api/mollie-checkout';
+const DIAGNOSTIC_REQUEST_URL = '/api/diagnostic-request';
 
 export default function PricingSection() {
     const { t, lang } = useLang();
     const [activeTier, setActiveTier] = useState(0);
     const [showContact, setShowContact] = useState(false);
+    const [showDiagForm, setShowDiagForm] = useState(false);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-    const handleDiagnosticCheckout = async () => {
+    const handleDiagnosticFormSubmit = async (data: DiagnosticFormData) => {
         if (checkoutLoading) return;
         setCheckoutLoading(true);
         try {
-            const response = await fetch(MOLLIE_CHECKOUT_URL, {
+            // Step 1: POST diagnostic-request → get request_id
+            const reqRes = await fetch(DIAGNOSTIC_REQUEST_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product: 'diagnostic', lang }),
+                body: JSON.stringify(data),
             });
-            if (!response.ok) {
-                throw new Error(`Checkout HTTP ${response.status}`);
+            if (!reqRes.ok) {
+                const err = await reqRes.json().catch(() => ({}));
+                throw new Error(err.error || `Request HTTP ${reqRes.status}`);
             }
-            const data = await response.json();
-            if (data.checkoutUrl) {
-                window.location.href = data.checkoutUrl;
+            const { request_id } = await reqRes.json();
+
+            // Save to sessionStorage for MerciPage invoice
+            try {
+                sessionStorage.setItem('aegis_diag_request', JSON.stringify({
+                    request_id,
+                    sector: data.sector,
+                    product: data.product,
+                    regs: data.regulations,
+                    context: data.context,
+                    email: data.email,
+                    company: data.company,
+                    name: `${data.firstName} ${data.lastName}`,
+                }));
+            } catch { /* sessionStorage unavailable */ }
+
+            // Step 2: POST mollie-checkout with request_id + customer info
+            const checkoutRes = await fetch(MOLLIE_CHECKOUT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product: 'diagnostic',
+                    lang,
+                    email: data.email,
+                    request_id,
+                    customer_name: `${data.firstName} ${data.lastName}`,
+                    customer_company: data.company,
+                }),
+            });
+            if (!checkoutRes.ok) {
+                throw new Error(`Checkout HTTP ${checkoutRes.status}`);
+            }
+            const checkoutData = await checkoutRes.json();
+            if (checkoutData.checkoutUrl) {
+                window.location.href = checkoutData.checkoutUrl;
             } else {
-                console.error('No checkout URL returned:', data);
+                console.error('No checkout URL returned:', checkoutData);
+                setShowDiagForm(false);
                 setShowContact(true);
             }
         } catch (err) {
-            console.error('Mollie checkout error:', err);
+            console.error('Diagnostic checkout error:', err);
+            setShowDiagForm(false);
             setShowContact(true);
         } finally {
             setCheckoutLoading(false);
@@ -46,7 +86,7 @@ export default function PricingSection() {
         if (tierName === 'PULSE') {
             scrollToHero();
         } else if (tierName === 'DIAGNOSTIC') {
-            handleDiagnosticCheckout();
+            setShowDiagForm(true);
         } else {
             setShowContact(true);
         }
@@ -158,6 +198,13 @@ export default function PricingSection() {
             </div>
         </section>
 
+            {showDiagForm && (
+                <DiagnosticCheckoutForm
+                    onClose={() => { setShowDiagForm(false); setCheckoutLoading(false); }}
+                    onSubmit={handleDiagnosticFormSubmit}
+                    isLoading={checkoutLoading}
+                />
+            )}
             {showContact && <ContactModal onClose={() => setShowContact(false)} lang={lang} />}
         </>
     );
