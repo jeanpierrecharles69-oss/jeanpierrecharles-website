@@ -84,13 +84,8 @@ const CookieBanner: React.FC = () => {
                 </button>
                 <button
                     onClick={() => {
-                        // Scroll to political section or open policy page
-                        const el = document.getElementById('politique');
-                        if (el) {
-                            el.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                            window.open('/#politique', '_blank', 'noopener,noreferrer');
-                        }
+                        // Dispatch event to open Privacy modal in FooterSection
+                        window.dispatchEvent(new Event('openPrivacyModal'));
                     }}
                     style={{
                         fontSize: 11, fontWeight: 500, padding: '7px 12px', borderRadius: 20,
