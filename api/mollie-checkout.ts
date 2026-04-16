@@ -5,12 +5,13 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
- * Version : 1.2.0 -- 20260409T1410 CET -- Dual-key LIVE/TEST + email self-block
+ * Version : 1.3.0 -- 20260416T1710 CET -- webhookUrl dynamique Preview deployments (DETTE12)
  */
 
 // Selection automatique de la cle Mollie selon l'environnement Vercel
 // Production = LIVE, Preview/Development = TEST
 // Bump : 20260409T1410 - protection contre debit involontaire pendant la phase J-6 -> J0
+// Bump : 20260416T1710 - webhookUrl dynamique pour Preview deployments (F_T1025_01 V&V Phase 2)
 const VERCEL_ENV = process.env.VERCEL_ENV || 'development';
 const MOLLIE_API_KEY =
     VERCEL_ENV === 'production'
@@ -18,6 +19,17 @@ const MOLLIE_API_KEY =
         : process.env.MOLLIE_API_KEY_TEST;
 const MOLLIE_MODE = VERCEL_ENV === 'production' ? 'LIVE' : 'TEST';
 const MOLLIE_API_URL = 'https://api.mollie.com/v2/payments';
+
+// Deploy URL resolution for dynamic webhookUrl:
+// Production = domaine canonique jeanpierrecharles.com
+// Preview = URL Vercel auto-generee (via VERCEL_URL runtime env)
+// Development local = fallback canonique (webhook Mollie ne peut pas joindre localhost)
+const DEPLOY_URL =
+    VERCEL_ENV === 'production'
+        ? 'https://jeanpierrecharles.com'
+        : process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'https://jeanpierrecharles.com';
 
 const ALLOWED_ORIGINS = [
     'https://jeanpierrecharles.com',
@@ -116,7 +128,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             description,
             redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
-            webhookUrl: `https://jeanpierrecharles.com/api/mollie-webhook`,
+            webhookUrl: `${DEPLOY_URL}/api/mollie-webhook`,
             metadata: {
                 product,
                 lang: langKey,
