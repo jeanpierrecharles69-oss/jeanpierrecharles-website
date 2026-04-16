@@ -122,7 +122,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 lang: langKey,
                 email: email || 'non fourni',
                 source: 'jeanpierrecharles.com',
-                version: 'v3.4.4',
+                version: 'v3.4.5',
                 mode: MOLLIE_MODE,
                 request_id: request_id || null,
                 customer_name: customer_name || null,

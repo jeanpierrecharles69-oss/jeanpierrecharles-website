@@ -66,7 +66,11 @@ export default function MerciPage() {
     const navigate = useNavigate();
     const { lang } = useLang();
     const [isGenerating, setIsGenerating] = useState(false);
-    const [invoiceNumber] = useState(() => generateInvoiceNumber());
+
+    // CHANGE-07 : fallback invoice number from URL param (email link support)
+    const urlInvoice = searchParams.get('invoice');
+    const urlRef = searchParams.get('ref');
+    const [invoiceNumber] = useState(() => urlInvoice || generateInvoiceNumber());
 
     const pageLang = (searchParams.get('lang') as 'fr' | 'en') || lang || 'fr';
     const t = content[pageLang] || content.fr;
@@ -74,8 +78,11 @@ export default function MerciPage() {
     const getDiagData = () => {
         try {
             const raw = sessionStorage.getItem('aegis_diag_request');
-            return raw ? JSON.parse(raw) : null;
-        } catch { return null; }
+            if (raw) return JSON.parse(raw);
+        } catch { /* ignore parse errors */ }
+        // Fallback : minimal data from URL params (CHANGE-07, email link support)
+        if (urlRef) return { ref: urlRef };
+        return null;
     };
 
     const handleDownloadInvoice = async () => {

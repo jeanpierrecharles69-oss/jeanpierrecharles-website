@@ -1,15 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { sendOpsPreNotify } from './_lib/mailer';
 
 /**
  * AEGIS Intelligence -- Diagnostic Request Handler
  * Receives pre-checkout form data, generates request_id, logs for JP.
  *
  * SECURITE : No sensitive data in logs. Only request_id + timestamp.
- * EMAIL : Phase 2 — SMTP credentials needed (JP_INPUT_NEEDED).
- *         For J0, handler validates + returns request_id. JP correlates
- *         via Mollie dashboard metadata.
+ * EMAIL Phase 2 ACTIVE : sendOpsPreNotify best-effort (kill switch OPS_PRENOTIFY_ENABLED).
  *
- * Version : 1.0.0 -- 20260415 -- MISSION-J0-EXEC-PCR-02 CHANGE-01
+ * Version : 2.0.0 -- 20260416 -- MISSION-EXEC-DETTE6 CHANGE-05
  */
 
 const ALLOWED_ORIGINS = [
@@ -114,9 +113,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             // NEVER log email, name, company, or full content
         }));
 
-        // Phase 2: Send email to JP via SMTP/Resend with full structured data
-        // JP_INPUT_NEEDED: Configure SMTP credentials in Vercel env vars
-        // ASSUMPTION_TAKEN: No email for J0, JP correlates via Mollie dashboard
+        // Phase 2 ACTIVE : ops pre-notify (best-effort, kill switch M2)
+        if (process.env.OPS_PRENOTIFY_ENABLED !== 'false') {
+            sendOpsPreNotify({
+                payment_id: 'pre-checkout',
+                request_id,
+                email,
+                customer_company: company,
+                sector,
+                product,
+            }).catch(() => {
+                // Best-effort : never block client response
+            });
+        }
 
         return res.status(200).json({
             request_id,
