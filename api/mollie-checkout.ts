@@ -45,6 +45,12 @@ const ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ];
 
+// Preview/Development: add dynamic DEPLOY_URL to CORS whitelist
+// Production: DEPLOY_URL = jeanpierrecharles.com (already in list, no-op)
+if (DEPLOY_URL && !ALLOWED_ORIGINS.includes(DEPLOY_URL)) {
+    ALLOWED_ORIGINS.push(DEPLOY_URL);
+}
+
 // Rate limiting (5 req/min par IP — plus strict que brain)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 5;

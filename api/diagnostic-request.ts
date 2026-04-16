@@ -18,6 +18,12 @@ const ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ];
 
+// Preview/Development: add Vercel Preview URL to CORS whitelist
+const _VERCEL_PREVIEW_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+if (_VERCEL_PREVIEW_URL && !ALLOWED_ORIGINS.includes(_VERCEL_PREVIEW_URL)) {
+    ALLOWED_ORIGINS.push(_VERCEL_PREVIEW_URL);
+}
+
 // Rate limiting (5 req/min par IP)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 5;
