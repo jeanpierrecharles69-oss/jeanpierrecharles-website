@@ -19,7 +19,7 @@ import {
     sendOpsNewOrder,
     isAlreadyProcessed,
     markProcessed,
-} from './_lib/mailer';
+} from './_lib/mailer.js';
 
 const VERCEL_ENV = process.env.VERCEL_ENV || 'development';
 const MOLLIE_API_KEY =

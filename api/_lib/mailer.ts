@@ -4,7 +4,7 @@ import {
     clientConfirmationHtml,
     opsNewOrderHtml,
     opsPreNotifyHtml,
-} from './email-templates';
+} from './email-templates.js';
 
 /**
  * AEGIS Intelligence -- Shared Mailer Module

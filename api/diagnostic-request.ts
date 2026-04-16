@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sendOpsPreNotify } from './_lib/mailer';
+import { sendOpsPreNotify } from './_lib/mailer.js';
 
 /**
  * AEGIS Intelligence -- Diagnostic Request Handler
