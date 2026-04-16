@@ -5,7 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
- * Version : 1.3.0 -- 20260416T1710 CET -- webhookUrl dynamique Preview deployments (DETTE12)
+ * Version : 1.3.1 -- 20260416T1740 CET -- Protection Bypass webhookUrl + redirectUrl dynamique (DETTE12 V&V Phase 2)
  */
 
 // Selection automatique de la cle Mollie selon l'environnement Vercel
@@ -30,6 +30,13 @@ const DEPLOY_URL =
         : process.env.VERCEL_URL
             ? `https://${process.env.VERCEL_URL}`
             : 'https://jeanpierrecharles.com';
+
+// Protection Bypass for Automation (Vercel Deployment Protection)
+// Vercel auto-injects VERCEL_AUTOMATION_BYPASS_SECRET when feature is enabled in Dashboard.
+// Appended to webhookUrl so Mollie can POST to Preview deployments through SSO protection.
+// Production: empty string (no bypass needed, domain is public).
+// Ref: vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection
+const VERCEL_BYPASS_SECRET = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
 
 const ALLOWED_ORIGINS = [
     'https://jeanpierrecharles.com',
@@ -115,10 +122,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const langKey = lang === 'en' ? 'en' : 'fr';
         const description = langKey === 'en' ? productConfig.description_en : productConfig.description_fr;
 
-        // Determiner base URL pour redirect
-        const baseUrl = origin.includes('localhost')
-            ? origin
-            : 'https://jeanpierrecharles.com';
+        // Determiner base URL pour redirect (DEPLOY_URL = preview URL en Preview, prod sinon)
+        const baseUrl = origin.includes('localhost') ? origin : DEPLOY_URL;
+
+        // Build webhookUrl with optional Deployment Protection bypass for Preview
+        let webhookUrl = `${DEPLOY_URL}/api/mollie-webhook`;
+        if (VERCEL_ENV !== 'production' && VERCEL_BYPASS_SECRET) {
+            webhookUrl += `?x-vercel-protection-bypass=${encodeURIComponent(VERCEL_BYPASS_SECRET)}`;
+        }
 
         // Creation paiement Mollie v2
         const mollieBody = {
@@ -128,7 +139,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             description,
             redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
-            webhookUrl: `${DEPLOY_URL}/api/mollie-webhook`,
+            webhookUrl,
             metadata: {
                 product,
                 lang: langKey,
