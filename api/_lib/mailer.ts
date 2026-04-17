@@ -4,6 +4,7 @@ import {
     clientConfirmationHtml,
     opsNewOrderHtml,
     opsPreNotifyHtml,
+    deliveryConfirmationHtml,
 } from './email-templates.js';
 
 /**
@@ -93,6 +94,14 @@ export interface MailerPaymentData {
     sector?: string;
     regulations?: string[];
     context?: string;
+    // FIX-03 : delivery email
+    download_url?: string;
+    invoice_number?: string;
+    // FIX-08 : signature digitale CGI eIDAS Art. 25 SES
+    approved_by?: string;
+    approved_at?: string;
+    pdf_sha256?: string;
+    signature_note?: string;
 }
 
 // --- Send functions ---
@@ -157,6 +166,45 @@ export async function sendOpsNewOrder(data: MailerPaymentData): Promise<void> {
         payment_id: data.payment_id,
         request_id: data.request_id || null,
         recipient_type: 'ops',
+        timestamp: new Date().toISOString(),
+    });
+}
+
+/**
+ * Send delivery confirmation email to client (report ready).
+ * FIX-03 : triggered manually by JP via /api/send-delivery.
+ */
+export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise<void> {
+    const recipient = data.email || '';
+    if (!recipient || !isValidEmail(recipient)) {
+        logMailer({
+            event: 'mailer_skipped',
+            reason: 'invalid_email',
+            payment_id: data.payment_id,
+            timestamp: new Date().toISOString(),
+        });
+        return;
+    }
+
+    const lang = (data.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+    const html = deliveryConfirmationHtml(data, lang);
+    const subject = lang === 'fr'
+        ? `[AEGIS] Votre rapport DIAGNOSTIC est prêt`
+        : `[AEGIS] Your DIAGNOSTIC report is ready`;
+
+    await getTransport().sendMail({
+        from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
+        to: recipient,
+        subject,
+        html,
+    });
+
+    logMailer({
+        event: 'mailer_sent',
+        payment_id: data.payment_id,
+        request_id: data.request_id || null,
+        recipient_type: 'client_delivery',
+        recipient_masked: maskEmail(recipient),
         timestamp: new Date().toISOString(),
     });
 }

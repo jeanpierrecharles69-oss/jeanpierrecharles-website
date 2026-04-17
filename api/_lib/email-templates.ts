@@ -16,11 +16,11 @@ const SELLER = {
     trade: 'AEGIS Intelligence',
     siren: '522 794 700',
     siret: '522 794 700 00032',
-    ape: '7112B - Ingenierie, etudes techniques',
-    address: '10 La Bertiniere, 86800 Terce, FRANCE',
+    ape: '7112B - Ingénierie, études techniques',
+    address: '10 La Bertinière, 86800 Tercé, FRANCE',
     email: 'contact@jeanpierrecharles.com',
     web: 'jeanpierrecharles.com',
-    tva: 'TVA non applicable, article 293 B du Code general des impots',
+    tva: 'TVA non applicable, article 293 B du Code général des impôts',
     forme: 'Entrepreneur individuel',
 };
 
@@ -86,7 +86,7 @@ table.invoice td{padding:12px;font-size:13px;border-bottom:1px solid ${BRAND.bor
 // --- Client confirmation email ---
 export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en'): string {
     const isFr = lang === 'fr';
-    const invoiceNum = generateInvoiceNumber();
+    const invoiceNum = data.invoice_number || generateInvoiceNumber();
     const date = formatDate(lang);
     const reqShort = (data.request_id || 'N/A').slice(0, 8);
     const amount = data.amount || '250.00';
@@ -95,14 +95,14 @@ export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en
     const content = `
 <div class="header">
     <h1>AEGIS Intelligence</h1>
-    <p>${isFr ? 'Diagnostic de Conformite Industrielle EU' : 'EU Industrial Compliance Diagnostic'}</p>
+    <p>${isFr ? 'Diagnostic de Conformité Industrielle EU' : 'EU Industrial Compliance Diagnostic'}</p>
 </div>
 <div class="body">
     <div style="text-align:center;margin-bottom:28px">
-        <div class="success-badge">${isFr ? 'Paiement confirme' : 'Payment confirmed'}</div>
+        <div class="success-badge">${isFr ? 'Paiement confirmé' : 'Payment confirmed'}</div>
         <h2 style="margin:16px 0 8px;font-size:20px;color:${BRAND.text}">${isFr ? 'Merci pour votre commande !' : 'Thank you for your order!'}</h2>
         <p style="margin:0;color:${BRAND.textMuted};font-size:14px">${isFr
-            ? 'Votre diagnostic AEGIS est en cours de preparation.'
+            ? 'Votre diagnostic AEGIS est en cours de préparation.'
             : 'Your AEGIS diagnostic is being prepared.'}</p>
     </div>
 
@@ -114,7 +114,7 @@ export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en
         <tbody>
             <tr>
                 <td>
-                    <strong>${isFr ? 'Diagnostic Technique de Conformite Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic'}</strong><br>
+                    <strong>${isFr ? 'Diagnostic Technique de Conformité Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic'}</strong><br>
                     <span style="font-size:11px;color:${BRAND.textMuted}">${isFr
                         ? 'Analyse multi-niveaux, graphe causal, feuille de route, rapport PDF premium'
                         : 'Multi-level analysis, causal graph, roadmap, premium PDF report'}</span>
@@ -139,20 +139,20 @@ export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en
     </div>
 
     <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid ${BRAND.border}">
-        <div class="label">${isFr ? 'DETAILS COMMANDE' : 'ORDER DETAILS'}</div>
+        <div class="label">${isFr ? 'DÉTAILS COMMANDE' : 'ORDER DETAILS'}</div>
         <div style="font-size:12px;line-height:1.8">
-            <strong>${isFr ? 'Reference' : 'Reference'}:</strong> REQ-${escapeHtml(reqShort)}<br>
+            <strong>${isFr ? 'Référence' : 'Reference'}:</strong> REQ-${escapeHtml(reqShort)}<br>
             <strong>Date:</strong> ${date}<br>
-            <strong>${isFr ? 'Livraison' : 'Delivery'}:</strong> ${isFr ? 'Jour ouvre du paiement (avant 19h CET)' : 'Same business day (before 19:00 CET)'}
+            <strong>${isFr ? 'Livraison' : 'Delivery'}:</strong> ${isFr ? 'Jour ouvré du paiement (avant 19h CET)' : 'Same business day (before 19:00 CET)'}
         </div>
     </div>
 
     <div style="text-align:center;margin:32px 0">
-        <a href="${merciUrl}" class="btn">${isFr ? 'Telecharger votre facture' : 'Download your invoice'}</a>
+        <a href="${merciUrl}" class="btn">${isFr ? 'Télécharger votre facture' : 'Download your invoice'}</a>
     </div>
 
     <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid ${BRAND.border}">
-        <div class="label">${isFr ? 'EMETTEUR' : 'FROM'}</div>
+        <div class="label">${isFr ? 'ÉMETTEUR' : 'FROM'}</div>
         <div style="font-size:11px;line-height:1.7">
             <strong>${SELLER.name}</strong><br>
             ${SELLER.trade}<br>
@@ -192,7 +192,7 @@ export function opsNewOrderHtml(data: MailerPaymentData): string {
 <div class="body">
     <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:24px">
         <strong style="color:#92400e">Action requise :</strong>
-        <span style="color:#92400e"> Produire le rapport DIAGNOSTIC sous 24h ouvrees.</span>
+        <span style="color:#92400e"> Produire le rapport DIAGNOSTIC sous 24h ouvrées.</span>
     </div>
 
     <div style="margin-bottom:24px">
@@ -214,7 +214,7 @@ export function opsNewOrderHtml(data: MailerPaymentData): string {
 
     ${data.regulations && data.regulations.length > 0 ? `
     <div style="margin-bottom:24px">
-        <div class="label">REGLEMENTATIONS</div>
+        <div class="label">RÉGLEMENTATIONS</div>
         <div style="font-size:13px">${data.regulations.map(r => `<span style="display:inline-block;padding:4px 10px;margin:2px 4px 2px 0;background:${BRAND.blue}15;color:${BRAND.blue};border-radius:12px;font-size:11px;font-weight:600">${escapeHtml(r)}</span>`).join('')}</div>
     </div>` : ''}
 
@@ -244,6 +244,92 @@ export function opsNewOrderHtml(data: MailerPaymentData): string {
     return emailWrapper(content);
 }
 
+// --- Delivery confirmation email ---
+export function deliveryConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en'): string {
+    const isFr = lang === 'fr';
+    const invoiceNum = data.invoice_number || generateInvoiceNumber();
+    const date = formatDate(lang);
+    const downloadUrl = data.download_url || '#';
+
+    const content = `
+<div class="header">
+    <h1>AEGIS Intelligence</h1>
+    <p>${isFr ? 'Diagnostic de Conformité Industrielle EU' : 'EU Industrial Compliance Diagnostic'}</p>
+</div>
+<div class="body">
+    <div style="text-align:center;margin-bottom:28px">
+        <div class="success-badge">${isFr ? 'Rapport livré' : 'Report delivered'}</div>
+        <h2 style="margin:16px 0 8px;font-size:20px;color:${BRAND.text}">${isFr
+            ? 'Votre rapport DIAGNOSTIC est prêt !'
+            : 'Your DIAGNOSTIC report is ready!'}</h2>
+        <p style="margin:0;color:${BRAND.textMuted};font-size:14px">${isFr
+            ? 'Votre analyse de conformité industrielle EU est disponible au téléchargement.'
+            : 'Your EU industrial compliance analysis is available for download.'}</p>
+    </div>
+
+    <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid ${BRAND.border}">
+        <div class="label">${isFr ? 'RAPPEL COMMANDE' : 'ORDER SUMMARY'}</div>
+        <div style="font-size:12px;line-height:1.8">
+            <strong>${isFr ? 'Facture' : 'Invoice'}:</strong> ${escapeHtml(invoiceNum)}<br>
+            <strong>Date:</strong> ${date}<br>
+            ${data.customer_company ? `<strong>${isFr ? 'Entreprise' : 'Company'}:</strong> ${escapeHtml(data.customer_company)}<br>` : ''}
+            ${data.customer_name ? `<strong>${isFr ? 'Client' : 'Customer'}:</strong> ${escapeHtml(data.customer_name)}<br>` : ''}
+        </div>
+    </div>
+
+    <div style="text-align:center;margin:32px 0">
+        <a href="${downloadUrl}" class="btn">${isFr ? 'Télécharger votre rapport' : 'Download your report'}</a>
+    </div>
+
+    <div style="text-align:center;margin-bottom:24px">
+        <p style="font-size:12px;color:${BRAND.textMuted}">${isFr
+            ? 'Ce lien est valable 30 jours. Contactez-nous pour toute question.'
+            : 'This link is valid for 30 days. Contact us with any questions.'}</p>
+    </div>
+
+    ${data.approved_by ? `
+    <div style="background:${BRAND.bgAlt};border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:3px solid ${BRAND.emerald}">
+        <div class="label">${isFr ? 'SIGNATURE NUMÉRIQUE' : 'DIGITAL SIGNATURE'}</div>
+        <div style="font-size:12px;line-height:1.7;margin-top:6px">
+            <strong>${isFr ? 'Approuvé par' : 'Approved by'}</strong> : ${escapeHtml(data.approved_by)}<br>
+            <strong>${isFr ? 'Horodatage' : 'Timestamp'}</strong> : ${escapeHtml(data.approved_at || '')}
+            ${data.pdf_sha256 ? `<br><strong>${isFr ? 'Empreinte PDF (SHA-256)' : 'PDF fingerprint (SHA-256)'}</strong> : <code style="font-size:10px;word-break:break-all;font-family:Consolas,'Courier New',monospace">${escapeHtml(data.pdf_sha256)}</code>` : ''}
+            ${data.signature_note ? `<br><strong>${isFr ? 'Note' : 'Note'}</strong> : ${escapeHtml(data.signature_note)}` : ''}
+        </div>
+        <div style="font-size:10px;color:${BRAND.textLight};margin-top:8px;font-style:italic">
+            ${isFr
+                ? 'Signature électronique simple eIDAS Article 25. L\'empreinte SHA-256 permet de vérifier l\'intégrité du rapport reçu.'
+                : 'Simple electronic signature eIDAS Article 25. The SHA-256 fingerprint enables verification of the received report integrity.'}
+        </div>
+    </div>` : ''}
+
+    <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid ${BRAND.border}">
+        <div class="label">${isFr ? 'ÉMETTEUR' : 'FROM'}</div>
+        <div style="font-size:11px;line-height:1.7">
+            <strong>${SELLER.name}</strong><br>
+            ${SELLER.trade}<br>
+            SIRET : ${SELLER.siret} | APE : ${SELLER.ape}<br>
+            ${SELLER.address}<br>
+            ${SELLER.email}
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:${BRAND.textLight}">${SELLER.tva}</div>
+    </div>
+
+    <div style="text-align:center;margin-top:24px">
+        <p style="font-size:13px;color:${BRAND.textMuted}">
+            ${isFr ? 'Une question ?' : 'Any questions?'}
+            <a href="mailto:${SELLER.email}" style="color:${BRAND.blue};font-weight:600">${SELLER.email}</a>
+        </p>
+    </div>
+</div>
+<div class="footer">
+    AEGIS Intelligence | ${SELLER.web} | SIRET ${SELLER.siret}<br>
+    ${SELLER.forme} | ${SELLER.tva}
+</div>`;
+
+    return emailWrapper(content);
+}
+
 // --- Ops pre-notify email ---
 export function opsPreNotifyHtml(data: MailerPaymentData): string {
     const content = `
@@ -253,7 +339,7 @@ export function opsPreNotifyHtml(data: MailerPaymentData): string {
 </div>
 <div class="body">
     <p style="font-size:14px;color:${BRAND.textMuted}">
-        Un utilisateur vient de soumettre le formulaire pre-checkout DIAGNOSTIC.
+        Un utilisateur vient de soumettre le formulaire pré-checkout DIAGNOSTIC.
         Si le paiement aboutit, un email de commande suivra.
     </p>
 
