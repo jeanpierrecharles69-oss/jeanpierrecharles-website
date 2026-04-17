@@ -29,12 +29,13 @@ export default function PricingSection() {
                 const err = await reqRes.json().catch(() => ({}));
                 throw new Error(err.error || `Request HTTP ${reqRes.status}`);
             }
-            const { request_id } = await reqRes.json();
+            const { request_id, invoice_number } = await reqRes.json();
 
             // Save to sessionStorage for MerciPage invoice
             try {
                 sessionStorage.setItem('aegis_diag_request', JSON.stringify({
                     request_id,
+                    invoice_number,
                     sector: data.sector,
                     product: data.product,
                     regs: data.regulations,
@@ -56,6 +57,11 @@ export default function PricingSection() {
                     request_id,
                     customer_name: `${data.firstName} ${data.lastName}`,
                     customer_company: data.company,
+                    sector: data.sector,
+                    product_description: data.product,
+                    regulations: data.regulations,
+                    context: data.context,
+                    invoice_number,
                 }),
             });
             if (!checkoutRes.ok) {

@@ -10,11 +10,11 @@ const SELLER = {
     trade: 'AEGIS Intelligence',
     siren: '522 794 700',
     siret: '522 794 700 00032',
-    ape: '7112B - Ingenierie, etudes techniques',
-    address: '10 La Bertiniere, 86800 Terce, FRANCE',
+    ape: '7112B - Ingénierie, études techniques',
+    address: '10 La Bertinière, 86800 Tercé, FRANCE',
     email: 'contact@jeanpierrecharles.com',
     web: 'jeanpierrecharles.com',
-    tva: 'TVA non applicable, article 293 B du Code general des impots',
+    tva: 'TVA non applicable, article 293 B du Code général des impôts',
     forme: 'Entrepreneur individuel',
 };
 
@@ -35,7 +35,7 @@ const content = {
         steps: [
             { icon: '\u2705', text: 'Paiement re\u00e7u \u2014 confirmation envoy\u00e9e par e-mail' },
             { icon: '\ud83d\udcdd', text: 'Votre facture est disponible ci-dessous' },
-            { icon: '\ud83d\udd0d', text: 'Jean-Pierre analyse votre produit et vos r\u00e9glements applicables' },
+            { icon: '\ud83d\udd0d', text: 'Jean-Pierre analyse votre produit et vos r\u00e8glements applicables' },
             { icon: '\ud83d\udcc4', text: 'Rapport PDF premium livr\u00e9 le jour ouvr\u00e9 du paiement (avant 19h CET)' },
         ],
         invoiceBtn: 'T\u00e9l\u00e9charger ma facture PDF',
@@ -70,7 +70,17 @@ export default function MerciPage() {
     // CHANGE-07 : fallback invoice number from URL param (email link support)
     const urlInvoice = searchParams.get('invoice');
     const urlRef = searchParams.get('ref');
-    const [invoiceNumber] = useState(() => urlInvoice || generateInvoiceNumber());
+    const [invoiceNumber] = useState(() => {
+        if (urlInvoice) return urlInvoice;
+        try {
+            const raw = sessionStorage.getItem('aegis_diag_request');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed?.invoice_number) return parsed.invoice_number;
+            }
+        } catch { /* sessionStorage unavailable */ }
+        return generateInvoiceNumber();
+    });
 
     const pageLang = (searchParams.get('lang') as 'fr' | 'en') || lang || 'fr';
     const t = content[pageLang] || content.fr;
@@ -129,7 +139,7 @@ export default function MerciPage() {
                 '    <div style="font-size:11px;line-height:1.6;color:#475569">',
                       (diag?.sector ? (isFr ? 'Secteur' : 'Sector') + ' : ' + diag.sector + '<br>' : ''),
                       (diag?.product ? (isFr ? 'Produit' : 'Product') + ' : ' + diag.product + '<br>' : ''),
-                      (diag?.regs?.length ? (isFr ? 'Reglements' : 'Regulations') + ' : ' + diag.regs.join(', ') + '<br>' : ''),
+                      (diag?.regs?.length ? (isFr ? 'Règlements' : 'Regulations') + ' : ' + diag.regs.join(', ') + '<br>' : ''),
                       (diag?.context ? (isFr ? 'Contexte' : 'Context') + ' : ' + diag.context : ''),
                 '    </div>',
                 '  </div>',
@@ -141,7 +151,7 @@ export default function MerciPage() {
                 '  </tr></thead>',
                 '  <tbody><tr style="border-bottom:1px solid #e2e8f0">',
                 '    <td style="padding:12px;font-size:12px">',
-                '      <strong>' + (isFr ? 'Diagnostic Technique de Conformite Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic') + '</strong><br>',
+                '      <strong>' + (isFr ? 'Diagnostic Technique de Conformité Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic') + '</strong><br>',
                 '      <span style="font-size:10px;color:#64748b">' + (isFr
                     ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
                     : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report') + '</span>',
@@ -163,12 +173,12 @@ export default function MerciPage() {
                 '  </div>',
                 '</div>',
                 '<div style="background:#f8fafc;border-radius:8px;padding:14px 16px;margin-bottom:20px;border:1px solid #e2e8f0">',
-                '  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:6px">' + (isFr ? 'MENTIONS LEGALES' : 'LEGAL NOTICES') + '</div>',
+                '  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:6px">' + (isFr ? 'MENTIONS LÉGALES' : 'LEGAL NOTICES') + '</div>',
                 '  <div style="font-size:9px;color:#64748b;line-height:1.6">',
                 '    ' + SELLER.tva + '<br>',
-                '    ' + (isFr ? 'Paiement effectue via Mollie (paiement securise EU).' : 'Payment processed via Mollie (secure EU payment).') + '<br>',
-                '    ' + (isFr ? 'Conditions : paiement comptant a la commande.' : 'Terms: payment due upon order.') + '<br>',
-                '    ' + (isFr ? 'Penalites de retard : 3x taux interet legal (Art. L.441-10 C. com.).' : 'Late penalty: 3x legal interest rate (Art. L.441-10 C. com.).'),
+                '    ' + (isFr ? 'Paiement effectué via Mollie (paiement sécurisé EU).' : 'Payment processed via Mollie (secure EU payment).') + '<br>',
+                '    ' + (isFr ? 'Conditions : paiement comptant à la commande.' : 'Terms: payment due upon order.') + '<br>',
+                '    ' + (isFr ? 'Pénalités de retard : 3x taux intérêt légal (Art. L.441-10 C. com.).' : 'Late penalty: 3x legal interest rate (Art. L.441-10 C. com.).'),
                 '  </div>',
                 '</div>',
                 '<div style="text-align:center;font-size:9px;color:#94a3b8;padding-top:12px;border-top:1px solid #e2e8f0">',

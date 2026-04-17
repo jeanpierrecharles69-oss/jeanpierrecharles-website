@@ -46,7 +46,7 @@ function isRateLimited(ip: string): boolean {
 const PRODUCTS: Record<string, { amount: string; description_fr: string; description_en: string }> = {
     diagnostic: {
         amount: '250.00',
-        description_fr: 'AEGIS Intelligence — Diagnostic Conformite Industrielle EU',
+        description_fr: 'AEGIS Intelligence — Diagnostic Conformité Industrielle EU',
         description_en: 'AEGIS Intelligence — EU Industrial Compliance Diagnostic',
     },
 };
@@ -90,7 +90,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { product, lang, email, request_id, customer_name, customer_company } = req.body;
+        const { product, lang, email, request_id, customer_name, customer_company,
+                sector, product_description, regulations, context,
+                invoice_number } = req.body;
 
         // Validation produit
         const productConfig = PRODUCTS[product];
@@ -122,11 +124,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 lang: langKey,
                 email: email || 'non fourni',
                 source: 'jeanpierrecharles.com',
-                version: 'v3.4.5',
+                version: 'v3.4.6',
                 mode: MOLLIE_MODE,
                 request_id: request_id || null,
                 customer_name: customer_name || null,
                 customer_company: customer_company || null,
+                sector: sector || null,
+                product_description: typeof product_description === 'string'
+                    ? product_description.slice(0, 450) : null,
+                regulations: Array.isArray(regulations)
+                    ? regulations.join(', ').slice(0, 200) : null,
+                context: typeof context === 'string'
+                    ? context.slice(0, 300) : null,
+                invoice_number: invoice_number || null,
             },
         };
 

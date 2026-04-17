@@ -99,13 +99,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             });
         }
 
-        // Generate request_id (UUID v4)
+        // Generate request_id (UUID v4) + invoice_number (FIX-04)
         const request_id = crypto.randomUUID();
+        const now = new Date();
+        const invoice_number = `AEGIS-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
         // Log only non-sensitive metadata (RGPD-safe)
         console.log(JSON.stringify({
             event: 'diagnostic_request',
             request_id,
+            invoice_number,
             timestamp: new Date().toISOString(),
             sector,
             regulations_count: regulations.length,
@@ -129,6 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         return res.status(200).json({
             request_id,
+            invoice_number,
             status: 'ok',
         });
 

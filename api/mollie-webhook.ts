@@ -87,10 +87,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 email: metadata.email || undefined,
                 customer_name: metadata.customer_name || undefined,
                 customer_company: metadata.customer_company || undefined,
-                product: metadata.product || undefined,
+                product: metadata.product_description || metadata.product || undefined,
                 lang: metadata.lang || undefined,
                 mode: metadata.mode || undefined,
                 amount: '250.00',
+                sector: metadata.sector || undefined,
+                regulations: metadata.regulations
+                    ? metadata.regulations.split(', ') : undefined,
+                context: metadata.context || undefined,
+                invoice_number: metadata.invoice_number || undefined,
             };
 
             // Await with safety timeout 7s (Vercel function limit 10s)
