@@ -1,0 +1,209 @@
+% ==================================================================
+% AEGIS Intelligence --- Template Pandoc/XeLaTeX DIAGNOSTIC (v3.4.6)
+% ==================================================================
+%
+% Template de RÉFÉRENCE minimal conforme D48 (typographie française complète).
+% Produit par ACDC Code --- mission v3.4.6 FIX-06 (20260417T####).
+%
+% USAGE
+% -----
+% Ce template est une RÉFÉRENCE à merger manuellement par JP avec le
+% template de production existant dans C:\Users\jpcha\Downloads\diagnostics\
+% (hors périmètre MCP).
+%
+% Invocation Pandoc typique (voir aegis-generate-pdf.ps1 FIX-07) :
+%
+%   pandoc diagnostic.md \
+%       -o diagnostic.pdf \
+%       --template=scripts/diagnostic-template-reference.tex \
+%       --pdf-engine=xelatex \
+%       --variable=invoice="AEGIS-20260417-1030" \
+%       --variable=approved_by="Jean-Pierre CHARLES" \
+%       --variable=approved_at="2026-04-17T10:30:00+02:00" \
+%       --variable=pdf_sha256="<sha256 hex 64>"
+%
+% VARIABLES PANDOC ATTENDUES
+% --------------------------
+%   invoice       chaîne requise   Numéro facture AEGIS-YYYYMMDD-HHMM
+%   approved_by   chaîne requise   Nom approbateur (ex. Jean-Pierre CHARLES)
+%   approved_at   chaîne requise   Horodatage ISO 8601 d'approbation
+%   pdf_sha256    chaîne optionnelle  Empreinte SHA-256 (64 chars hex) --- injectée
+%                                     après hash du PDF intermédiaire si pipeline
+%                                     double-pass, sinon laisser vide
+%
+% CONVENTION D48 --- TYPOGRAPHIE FRANÇAISE COMPLÈTE
+% -------------------------------------------------
+%   Tous les accents, cédilles, ligatures du français sont en UTF-8 natif.
+%   Aucun résidu ASCII (équivalents non-accentués des termes SELLER) n'est
+%   toléré dans les emails, factures ou rapports client-facing.
+%
+% DÉPENDANCES LATEX
+% -----------------
+%   - inputenc  UTF-8 direct (évite les escapes \'e, \`e, \^e)
+%   - fontenc   T1 pour accents compris par les fontes
+%   - babel     french pour règles typographiques (espaces insécables avant :;)
+%
+% ==================================================================
+
+\documentclass[a4paper,11pt]{article}
+
+% ---------- Typographie UTF-8 française D48 ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+% ---------- Géométrie page ----------
+\usepackage[margin=2.5cm,top=3cm,bottom=3cm,headheight=15pt]{geometry}
+
+% ---------- Couleurs AEGIS ----------
+\usepackage{xcolor}
+\definecolor{aegisblue}{RGB}{29,78,216}
+\definecolor{aegisemerald}{RGB}{16,185,129}
+\definecolor{aegistext}{RGB}{15,23,42}
+\definecolor{aegismuted}{RGB}{100,116,139}
+\definecolor{aegisborder}{RGB}{226,232,240}
+
+% ---------- Header / Footer ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\color{aegisblue}\textbf{AEGIS Intelligence}}
+\fancyhead[R]{\color{aegismuted}\small Facture $invoice$}
+\fancyfoot[C]{\color{aegismuted}\small Page \thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\usepackage{lastpage}
+
+% ---------- Sections (D48 typographie FR) ----------
+\usepackage{titlesec}
+\titleformat{\section}{\color{aegisblue}\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\color{aegistext}\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\color{aegistext}\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% ---------- Liens ----------
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=aegisblue,
+    urlcolor=aegisblue,
+    pdftitle={AEGIS DIAGNOSTIC $invoice$},
+    pdfauthor={$approved_by$},
+    pdfsubject={Diagnostic Technique de Conformité Industrielle EU},
+    pdfkeywords={AEGIS, Diagnostic, Conformité, EU, AI Act, CRA}
+}
+
+% ---------- Tableaux ----------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+
+% ---------- Listes ----------
+\usepackage{enumitem}
+
+% ---------- Mathématiques (si formules analyse Pearl) ----------
+\usepackage{amsmath}
+
+% ---------- Pandoc plumbing ----------
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ---------- Métadonnées document ----------
+\title{\color{aegisblue}\textbf{AEGIS DIAGNOSTIC}\\[0.3em]
+       \large Technique de Conformité Industrielle EU}
+\author{Jean-Pierre CHARLES --- AEGIS Intelligence}
+\date{$approved_at$}
+
+% ==================================================================
+\begin{document}
+% ==================================================================
+
+\maketitle
+\thispagestyle{fancy}
+
+\begin{center}
+\color{aegismuted}\small
+\textbf{Facture} : $invoice$\\
+\textbf{Rapport approuvé par} : $approved_by$\\
+\textbf{Horodatage d'émission} : $approved_at$
+\end{center}
+
+\vspace{1.5em}
+
+% ------------------------------------------------------------------
+% CORPS DU RAPPORT --- injecté par Pandoc depuis le markdown source
+% ------------------------------------------------------------------
+$body$
+
+% ==================================================================
+% SIGNATURE NUMÉRIQUE --- CGI eIDAS Article 25 (SES simple)
+% ==================================================================
+\vfill
+\clearpage
+
+\begin{center}
+\rule{0.6\textwidth}{0.4pt}\\[1em]
+{\color{aegisemerald}\Large\textbf{SIGNATURE NUMÉRIQUE}}\\[0.5em]
+{\small\color{aegismuted}\itshape Compliance Gouvernance Intégrée --- eIDAS Article 25}
+\end{center}
+
+\vspace{1em}
+
+\begin{center}
+\begin{tabular}{rl}
+\textbf{Approuvé par} & : $approved_by$ \\[0.4em]
+\textbf{Horodatage} & : $approved_at$ \\[0.4em]
+\textbf{Facture référence} & : $invoice$ \\
+$if(pdf_sha256)$
+\\[0.4em]
+\textbf{Empreinte PDF (SHA-256)} & : \\
+\multicolumn{2}{l}{\texttt{\footnotesize $pdf_sha256$}} \\
+$endif$
+\end{tabular}
+\end{center}
+
+\vspace{1em}
+
+\begin{center}
+\color{aegismuted}\footnotesize\itshape
+Signature électronique simple eIDAS Article 25.\\
+L'empreinte SHA-256 permet au client de vérifier l'intégrité du rapport reçu\\
+par recalcul indépendant du hash sur le PDF téléchargé.
+\end{center}
+
+% ==================================================================
+% FOOTER SELLER --- Mentions légales D48 (cohérence MerciPage / emails)
+% ==================================================================
+\vspace{2em}
+
+\begin{center}
+\color{aegismuted}\footnotesize
+\rule{0.8\textwidth}{0.2pt}\\[0.5em]
+\textbf{AEGIS Intelligence} --- Jean-Pierre CHARLES\\
+SIRET : 522 794 700 00032 --- APE : 7112B - Ingénierie, études techniques\\
+10 La Bertinière, 86800 Tercé, FRANCE --- contact@jeanpierrecharles.com\\
+TVA non applicable, article 293 B du Code général des impôts\\
+Entrepreneur individuel
+\end{center}
+
+% ==================================================================
+\end{document}
+% ==================================================================
+%
+% NOTES MERGE POUR JP --- post-mission
+% -----------------------------------
+% Copier les blocs suivants de ce fichier vers ton template de production
+% (C:\Users\jpcha\Downloads\diagnostics\AEGIS-DIAGNOSTIC-*.tex) :
+%
+%   1. Packages ligne 63-65     (inputenc + fontenc + babel french) --- base D48
+%   2. Couleurs AEGIS ligne 71-75  (définitions xcolor)
+%   3. Bloc SIGNATURE NUMÉRIQUE --- eIDAS Art. 25 (depuis "\vfill\clearpage" jusqu'à la fin signature)
+%   4. Footer SELLER D48 --- Mentions légales
+%   5. Variables Pandoc --- $invoice$ / $approved_by$ / $approved_at$ / $pdf_sha256$
+%
+% Si le template de production utilise déjà \documentclass + packages FR UTF-8,
+% conserver ces définitions et n'ajouter que les blocs signature + footer.
+%
+% La conditionnelle $if(pdf_sha256)$...$endif$ permet d'omettre l'empreinte
+% quand le pipeline PDF est single-pass (sans re-injection hash).
+%

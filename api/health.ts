@@ -8,7 +8,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Version : 1.0.0 -- 20260409T1445 CET
  */
 
-const AEGIS_VERSION = '3.4.5';
+const AEGIS_VERSION = '3.4.6';
 const TIMEOUT_MS = 3000;
 
 interface ProviderStatus {
