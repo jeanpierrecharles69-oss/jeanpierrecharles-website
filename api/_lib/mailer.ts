@@ -9,7 +9,7 @@ import {
 
 /**
  * AEGIS Intelligence -- Shared Mailer Module
- * SMTP Gandi (port 465 SSL) — singleton transport, 3 fonctions envoi.
+ * SMTP Gandi (port 465 SSL) — singleton transport, 4 fonctions envoi.
  *
  * SECURITE C0 :
  *  - TLS/SSL obligatoire (port 465, secure: true)
@@ -22,8 +22,10 @@ import {
  *  - Set<string> in-memory par instance warm
  *  - DETTE7 : Vercel KV pour persistance cross-instance (v3.4.6)
  *
- * Version : 1.0.0 -- 20260416 -- MISSION-EXEC-DETTE6 CHANGE-02
+ * Version : 1.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX DETTE18 (piece jointe PDF)
  */
+
+const PDF_MAX_BYTES = 20 * 1024 * 1024;
 
 // --- Environment ---
 const SMTP_HOST = process.env.SMTP_HOST || 'mail.gandi.net';
@@ -102,6 +104,9 @@ export interface MailerPaymentData {
     approved_at?: string;
     pdf_sha256?: string;
     signature_note?: string;
+    // NIGHT-N5 DETTE18 : piece jointe PDF email (remplace hebergement serveur)
+    pdf_base64?: string;
+    pdf_filename?: string;
 }
 
 // --- Send functions ---
@@ -192,11 +197,28 @@ export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise
         ? `[AEGIS] Votre rapport DIAGNOSTIC est prêt`
         : `[AEGIS] Your DIAGNOSTIC report is ready`;
 
+    let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
+    let attachmentSize = 0;
+    if (data.pdf_base64) {
+        const buf = Buffer.from(data.pdf_base64, 'base64');
+        attachmentSize = buf.byteLength;
+        if (attachmentSize > PDF_MAX_BYTES) {
+            throw new Error(`PDF attachment too large: ${attachmentSize} bytes (max ${PDF_MAX_BYTES})`);
+        }
+        const invoice = data.invoice_number || 'diagnostic';
+        attachments = [{
+            filename: data.pdf_filename || `AEGIS-DIAGNOSTIC-${invoice}.pdf`,
+            content: buf,
+            contentType: 'application/pdf',
+        }];
+    }
+
     await getTransport().sendMail({
         from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
         to: recipient,
         subject,
         html,
+        attachments,
     });
 
     logMailer({
@@ -205,6 +227,8 @@ export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise
         request_id: data.request_id || null,
         recipient_type: 'client_delivery',
         recipient_masked: maskEmail(recipient),
+        has_attachment: attachments !== undefined,
+        attachment_size_bytes: attachmentSize || null,
         timestamp: new Date().toISOString(),
     });
 }

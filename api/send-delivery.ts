@@ -2,21 +2,26 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sendDeliveryConfirmation } from './_lib/mailer.js';
 
 /**
- * AEGIS Intelligence -- Send Delivery Email (FIX-03 + FIX-08)
+ * AEGIS Intelligence -- Send Delivery Email (FIX-03 + FIX-08 + NIGHT-N5 DETTE18)
  * POST /api/send-delivery
  * Protected by AEGIS_OPS_TOKEN (Bearer auth).
  * JP invokes via PowerShell after producing the DIAGNOSTIC report.
  *
  * Body JSON :
- *   { email, lang, invoice_number, download_url, customer_name, customer_company,
- *     approved_by (required), approved_at?, pdf_sha256?, signature_note? }
+ *   { email, lang, invoice_number, download_url?, customer_name, customer_company,
+ *     approved_by (required), approved_at?, pdf_sha256?, signature_note?,
+ *     pdf_base64?, pdf_filename? }
  *
  * FIX-08 : signature digitale CGI (Compliance Gouvernance Intégrée) eIDAS Art. 25 SES.
+ * NIGHT-N5 DETTE18 : piece jointe PDF directe (download_url devient optionnel).
+ *   Mode PJ prefere ; download_url = fallback legacy.
  *
- * Version : 1.1.0 -- 20260417 -- MISSION-EXEC-V346 FIX-08
+ * Version : 1.2.0 -- 20260418 -- NIGHT-N5 FAI-FIX DETTE18
  */
 
 const OPS_TOKEN = process.env.AEGIS_OPS_TOKEN || '';
+const PDF_MAX_BYTES = 20 * 1024 * 1024;
+const BASE64_REGEX = /^[A-Za-z0-9+/]+=*$/;
 
 function maskEmail(email: string): string {
     const [local, domain] = email.split('@');
@@ -54,13 +59,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             approved_at,
             pdf_sha256,
             signature_note,
+            pdf_base64,
+            pdf_filename,
         } = req.body;
 
         if (!email || typeof email !== 'string') {
             return res.status(400).json({ error: 'Missing required field: email' });
         }
-        if (!download_url || typeof download_url !== 'string') {
-            return res.status(400).json({ error: 'Missing required field: download_url' });
+        // NIGHT-N5 DETTE18 : soit pdf_base64 (mode PJ prefere), soit download_url (fallback legacy)
+        const hasBase64 = typeof pdf_base64 === 'string' && pdf_base64.length > 0;
+        const hasUrl = typeof download_url === 'string' && download_url.length > 0;
+        if (!hasBase64 && !hasUrl) {
+            return res.status(400).json({ error: 'Missing delivery payload: pdf_base64 or download_url required' });
         }
         if (!approved_by || typeof approved_by !== 'string') {
             return res.status(400).json({ error: 'Missing required field: approved_by' });
@@ -98,6 +108,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             note = sanitizeText(signature_note, 200);
         }
 
+        // NIGHT-N5 DETTE18 : validation base64 + taille
+        let attachmentSize = 0;
+        let pdfFilenameClean: string | undefined;
+        if (hasBase64) {
+            if (!BASE64_REGEX.test(pdf_base64)) {
+                return res.status(400).json({ error: 'Invalid pdf_base64 (not base64)' });
+            }
+            attachmentSize = Math.floor((pdf_base64.length * 3) / 4) - (pdf_base64.endsWith('==') ? 2 : pdf_base64.endsWith('=') ? 1 : 0);
+            if (attachmentSize > PDF_MAX_BYTES) {
+                return res.status(400).json({ error: `PDF attachment too large (max ${PDF_MAX_BYTES} bytes, received ${attachmentSize})` });
+            }
+            if (pdf_filename !== undefined) {
+                if (typeof pdf_filename !== 'string') {
+                    return res.status(400).json({ error: 'Invalid pdf_filename type' });
+                }
+                // Sanitize: keep alnum, dash, underscore, dot, space; strip path separators
+                pdfFilenameClean = pdf_filename.replace(/[^\w\-. ]/g, '').slice(0, 120);
+                if (!pdfFilenameClean.toLowerCase().endsWith('.pdf')) {
+                    pdfFilenameClean += '.pdf';
+                }
+            }
+        }
+
         console.log(JSON.stringify({
             event: 'delivery_signed',
             invoice_number: invoice_number || null,
@@ -105,6 +138,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             approved_at: approvedAt,
             pdf_sha256: sha256 || null,
             recipient_masked: maskEmail(email),
+            has_attachment: hasBase64,
+            attachment_size_bytes: attachmentSize || null,
             severity: 'info',
             timestamp: new Date().toISOString(),
         }));
@@ -114,18 +149,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             email,
             lang: lang || 'fr',
             invoice_number: invoice_number || undefined,
-            download_url,
+            download_url: hasUrl ? download_url : undefined,
             customer_name: customer_name || undefined,
             customer_company: customer_company || undefined,
             approved_by: approvedByTrim,
             approved_at: approvedAt,
             pdf_sha256: sha256,
             signature_note: note,
+            pdf_base64: hasBase64 ? pdf_base64 : undefined,
+            pdf_filename: pdfFilenameClean,
         });
 
         return res.status(200).json({
             sent: true,
             approved_at: approvedAt,
+            mode: hasBase64 ? 'attachment' : 'download_url',
         });
 
     } catch (error: any) {

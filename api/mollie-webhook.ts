@@ -10,8 +10,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Phase 2 ACTIVE : On status === 'paid', send client confirmation + ops notification.
  * Pattern : await Promise.race([allSettled, timeout 7s]) (Vercel serverless safe).
  * Idempotence : in-memory Set per warm instance (DETTE7 : Vercel KV v3.4.6).
+ * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
  *
- * Version : 2.0.0 -- 20260416 -- MISSION-EXEC-DETTE6 CHANGE-04
+ * Version : 2.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B3
  */
 
 import {
@@ -20,6 +21,7 @@ import {
     isAlreadyProcessed,
     markProcessed,
 } from './_lib/mailer.js';
+import { supabase } from './_lib/supabase.js';
 
 const VERCEL_ENV = process.env.VERCEL_ENV || 'development';
 const MOLLIE_API_KEY =
@@ -80,6 +82,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Phase 2 ACTIVE : email pipeline on paid (C3-bis pattern)
         if (status === 'paid' && !isAlreadyProcessed(id)) {
             markProcessed(id);
+
+            // NIGHT-N5 Phase B3 : update Supabase status=paid (NON-BLOQUANT, fire-and-forget)
+            if (supabase && metadata.request_id) {
+                supabase
+                    .from('diagnostic_requests')
+                    .update({
+                        status: 'paid',
+                        paid_at: new Date().toISOString(),
+                        payment_id: id,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('request_id', metadata.request_id)
+                    .then(({ error }: { error: unknown }) => {
+                        if (error) {
+                            const msg = (error as { message?: string })?.message || 'unknown';
+                            console.error(JSON.stringify({
+                                event: 'supabase_update_failed',
+                                context: 'mollie-webhook',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                error: msg,
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        } else {
+                            console.log(JSON.stringify({
+                                event: 'supabase_update_ok',
+                                context: 'mollie-webhook',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                new_status: 'paid',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+                    });
+            }
 
             const emailData = {
                 payment_id: id,

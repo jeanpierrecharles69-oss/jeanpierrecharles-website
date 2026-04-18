@@ -7,7 +7,7 @@ import type { MailerPaymentData } from './mailer';
  *
  * SELLER constants = memes valeurs que MerciPage.tsx (DRY cross-module).
  *
- * Version : 1.0.0 -- 20260416 -- MISSION-EXEC-DETTE6 CHANGE-03
+ * Version : 1.1.0 -- 20260418 -- NIGHT-N5 DETTE18 (bloc piece jointe vs bouton lien)
  */
 
 // --- Shared constants (mirror MerciPage.tsx SELLER) ---
@@ -249,7 +249,35 @@ export function deliveryConfirmationHtml(data: MailerPaymentData, lang: 'fr' | '
     const isFr = lang === 'fr';
     const invoiceNum = data.invoice_number || generateInvoiceNumber();
     const date = formatDate(lang);
-    const downloadUrl = data.download_url || '#';
+    const hasAttachment = Boolean(data.pdf_base64);
+    const downloadUrl = data.download_url || '';
+
+    const deliveryBlock = hasAttachment
+        ? `
+    <div style="background:${BRAND.emerald}10;border:1px solid ${BRAND.emerald}40;border-radius:12px;padding:18px 20px;margin:28px 0;text-align:center">
+        <div style="font-size:13px;color:${BRAND.text};line-height:1.6">
+            <strong style="color:${BRAND.emerald}">${isFr ? 'Pièce jointe PDF' : 'PDF attachment'}</strong><br>
+            ${isFr
+                ? 'Votre rapport DIAGNOSTIC est joint à cet email en pièce jointe (PDF).'
+                : 'Your DIAGNOSTIC report is attached to this email (PDF).'}
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:24px">
+        <p style="font-size:12px;color:${BRAND.textMuted}">${isFr
+            ? 'Conservez cet email, votre rapport y est attaché durablement.'
+            : 'Keep this email — your report is permanently attached.'}</p>
+    </div>`
+        : `
+    <div style="text-align:center;margin:32px 0">
+        <a href="${downloadUrl || '#'}" class="btn">${isFr ? 'Télécharger votre rapport' : 'Download your report'}</a>
+    </div>
+
+    <div style="text-align:center;margin-bottom:24px">
+        <p style="font-size:12px;color:${BRAND.textMuted}">${isFr
+            ? 'Ce lien est valable 30 jours. Contactez-nous pour toute question.'
+            : 'This link is valid for 30 days. Contact us with any questions.'}</p>
+    </div>`;
 
     const content = `
 <div class="header">
@@ -263,8 +291,12 @@ export function deliveryConfirmationHtml(data: MailerPaymentData, lang: 'fr' | '
             ? 'Votre rapport DIAGNOSTIC est prêt !'
             : 'Your DIAGNOSTIC report is ready!'}</h2>
         <p style="margin:0;color:${BRAND.textMuted};font-size:14px">${isFr
-            ? 'Votre analyse de conformité industrielle EU est disponible au téléchargement.'
-            : 'Your EU industrial compliance analysis is available for download.'}</p>
+            ? (hasAttachment
+                ? 'Votre analyse de conformité industrielle EU est jointe à cet email.'
+                : 'Votre analyse de conformité industrielle EU est disponible au téléchargement.')
+            : (hasAttachment
+                ? 'Your EU industrial compliance analysis is attached to this email.'
+                : 'Your EU industrial compliance analysis is available for download.')}</p>
     </div>
 
     <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid ${BRAND.border}">
@@ -276,16 +308,7 @@ export function deliveryConfirmationHtml(data: MailerPaymentData, lang: 'fr' | '
             ${data.customer_name ? `<strong>${isFr ? 'Client' : 'Customer'}:</strong> ${escapeHtml(data.customer_name)}<br>` : ''}
         </div>
     </div>
-
-    <div style="text-align:center;margin:32px 0">
-        <a href="${downloadUrl}" class="btn">${isFr ? 'Télécharger votre rapport' : 'Download your report'}</a>
-    </div>
-
-    <div style="text-align:center;margin-bottom:24px">
-        <p style="font-size:12px;color:${BRAND.textMuted}">${isFr
-            ? 'Ce lien est valable 30 jours. Contactez-nous pour toute question.'
-            : 'This link is valid for 30 days. Contact us with any questions.'}</p>
-    </div>
+${deliveryBlock}
 
     ${data.approved_by ? `
     <div style="background:${BRAND.bgAlt};border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:3px solid ${BRAND.emerald}">

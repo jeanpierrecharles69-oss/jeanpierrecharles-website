@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sendOpsPreNotify } from './_lib/mailer.js';
+import { supabase, logSupabaseUnavailable } from './_lib/supabase.js';
 
 /**
  * AEGIS Intelligence -- Diagnostic Request Handler
@@ -7,8 +8,9 @@ import { sendOpsPreNotify } from './_lib/mailer.js';
  *
  * SECURITE : No sensitive data in logs. Only request_id + timestamp.
  * EMAIL Phase 2 ACTIVE : sendOpsPreNotify best-effort (kill switch OPS_PRENOTIFY_ENABLED).
+ * NIGHT-N5 FAI-FIX Phase B2 : persistance Supabase EU Frankfurt non-bloquante.
  *
- * Version : 2.0.0 -- 20260416 -- MISSION-EXEC-DETTE6 CHANGE-05
+ * Version : 2.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B2
  */
 
 const ALLOWED_ORIGINS = [
@@ -115,6 +117,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             product_length: product.length,
             // NEVER log email, name, company, or full content
         }));
+
+        // NIGHT-N5 Phase B2 : persistance Supabase EU Frankfurt (NON-BLOQUANT)
+        // Si Supabase down ou non configure -> checkout continue normalement (v3.4.6 compat)
+        const lang = typeof body.lang === 'string' && body.lang === 'en' ? 'en' : 'fr';
+        if (supabase) {
+            supabase
+                .from('diagnostic_requests')
+                .insert({
+                    request_id,
+                    invoice_number,
+                    status: 'pending_payment',
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    company,
+                    country,
+                    city,
+                    sector,
+                    product,
+                    context,
+                    regulations,
+                    lang,
+                    created_at: new Date().toISOString(),
+                })
+                .then(({ error }: { error: unknown }) => {
+                    if (error) {
+                        const msg = (error as { message?: string })?.message || 'unknown';
+                        console.error(JSON.stringify({
+                            event: 'supabase_insert_failed',
+                            context: 'diagnostic-request',
+                            request_id,
+                            error: msg,
+                            severity: 'warning',
+                            timestamp: new Date().toISOString(),
+                        }));
+                    } else {
+                        console.log(JSON.stringify({
+                            event: 'supabase_insert_ok',
+                            context: 'diagnostic-request',
+                            request_id,
+                            timestamp: new Date().toISOString(),
+                        }));
+                    }
+                });
+        } else {
+            logSupabaseUnavailable('diagnostic-request');
+        }
 
         // Phase 2 ACTIVE : ops pre-notify (best-effort, kill switch M2)
         if (process.env.OPS_PRENOTIFY_ENABLED !== 'false') {
