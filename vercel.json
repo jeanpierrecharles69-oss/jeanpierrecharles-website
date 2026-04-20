@@ -5,62 +5,64 @@
       "maxDuration": 10,
       "regions": [
         "cdg1"
-      ]
-    },
-    "api/claude-proxy.ts": {
+      ],
       "includeFiles": "config/**"
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/insights/:slug*",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i).*(LinkedInBot|facebookexternalhit|Twitterbot|Googlebot|bingbot|Slackbot|WhatsApp|Discordbot|TelegramBot).*"
-        }
-      ],
-      "destination": "/api/og-render?slug=:slug*"
-    },
-    {
-      "source": "/insights/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/merci",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/en",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    }
-  ]
+  "api/claude-proxy.ts": {
+    "includeFiles": "config/**"
+  }
+},
+"rewrites": [
+  {
+    "source": "/api/(.*)",
+    "destination": "/api/$1"
+  },
+  {
+    "source": "/insights/:slug*",
+    "has": [
+      {
+        "type": "header",
+        "key": "user-agent",
+        "value": "(?i).*(LinkedInBot|facebookexternalhit|Twitterbot|Googlebot|bingbot|Slackbot|WhatsApp|Discordbot|TelegramBot).*"
+      }
+    ],
+    "destination": "/api/og-render?slug=:slug*"
+  },
+  {
+    "source": "/insights/(.*)",
+    "destination": "/index.html"
+  },
+  {
+    "source": "/merci",
+    "destination": "/index.html"
+  },
+  {
+    "source": "/en",
+    "destination": "/index.html"
+  }
+],
+"headers": [
+  {
+    "source": "/(.*)",
+    "headers": [
+      {
+        "key": "X-Content-Type-Options",
+        "value": "nosniff"
+      },
+      {
+        "key": "X-Frame-Options",
+        "value": "DENY"
+      },
+      {
+        "key": "X-XSS-Protection",
+        "value": "1; mode=block"
+      },
+      {
+        "key": "Referrer-Policy",
+        "value": "strict-origin-when-cross-origin"
+      }
+    ]
+  }
+]
 }
