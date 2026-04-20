@@ -5,7 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
- * Version : 1.2.0 -- 20260409T1410 CET -- Dual-key LIVE/TEST + email self-block
+ * Version : 1.3.0 -- 20260420T1445 CET -- webhookUrl dynamique VERCEL_ENV-aware (asset Rupture 2 FAI V&V preview)
  */
 
 // Selection automatique de la cle Mollie selon l'environnement Vercel
@@ -18,6 +18,19 @@ const MOLLIE_API_KEY =
         : process.env.MOLLIE_API_KEY_TEST;
 const MOLLIE_MODE = VERCEL_ENV === 'production' ? 'LIVE' : 'TEST';
 const MOLLIE_API_URL = 'https://api.mollie.com/v2/payments';
+
+// Webhook URL dynamique (v1.3.0)
+// - Production : URL fixe jeanpierrecharles.com (v1.2.0 preserve)
+// - Preview : URL branch stable via VERCEL_BRANCH_URL (asset V&V permanent Rupture 2 FAI)
+// - Development : fallback production (Mollie webhook inaccessible localhost)
+// Note : VERCEL_BRANCH_URL stable tant que branche existe (vs VERCEL_URL qui change chaque deploy).
+const WEBHOOK_BASE_URL = (() => {
+    if (VERCEL_ENV === 'production') return 'https://jeanpierrecharles.com';
+    if (VERCEL_ENV === 'preview' && process.env.VERCEL_BRANCH_URL) {
+        return `https://${process.env.VERCEL_BRANCH_URL}`;
+    }
+    return 'https://jeanpierrecharles.com'; // fallback dev + preview sans VERCEL_BRANCH_URL
+})();
 
 const ALLOWED_ORIGINS = [
     'https://jeanpierrecharles.com',
@@ -72,6 +85,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     }
 
+    // Log observabilite config checkout (v1.3.0, R_T1340_01 strict : aucun secret expose)
+    console.log(JSON.stringify({
+        event: 'mollie_checkout_config',
+        env: VERCEL_ENV,
+        mode: MOLLIE_MODE,
+        webhook_base: WEBHOOK_BASE_URL,
+        timestamp: new Date().toISOString(),
+    }));
+
     // Validation defensive : si on est en production et qu'on a une cle test, REFUS
     // Et reciproquement : si on est en preview/dev avec une cle live, REFUS
     if (VERCEL_ENV === 'production' && !MOLLIE_API_KEY.startsWith('live_')) {
@@ -118,7 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             description,
             redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
-            webhookUrl: `https://jeanpierrecharles.com/api/mollie-webhook`,
+            webhookUrl: `${WEBHOOK_BASE_URL}/api/mollie-webhook`,
             metadata: {
                 product,
                 lang: langKey,
