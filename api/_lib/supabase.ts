@@ -15,7 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  *  - JAMAIS utiliser ANON_KEY ici
  *  - JAMAIS exposer la cle dans les logs ou les reponses API
  *
- * Version : 1.0.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B1
+ * Version : 1.1.0 -- 20260420 -- ajout log boot supabase_client_init (diagnostic cold start)
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
@@ -32,6 +32,14 @@ export const supabase: SupabaseClient | null =
         : null;
 
 export const SUPABASE_ENABLED = supabase !== null;
+
+// Log boot diagnostic - emis une fois par cold start Vercel lambda
+// R_T1340_01 : AUCUNE valeur de cle loggee, uniquement le booleen client_ready
+console.log(JSON.stringify({
+    event: 'supabase_client_init',
+    client_ready: SUPABASE_ENABLED,
+    timestamp: new Date().toISOString(),
+}));
 
 export function logSupabaseUnavailable(context: string): void {
     console.warn(JSON.stringify({

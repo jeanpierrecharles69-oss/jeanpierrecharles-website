@@ -10,7 +10,7 @@ import { supabase, logSupabaseUnavailable } from './_lib/supabase.js';
  * EMAIL Phase 2 ACTIVE : sendOpsPreNotify best-effort (kill switch OPS_PRENOTIFY_ENABLED).
  * NIGHT-N5 FAI-FIX Phase B2 : persistance Supabase EU Frankfurt non-bloquante.
  *
- * Version : 2.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B2
+ * Version : 2.2.0 -- 20260420 -- FIX silent fail await Promise.race 3s (kill fire-and-forget Vercel serverless)
  */
 
 const ALLOWED_ORIGINS = [
@@ -118,49 +118,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             // NEVER log email, name, company, or full content
         }));
 
-        // NIGHT-N5 Phase B2 : persistance Supabase EU Frankfurt (NON-BLOQUANT)
-        // Si Supabase down ou non configure -> checkout continue normalement (v3.4.6 compat)
+        // NIGHT-N5 Phase B2 + v2.2.0 FIX : persistance Supabase EU Frankfurt (AWAIT Promise.race 3s)
+        // v2.1.0 fire-and-forget .then() etait tue par Vercel serverless apres return res.
+        // v2.2.0 : await Promise.race(insert, timeout3s) garantit execution avant response HTTP.
+        // Impact latence : +200-500ms (RTT cdg1 <-> fra1 + SQL), invisible UX (redirection Mollie suit).
         const lang = typeof body.lang === 'string' && body.lang === 'en' ? 'en' : 'fr';
         if (supabase) {
-            supabase
-                .from('diagnostic_requests')
-                .insert({
+            try {
+                const insertPromise = supabase
+                    .from('diagnostic_requests')
+                    .insert({
+                        request_id,
+                        invoice_number,
+                        status: 'pending_payment',
+                        email,
+                        first_name: firstName,
+                        last_name: lastName,
+                        company,
+                        country,
+                        city,
+                        sector,
+                        product,
+                        context,
+                        regulations,
+                        lang,
+                        created_at: new Date().toISOString(),
+                    });
+
+                const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
+                    setTimeout(() => reject(new Error('supabase_insert_timeout_3s')), 3000)
+                );
+
+                const result = await Promise.race([insertPromise, timeoutPromise]) as { error: unknown };
+
+                if (result.error) {
+                    const msg = (result.error as { message?: string })?.message || 'unknown';
+                    console.error(JSON.stringify({
+                        event: 'supabase_insert_failed',
+                        context: 'diagnostic-request',
+                        request_id,
+                        invoice_number,
+                        error: msg,
+                        severity: 'warning',
+                        timestamp: new Date().toISOString(),
+                    }));
+                } else {
+                    console.log(JSON.stringify({
+                        event: 'supabase_insert_ok',
+                        context: 'diagnostic-request',
+                        request_id,
+                        invoice_number,
+                        timestamp: new Date().toISOString(),
+                    }));
+                }
+            } catch (e: unknown) {
+                const msg = (e as { message?: string })?.message || 'unknown';
+                console.error(JSON.stringify({
+                    event: 'supabase_insert_timeout',
+                    context: 'diagnostic-request',
                     request_id,
                     invoice_number,
-                    status: 'pending_payment',
-                    email,
-                    first_name: firstName,
-                    last_name: lastName,
-                    company,
-                    country,
-                    city,
-                    sector,
-                    product,
-                    context,
-                    regulations,
-                    lang,
-                    created_at: new Date().toISOString(),
-                })
-                .then(({ error }: { error: unknown }) => {
-                    if (error) {
-                        const msg = (error as { message?: string })?.message || 'unknown';
-                        console.error(JSON.stringify({
-                            event: 'supabase_insert_failed',
-                            context: 'diagnostic-request',
-                            request_id,
-                            error: msg,
-                            severity: 'warning',
-                            timestamp: new Date().toISOString(),
-                        }));
-                    } else {
-                        console.log(JSON.stringify({
-                            event: 'supabase_insert_ok',
-                            context: 'diagnostic-request',
-                            request_id,
-                            timestamp: new Date().toISOString(),
-                        }));
-                    }
-                });
+                    error: msg,
+                    severity: 'warning',
+                    timestamp: new Date().toISOString(),
+                }));
+            }
         } else {
             logSupabaseUnavailable('diagnostic-request');
         }

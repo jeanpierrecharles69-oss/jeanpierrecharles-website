@@ -12,7 +12,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Idempotence : in-memory Set per warm instance (DETTE7 : Vercel KV v3.4.6).
  * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
  *
- * Version : 2.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B3
+ * Version : 2.2.0 -- 20260420 -- FIX silent fail update await Promise.race 3s (Promise.race 7s emails C3-bis inchange)
  */
 
 import {
@@ -83,40 +83,61 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (status === 'paid' && !isAlreadyProcessed(id)) {
             markProcessed(id);
 
-            // NIGHT-N5 Phase B3 : update Supabase status=paid (NON-BLOQUANT, fire-and-forget)
+            // NIGHT-N5 Phase B3 + v2.2.0 FIX : update Supabase status=paid (AWAIT Promise.race 3s)
+            // v2.1.0 fire-and-forget .then() etait tue par Vercel serverless apres return res.
+            // v2.2.0 : await Promise.race(update, timeout3s) garantit execution avant Promise.race 7s emails.
+            // Placement AVANT le Promise.race emails C3-bis (inchange) conforme audit L2 T2035.
             if (supabase && metadata.request_id) {
-                supabase
-                    .from('diagnostic_requests')
-                    .update({
-                        status: 'paid',
-                        paid_at: new Date().toISOString(),
+                try {
+                    const updatePromise = supabase
+                        .from('diagnostic_requests')
+                        .update({
+                            status: 'paid',
+                            paid_at: new Date().toISOString(),
+                            payment_id: id,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('request_id', metadata.request_id);
+
+                    const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
+                        setTimeout(() => reject(new Error('supabase_update_timeout_3s')), 3000)
+                    );
+
+                    const result = await Promise.race([updatePromise, timeoutPromise]) as { error: unknown };
+
+                    if (result.error) {
+                        const msg = (result.error as { message?: string })?.message || 'unknown';
+                        console.error(JSON.stringify({
+                            event: 'supabase_update_failed',
+                            context: 'mollie-webhook',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            error: msg,
+                            severity: 'warning',
+                            timestamp: new Date().toISOString(),
+                        }));
+                    } else {
+                        console.log(JSON.stringify({
+                            event: 'supabase_update_ok',
+                            context: 'mollie-webhook',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            new_status: 'paid',
+                            timestamp: new Date().toISOString(),
+                        }));
+                    }
+                } catch (e: unknown) {
+                    const msg = (e as { message?: string })?.message || 'unknown';
+                    console.error(JSON.stringify({
+                        event: 'supabase_update_timeout',
+                        context: 'mollie-webhook',
                         payment_id: id,
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('request_id', metadata.request_id)
-                    .then(({ error }: { error: unknown }) => {
-                        if (error) {
-                            const msg = (error as { message?: string })?.message || 'unknown';
-                            console.error(JSON.stringify({
-                                event: 'supabase_update_failed',
-                                context: 'mollie-webhook',
-                                payment_id: id,
-                                request_id: metadata.request_id,
-                                error: msg,
-                                severity: 'warning',
-                                timestamp: new Date().toISOString(),
-                            }));
-                        } else {
-                            console.log(JSON.stringify({
-                                event: 'supabase_update_ok',
-                                context: 'mollie-webhook',
-                                payment_id: id,
-                                request_id: metadata.request_id,
-                                new_status: 'paid',
-                                timestamp: new Date().toISOString(),
-                            }));
-                        }
-                    });
+                        request_id: metadata.request_id,
+                        error: msg,
+                        severity: 'warning',
+                        timestamp: new Date().toISOString(),
+                    }));
+                }
             }
 
             const emailData = {
