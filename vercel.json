@@ -4,9 +4,6 @@
       "memory": 256,
       "maxDuration": 10,
       "includeFiles": "config/**"
-    },
-    "api/diagnostic-deliver.ts": {
-      "maxDuration": 15
     }
   },
   "regions": ["cdg1"],
