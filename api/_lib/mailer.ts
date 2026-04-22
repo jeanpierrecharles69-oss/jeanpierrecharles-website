@@ -22,7 +22,7 @@ import {
  *  - Set<string> in-memory par instance warm
  *  - DETTE7 : Vercel KV pour persistance cross-instance (v3.4.6)
  *
- * Version : 1.1.0 -- 20260418 -- NIGHT-N5 FAI-FIX DETTE18 (piece jointe PDF)
+ * Version : 1.2.0 -- 20260422 -- PHASE-C sendClientDiagnostic (Living Spec v1.1 §7 + EA-05)
  */
 
 const PDF_MAX_BYTES = 20 * 1024 * 1024;
@@ -229,6 +229,71 @@ export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise
         recipient_masked: maskEmail(recipient),
         has_attachment: attachments !== undefined,
         attachment_size_bytes: attachmentSize || null,
+        timestamp: new Date().toISOString(),
+    });
+}
+
+/**
+ * Send DIAGNOSTIC PDF to client (Phase C endpoint diagnostic-deliver).
+ * Pattern EA-05 Gandi SMTP 465 + EA-15 DETTE6 C3-bis timeout heritage.
+ * Signature simplifiee (Buffer direct) distincte de sendDeliveryConfirmation (pdf_base64 legacy).
+ *
+ * R_T0838_JP_01 doctrinale : aucun email clair en log (maskEmail).
+ * R_T1340_01 strict : aucun err.message nodemailer propagated (caller must catch via emailLogIdentifier).
+ */
+export async function sendClientDiagnostic(params: {
+    to: string;
+    pdfBuffer: Buffer;
+    invoiceNumber: string;
+    lang?: 'fr' | 'en';
+}): Promise<void> {
+    const { to, pdfBuffer, invoiceNumber, lang = 'fr' } = params;
+
+    if (!isValidEmail(to)) {
+        throw new Error('invalid_recipient_email');
+    }
+    if (pdfBuffer.length > PDF_MAX_BYTES) {
+        throw new Error(`pdf_too_large_${pdfBuffer.length}_bytes`);
+    }
+
+    const subject = lang === 'fr'
+        ? `[AEGIS] Votre rapport DIAGNOSTIC ${invoiceNumber}`
+        : `[AEGIS] Your DIAGNOSTIC report ${invoiceNumber}`;
+
+    const html = lang === 'fr'
+        ? `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#0f172a;">
+<p>Bonjour,</p>
+<p>Veuillez trouver en pièce jointe votre rapport <strong>DIAGNOSTIC AEGIS Intelligence</strong> (référence <code>${invoiceNumber}</code>).</p>
+<p>Ce rapport est signé numériquement (eIDAS Art. 25 SES) avec empreinte SHA-256 d'intégrité apposée en bloc signature.</p>
+<p>Pour toute question ou suivi, répondez directement à cet email.</p>
+<p>Cordialement,<br><strong>Jean-Pierre CHARLES</strong><br>AEGIS Intelligence — <a href="https://jeanpierrecharles.com">jeanpierrecharles.com</a></p>
+</body></html>`
+        : `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#0f172a;">
+<p>Hello,</p>
+<p>Please find attached your <strong>AEGIS Intelligence DIAGNOSTIC report</strong> (reference <code>${invoiceNumber}</code>).</p>
+<p>This report is digitally signed (eIDAS Art. 25 SES) with SHA-256 integrity hash embedded in the signature block.</p>
+<p>For any question or follow-up, reply directly to this email.</p>
+<p>Regards,<br><strong>Jean-Pierre CHARLES</strong><br>AEGIS Intelligence — <a href="https://jeanpierrecharles.com">jeanpierrecharles.com</a></p>
+</body></html>`;
+
+    await getTransport().sendMail({
+        from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
+        to,
+        subject,
+        html,
+        attachments: [{
+            filename: `AEGIS-DIAGNOSTIC-${invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+        }],
+    });
+
+    logMailer({
+        event: 'mailer_sent',
+        recipient_type: 'client_diagnostic',
+        recipient_masked: maskEmail(to),
+        invoice_number: invoiceNumber,
+        pdf_size_bytes: pdfBuffer.length,
         timestamp: new Date().toISOString(),
     });
 }
