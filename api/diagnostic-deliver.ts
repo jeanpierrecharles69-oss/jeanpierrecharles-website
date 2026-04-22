@@ -44,20 +44,40 @@ function emailLogIdentifier(email: string | undefined | null): string {
 }
 
 // --- Multipart parser minimal (Node stream natif, pas de dependance externe) ---
-async function readRawBody(req: VercelRequest): Promise<Buffer> {
-    if (req.body && Buffer.isBuffer(req.body)) return req.body;
-
-    return new Promise<Buffer>((resolve, reject) => {
+// L_T1602_01 : Vercel @vercel/node body handling varie selon Content-Type.
+// Pour multipart : peut etre Buffer OU string (latin1/binary) OU undefined (stream non-consomme).
+async function readRawBody(req: VercelRequest): Promise<{ buffer: Buffer; source: string }> {
+    // Cas 1 : deja Buffer (Vercel auto-buffer pour multipart)
+    if (req.body && Buffer.isBuffer(req.body)) {
+        return { buffer: req.body, source: 'req.body_buffer' };
+    }
+    // Cas 2 : string (certains runtime deliver body as binary string)
+    if (typeof req.body === 'string') {
+        return { buffer: Buffer.from(req.body, 'binary'), source: 'req.body_string_binary' };
+    }
+    // Cas 3 : objet parse (Vercel a tente parse JSON/form-urlencoded par erreur)
+    if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
+        // Stream probablement consume, reconstruction impossible
+        return { buffer: Buffer.alloc(0), source: 'req.body_object_consumed' };
+    }
+    // Cas 4 : undefined -> lecture stream natif
+    return new Promise<{ buffer: Buffer; source: string }>((resolve, reject) => {
         const chunks: Buffer[] = [];
         let totalLen = 0;
-        req.on('data', (chunk: Buffer) => {
-            chunks.push(Buffer.from(chunk));
-            totalLen += chunk.length;
+        let eventCount = 0;
+        req.on('data', (chunk: Buffer | string) => {
+            eventCount++;
+            const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, 'binary');
+            chunks.push(buf);
+            totalLen += buf.length;
             if (totalLen > MULTIPART_MAX_BYTES) {
                 reject(new Error('multipart_body_too_large'));
             }
         });
-        req.on('end', () => resolve(Buffer.concat(chunks)));
+        req.on('end', () => resolve({
+            buffer: Buffer.concat(chunks),
+            source: `stream_read_events=${eventCount}_bytes=${totalLen}`
+        }));
         req.on('error', reject);
     });
 }
@@ -145,13 +165,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let clientSha256 = '';
     let pdfBuffer: Buffer = Buffer.alloc(0);
     let clientEmailOverride: string | null = null;
+    let bodyDebug = { source: 'unknown', raw_length: 0, parts_found: 0 };
     try {
-        const rawBody = await readRawBody(req);
+        const { buffer: rawBody, source } = await readRawBody(req);
+        bodyDebug.source = source;
+        bodyDebug.raw_length = rawBody.length;
         const contentType = req.headers['content-type'] || '';
         if (!contentType.startsWith('multipart/form-data')) {
             return res.status(400).json({ error: 'invalid_content_type', expected: 'multipart/form-data' });
         }
         const parsed = parseMultipart(rawBody, contentType);
+        bodyDebug.parts_found = Object.keys(parsed.fields).length + Object.keys(parsed.files).length;
 
         requestId = (parsed.fields['request_id'] || '').trim();
         invoiceNumber = (parsed.fields['invoice_number'] || '').trim();
@@ -164,6 +188,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({
             error: 'multipart_parse_failed',
             err_code: (err as Error).message,
+            debug: bodyDebug,
         });
     }
 
@@ -190,6 +215,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 invoice_number: !INVOICE_REGEX.test(invoiceNumber),
                 pdf_size_bytes: pdfBuffer.length,
             },
+            debug: bodyDebug,
         });
     }
 
