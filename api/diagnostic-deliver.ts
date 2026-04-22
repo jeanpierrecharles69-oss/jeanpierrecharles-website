@@ -121,12 +121,16 @@ function parseMultipart(body: Buffer, contentType: string): ParsedMultipart {
         const headers = part.slice(0, headerEnd).toString('utf8');
         const content = part.slice(headerEnd + 4);
 
-        const nameMatch = headers.match(/name="([^"]+)"/);
+        // L_T1609_01 : .NET MultipartFormDataContent produit name=fieldname SANS quotes
+        //              curl / browsers produisent name="fieldname" AVEC quotes
+        //              Accepter les 2 formats pour robustesse cross-clients
+        const nameMatch = headers.match(/name=(?:"([^"]+)"|([^;\s\r\n]+))/);
         if (!nameMatch) continue;
-        const name = nameMatch[1];
+        const name = nameMatch[1] || nameMatch[2];
 
-        const filenameMatch = headers.match(/filename="([^"]*)"/);
-        if (filenameMatch && filenameMatch[1].length > 0) {
+        const filenameMatch = headers.match(/filename=(?:"([^"]*)"|([^;\s\r\n]*))/);
+        const filename = filenameMatch ? (filenameMatch[1] || filenameMatch[2]) : null;
+        if (filename && filename.length > 0) {
             files[name] = content;
         } else {
             fields[name] = content.toString('utf8');
