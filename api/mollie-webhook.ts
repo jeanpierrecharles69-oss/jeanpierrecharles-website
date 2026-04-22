@@ -9,10 +9,17 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  *
  * Phase 2 ACTIVE : On status === 'paid', send client confirmation + ops notification.
  * Pattern : await Promise.race([allSettled, timeout 7s]) (Vercel serverless safe).
- * Idempotence : in-memory Set per warm instance (DETTE7 : Vercel KV v3.4.6).
+ *
+ * Idempotence (Night N7 v2.3.0 renforcee) :
+ *   - Set<string> in-memory par instance warm (fast-path <1ms)
+ *   - + SELECT Supabase status pre-email (survit cold starts Vercel lambda)
+ *   - Tout UPDATE cible status IN ('pending_payment', 'pending') uniquement -> idempotent via WHERE
+ *   - pending_generations : contrainte UNIQUE request_id -> INSERT duplique echoue gracieusement
+ *
+ * Night N7 Option β : apres UPDATE paid, INSERT pending_generations pour dashboard JP.
  * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
  *
- * Version : 2.2.0 -- 20260420 -- FIX silent fail update await Promise.race 3s (Promise.race 7s emails C3-bis inchange)
+ * Version : 2.3.0 -- 20260422T2130 -- Night N7 : INSERT pending_generations + idempotence Supabase-level (L_T2130_N7_01)
  */
 
 import {
@@ -83,10 +90,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (status === 'paid' && !isAlreadyProcessed(id)) {
             markProcessed(id);
 
+            // Night N7 v2.3.0 : Supabase-level idempotence pre-check (survit cold starts).
+            // Si le row est deja status='paid' ou 'delivered', on evite emails & INSERT pending dupliques.
+            // Ce check survient APRES markProcessed pour preserver fast-path warm instance.
+            let dbAlreadyPaid = false;
+            if (supabase && metadata.request_id) {
+                try {
+                    const selectPromise = supabase
+                        .from('diagnostic_requests')
+                        .select('status')
+                        .eq('request_id', metadata.request_id)
+                        .single();
+
+                    const selectTimeout = new Promise<{ data: null; error: { message: string } }>((_, reject) =>
+                        setTimeout(() => reject(new Error('supabase_select_timeout_2s')), 2000)
+                    );
+
+                    const { data: existing } = await Promise.race([selectPromise, selectTimeout]) as {
+                        data: { status?: string } | null;
+                        error: unknown;
+                    };
+
+                    if (existing?.status === 'paid' || existing?.status === 'delivered' || existing?.status === 'generating') {
+                        dbAlreadyPaid = true;
+                        console.log(JSON.stringify({
+                            event: 'webhook_idempotent_db_check',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            existing_status: existing.status,
+                            timestamp: new Date().toISOString(),
+                        }));
+                    }
+                } catch (e: unknown) {
+                    // Sur timeout/erreur du SELECT, on continue (degrade gracefully vers in-memory only).
+                    const msg = (e as { message?: string })?.message || 'unknown';
+                    console.warn(JSON.stringify({
+                        event: 'webhook_idempotent_db_check_skipped',
+                        payment_id: id,
+                        request_id: metadata.request_id,
+                        reason: msg,
+                        timestamp: new Date().toISOString(),
+                    }));
+                }
+            }
+
+            if (dbAlreadyPaid) {
+                // Reponse 200 immediate sans effets de bord
+                return res.status(200).json({ received: true, status, idempotent: 'db' });
+            }
+
             // NIGHT-N5 Phase B3 + v2.2.0 FIX : update Supabase status=paid (AWAIT Promise.race 3s)
-            // v2.1.0 fire-and-forget .then() etait tue par Vercel serverless apres return res.
-            // v2.2.0 : await Promise.race(update, timeout3s) garantit execution avant Promise.race 7s emails.
-            // Placement AVANT le Promise.race emails C3-bis (inchange) conforme audit L2 T2035.
+            // v2.3.0 Night N7 : WHERE status IN ('pending_payment','pending') pour atomicite cross-cold-start.
             if (supabase && metadata.request_id) {
                 try {
                     const updatePromise = supabase
@@ -97,7 +151,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             payment_id: id,
                             updated_at: new Date().toISOString(),
                         })
-                        .eq('request_id', metadata.request_id);
+                        .eq('request_id', metadata.request_id)
+                        .in('status', ['pending_payment', 'pending']);
 
                     const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
                         setTimeout(() => reject(new Error('supabase_update_timeout_3s')), 3000)
@@ -125,6 +180,61 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             new_status: 'paid',
                             timestamp: new Date().toISOString(),
                         }));
+
+                        // Night N7 Option β : INSERT pending_generations (Unique constraint request_id evite doublon)
+                        try {
+                            const insertPromise = supabase
+                                .from('pending_generations')
+                                .insert({
+                                    request_id: metadata.request_id,
+                                    status: 'pending',
+                                });
+
+                            const insertTimeout = new Promise<{ error: { message: string; code?: string } }>((_, reject) =>
+                                setTimeout(() => reject(new Error('supabase_insert_pending_timeout_2s')), 2000)
+                            );
+
+                            const insResult = await Promise.race([insertPromise, insertTimeout]) as { error: { message?: string; code?: string } | null };
+
+                            if (insResult.error) {
+                                // Code 23505 = unique_violation (row deja presente, idempotent OK)
+                                if (insResult.error.code === '23505') {
+                                    console.log(JSON.stringify({
+                                        event: 'pending_generations_already_exists',
+                                        payment_id: id,
+                                        request_id: metadata.request_id,
+                                        timestamp: new Date().toISOString(),
+                                    }));
+                                } else {
+                                    console.error(JSON.stringify({
+                                        event: 'pending_generations_insert_failed',
+                                        payment_id: id,
+                                        request_id: metadata.request_id,
+                                        error: insResult.error.message || 'unknown',
+                                        code: insResult.error.code || null,
+                                        severity: 'warning',
+                                        timestamp: new Date().toISOString(),
+                                    }));
+                                }
+                            } else {
+                                console.log(JSON.stringify({
+                                    event: 'pending_generations_insert_ok',
+                                    payment_id: id,
+                                    request_id: metadata.request_id,
+                                    timestamp: new Date().toISOString(),
+                                }));
+                            }
+                        } catch (pe: unknown) {
+                            const pmsg = (pe as { message?: string })?.message || 'unknown';
+                            console.warn(JSON.stringify({
+                                event: 'pending_generations_insert_timeout',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                error: pmsg,
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
                     }
                 } catch (e: unknown) {
                     const msg = (e as { message?: string })?.message || 'unknown';
