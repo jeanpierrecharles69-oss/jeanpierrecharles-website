@@ -184,15 +184,26 @@ export function opsNewOrderHtml(data: MailerPaymentData): string {
     const reqShort = reqFull.slice(0, 8);
     const date = new Date().toISOString();
 
+    const dashboardUrl = 'https://jeanpierrecharles.com/admin/pending-diagnostics.html';
+
     const content = `
 <div class="header">
     <h1>[AEGIS] Nouvelle Commande</h1>
     <p>DIAGNOSTIC #REQ-${escapeHtml(reqShort)}</p>
 </div>
 <div class="body">
-    <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:24px">
-        <strong style="color:#92400e">Action requise :</strong>
-        <span style="color:#92400e"> Produire le rapport DIAGNOSTIC sous 24h ouvrées.</span>
+    <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:14px 18px;margin-bottom:16px">
+        <strong style="color:#92400e">Action requise (Option β manuel) :</strong>
+        <div style="color:#92400e;font-size:13px;margin-top:6px;line-height:1.6">
+            1. Ouvrir le dashboard :
+            <a href="${dashboardUrl}" style="color:${BRAND.blueDark};font-weight:700;text-decoration:underline">${dashboardUrl}</a><br>
+            2. Cliquer « Générer et livrer » sur la ligne #REQ-${escapeHtml(reqShort)}<br>
+            3. Copier la commande PowerShell affichée, l'exécuter localement<br>
+            4. SLA : jour ouvré (avant 19h CET), sinon J+1 12h CET
+        </div>
+    </div>
+    <div style="text-align:center;margin-bottom:24px">
+        <a href="${dashboardUrl}" class="btn">Ouvrir le dashboard Admin</a>
     </div>
 
     <div style="margin-bottom:24px">
