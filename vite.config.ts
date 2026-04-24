@@ -176,5 +176,19 @@ export default defineConfig(() => {
                 '@': path.resolve(__dirname, '.'),
             },
         },
+        build: {
+            // D_T2010_11 (Mission N8) -- split manuel des gros modules pour sortir
+            // des warnings chunk > 500 kB. html2pdf a son propre bundle isole,
+            // les autres deps node_modules vont dans un chunk "vendor" commun.
+            rollupOptions: {
+                output: {
+                    manualChunks: (id: string) => {
+                        if (id.includes('html2pdf')) return 'html2pdf';
+                        if (id.includes('node_modules')) return 'vendor';
+                        return undefined;
+                    },
+                },
+            },
+        },
     };
 });
