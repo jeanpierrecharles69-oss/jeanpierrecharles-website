@@ -9,7 +9,14 @@
 -- Durée estimée : <5 secondes (table vide initialement)
 -- Rollback : DROP TABLE pending_generations; (aucune dépendance hors ce fichier)
 --
--- FK : pending_generations.request_id -> diagnostic_requests.request_id (TEXT, UUID format)
+-- FK : pending_generations.request_id -> diagnostic_requests.request_id (UUID)
+--
+-- D_T2010_08 (correction T1020 Mission N8) :
+--   Alignement type FK sur diagnostic_requests.request_id qui est UUID en prod.
+--   La migration a été appliquée en prod avec correction manuelle P0-1 (cf. bridge T2010 §3 D_T2010_08)
+--   -- la colonne source était écrite TEXT, JP a exécuté en remplaçant par UUID à la main.
+--   Cette correction du fichier source ne s'exécutera pas en prod (migration déjà passée) ;
+--   objectif = reproductibilité / cohérence dépôt git seule.
 --
 -- Statuts métier :
 --   pending    : webhook Mollie paid reçu, attente action JP dashboard
@@ -21,7 +28,7 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS pending_generations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    request_id TEXT NOT NULL REFERENCES diagnostic_requests(request_id),
+    request_id UUID NOT NULL REFERENCES diagnostic_requests(request_id),
     status TEXT NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'generating', 'generated', 'failed')),
     triggered_by TEXT NULL
