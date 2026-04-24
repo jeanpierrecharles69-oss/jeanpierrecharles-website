@@ -17,6 +17,11 @@ import { supabase, logSupabaseUnavailable } from '../_lib/supabase.js';
  * Il marque l'intention JP + fournit la commande à exécuter localement.
  * PowerShell script `aegis-deliver-diagnostic.ps1` reste HORS repo (C:\Projects\aegis-ops\scripts\).
  *
+ * Version : 1.1.0 -- 20260424 -- D_T2010_01 (Mission N8) :
+ *           local_command émet désormais `-RequestId <uuid>` au lieu de
+ *           `-PendingGenerationId <uuid>` pour aligner sur le contrat
+ *           consommé par le script PS1 `aegis-deliver-diagnostic.ps1` v1.0.1
+ *           (hors repo, non modifiable depuis ACDC -- cf. CLAUDE.md §API Claude).
  * Version : 1.0.0 -- 20260422 -- Mission Night N7
  */
 
@@ -99,8 +104,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             request_id: data.request_id,
             triggered_at: data.triggered_at,
             message: 'Intention enregistrée. Exécutez localement :',
-            local_command: `aegis-deliver-diagnostic.ps1 -PendingGenerationId ${pendingGenerationId}`,
-            note: 'Le script PowerShell est dans C:\\Projects\\aegis-ops\\scripts\\ (hors repo). Paramètre -PendingGenerationId à implémenter JP jeudi matin.',
+            local_command: `aegis-deliver-diagnostic.ps1 -RequestId ${data.request_id}`,
+            note: 'Le script PowerShell est dans C:\\Projects\\aegis-ops\\scripts\\ (hors repo git, cf. CLAUDE.md §API Claude). Contrat PS1 v1.0.1 consomme -RequestId ; pending_generation_id reste tracé côté logs/UPDATE dashboard.',
         });
     } catch (err: unknown) {
         const msg = (err as { message?: string })?.message || 'unknown';
