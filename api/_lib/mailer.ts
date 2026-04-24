@@ -22,6 +22,15 @@ import {
  *  - Set<string> in-memory par instance warm
  *  - DETTE7 : Vercel KV pour persistance cross-instance (v3.4.6)
  *
+ * Version : 1.3.0 -- 20260424 -- Mission N8 D_T2010_10 patches B + C :
+ *   - Patch B (anti-spam subject) : retrait crochets [AEGIS] des subjects CLIENT
+ *     (sendDeliveryConfirmation, sendClientDiagnostic). Subjects ops inchanges.
+ *     Rationale : Gmail / Outlook flag les subjects crochetes comme spam ;
+ *     observation empirique smoke InnovateMat T2010 (rejet silencieux delivery).
+ *   - Patch C (multipart plain-text fallback) : ajout propriete `text` a cote
+ *     de `html` sur les sendMail pour ameliorer la deliverabilite (score SpamAssassin
+ *     ameliore, prevention "HTML only" flags). Helper htmlToPlainText local,
+ *     sans nouvelle dependance npm.
  * Version : 1.2.0 -- 20260422 -- PHASE-C sendClientDiagnostic (Living Spec v1.1 §7 + EA-05)
  */
 
@@ -79,6 +88,34 @@ function isValidEmail(email: string): boolean {
 
 function logMailer(data: Record<string, unknown>): void {
     console.log(JSON.stringify(data));
+}
+
+/**
+ * Convertit un corps HTML email en plain-text simple pour le multipart fallback.
+ * D_T2010_10 Patch C -- pas de dependance externe (html-to-text non requise).
+ * Approche pragmatique : remplace br/p par newlines, strip balises, decode entites
+ * usuelles, normalise les blancs. Suffisant pour les emails AEGIS courts / structures.
+ */
+function htmlToPlainText(html: string): string {
+    return html
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n\n')
+        .replace(/<\/div>/gi, '\n')
+        .replace(/<\/h[1-6]>/gi, '\n\n')
+        .replace(/<\/tr>/gi, '\n')
+        .replace(/<\/td>/gi, '\t')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&#39;|&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
 }
 
 // --- Data types ---
@@ -139,6 +176,7 @@ export async function sendClientConfirmation(data: MailerPaymentData): Promise<v
         to: recipient,
         subject,
         html,
+        text: htmlToPlainText(html),
     });
 
     logMailer({
@@ -164,6 +202,7 @@ export async function sendOpsNewOrder(data: MailerPaymentData): Promise<void> {
         to: OPS_NOTIFY_EMAIL,
         subject: `[AEGIS] Nouvelle commande DIAGNOSTIC #REQ-${reqShort}`,
         html,
+        text: htmlToPlainText(html),
     });
 
     logMailer({
@@ -193,9 +232,11 @@ export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise
 
     const lang = (data.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
     const html = deliveryConfirmationHtml(data, lang);
+    const companyPart = data.customer_company ? ` — ${data.customer_company}` : '';
+    const invoicePart = data.invoice_number ? ` (${data.invoice_number})` : '';
     const subject = lang === 'fr'
-        ? `[AEGIS] Votre rapport DIAGNOSTIC est prêt`
-        : `[AEGIS] Your DIAGNOSTIC report is ready`;
+        ? `Votre diagnostic conformité industrielle${companyPart}${invoicePart}`
+        : `Your industrial compliance diagnostic${companyPart}${invoicePart}`;
 
     let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
     let attachmentSize = 0;
@@ -218,6 +259,7 @@ export async function sendDeliveryConfirmation(data: MailerPaymentData): Promise
         to: recipient,
         subject,
         html,
+        text: htmlToPlainText(html),
         attachments,
     });
 
@@ -257,8 +299,8 @@ export async function sendClientDiagnostic(params: {
     }
 
     const subject = lang === 'fr'
-        ? `[AEGIS] Votre rapport DIAGNOSTIC ${invoiceNumber}`
-        : `[AEGIS] Your DIAGNOSTIC report ${invoiceNumber}`;
+        ? `Votre diagnostic conformité industrielle (${invoiceNumber})`
+        : `Your industrial compliance diagnostic (${invoiceNumber})`;
 
     const html = lang === 'fr'
         ? `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#0f172a;">
@@ -281,6 +323,7 @@ export async function sendClientDiagnostic(params: {
         to,
         subject,
         html,
+        text: htmlToPlainText(html),
         attachments: [{
             filename: `AEGIS-DIAGNOSTIC-${invoiceNumber}.pdf`,
             content: pdfBuffer,
@@ -310,6 +353,7 @@ export async function sendOpsPreNotify(data: MailerPaymentData): Promise<void> {
         to: OPS_NOTIFY_EMAIL,
         subject: `[AEGIS] Tentative checkout — ${data.customer_company || data.sector || 'N/A'}`,
         html,
+        text: htmlToPlainText(html),
     });
 
     logMailer({
