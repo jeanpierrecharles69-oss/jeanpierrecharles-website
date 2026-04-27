@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
+ * Version : 1.3.2 -- 20260427T1320 CET -- FIX L_T1212_01 propagation invoice_number + ref dans redirectUrl (cross-origin sessionStorage perte preview cobaye-2-en)
  * Version : 1.3.1 -- 20260424T1715 CET -- metadata allege (1kB limit Mollie) product_description 100c regulations 80c context null
  */
 
@@ -139,7 +140,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 value: productConfig.amount,
             },
             description,
-            redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
+            redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`
+                + (invoice_number ? `&invoice=${encodeURIComponent(invoice_number)}` : '')
+                + (request_id ? `&ref=${encodeURIComponent(request_id)}` : ''),
             webhookUrl: `${WEBHOOK_BASE_URL}/api/mollie-webhook`,
             metadata: {
                 product,
