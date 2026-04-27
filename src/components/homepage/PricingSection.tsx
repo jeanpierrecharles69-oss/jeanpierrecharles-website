@@ -23,7 +23,7 @@ export default function PricingSection() {
             const reqRes = await fetch(DIAGNOSTIC_REQUEST_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, lang }),
             });
             if (!reqRes.ok) {
                 const err = await reqRes.json().catch(() => ({}));
@@ -72,13 +72,17 @@ export default function PricingSection() {
                 window.location.href = checkoutData.checkoutUrl;
             } else {
                 console.error('No checkout URL returned:', checkoutData);
+                alert(lang === 'fr'
+                    ? 'Erreur lors du paiement. Veuillez réessayer ou nous contacter à contact@jeanpierrecharles.com'
+                    : 'Payment error. Please try again or contact us at contact@jeanpierrecharles.com');
                 setShowDiagForm(false);
-                setShowContact(true);
             }
         } catch (err) {
             console.error('Diagnostic checkout error:', err);
+            alert(lang === 'fr'
+                ? 'Erreur lors du paiement. Veuillez réessayer ou nous contacter à contact@jeanpierrecharles.com'
+                : 'Payment error. Please try again or contact us at contact@jeanpierrecharles.com');
             setShowDiagForm(false);
-            setShowContact(true);
         } finally {
             setCheckoutLoading(false);
         }
