@@ -7,6 +7,7 @@ import type { MailerPaymentData } from './mailer';
  *
  * SELLER constants = memes valeurs que MerciPage.tsx (DRY cross-module).
  *
+ * Version : 1.2.0 -- 20260427T1452 CET -- FIX L_T1355_01 email client utilise invoice_number canonique (vs REQ-{uuid8})
  * Version : 1.1.0 -- 20260418 -- NIGHT-N5 DETTE18 (bloc piece jointe vs bouton lien)
  */
 
@@ -88,7 +89,6 @@ export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en
     const isFr = lang === 'fr';
     const invoiceNum = data.invoice_number || generateInvoiceNumber();
     const date = formatDate(lang);
-    const reqShort = (data.request_id || 'N/A').slice(0, 8);
     const amount = data.amount || '250.00';
     const merciUrl = `https://jeanpierrecharles.com/merci?product=diagnostic&lang=${lang}&invoice=${encodeURIComponent(invoiceNum)}&ref=${encodeURIComponent(data.request_id || '')}`;
 
@@ -141,7 +141,7 @@ export function clientConfirmationHtml(data: MailerPaymentData, lang: 'fr' | 'en
     <div style="background:${BRAND.bgAlt};border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid ${BRAND.border}">
         <div class="label">${isFr ? 'DÉTAILS COMMANDE' : 'ORDER DETAILS'}</div>
         <div style="font-size:12px;line-height:1.8">
-            <strong>${isFr ? 'Référence' : 'Reference'}:</strong> REQ-${escapeHtml(reqShort)}<br>
+            <strong>${isFr ? 'Référence' : 'Reference'}:</strong> ${escapeHtml(invoiceNum)}<br>
             <strong>Date:</strong> ${date}<br>
             <strong>${isFr ? 'Livraison' : 'Delivery'}:</strong> ${isFr ? 'Jour ouvré du paiement (avant 19h CET)' : 'Same business day (before 19:00 CET)'}
         </div>
