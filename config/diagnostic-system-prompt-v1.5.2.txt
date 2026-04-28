@@ -253,7 +253,29 @@ Le paragraphe doit faire sens pour un dirigeant de PME/ETI lisant le rapport en 
 Pour preserver la simplicite du pipeline Pandoc + XeLaTeX actuel (pas de dependance LaTeX supplementaire, pas de fichier SVG externe a injecter). Le tableau consolide + narratif est le compromis robuste arbitrage JP T0950.
 
 # TYPOGRAPHIE ET FORMAT
-- Langue francaise : utiliser les accents corrects (e, e, a, u, c, oe, ae).
+
+## ACCENTS FRANCAIS -- REGLE ABSOLUE (v1.5.2 fix BUG-3 28/04)
+
+INTERDICTION ABSOLUE de produire le rapport FR sans accents. Le prompt systeme ci-dessus est volontairement archive sans accents (contraintes outillage interne), MAIS le rapport livre au client DOIT contenir l'integralite des accents francais corrects. Tout rapport FR sans accents est une REGRESSION et sera REJETE par le controle qualite.
+
+Caracteres accentues obligatoires : e a (e accent aigu, e accent grave), e i o u (e/i/o/u circonflexe), a e u (trema), c (c cedille), oe ae (ligatures).
+
+Exemples imperatifs (FR correct attendu / FR errone interdit) :
+- « Reference diagnostic » -> "Référence diagnostic"  (et JAMAIS "Reference diagnostic")
+- « Reglement » -> "Règlement"  (et JAMAIS "Reglement")
+- « Securite » -> "Sécurité"  (et JAMAIS "Securite")
+- « Systeme » -> "Système"  (et JAMAIS "Systeme")
+- « Marche europeenne » -> "Marché européen"  (et JAMAIS "Marche europeenne")
+- « specificite, conformite, autorite, integrite » -> "spécificité, conformité, autorité, intégrité"
+- « apres, des que, ou (conjonction), la (adverbe), deja, controle » -> "après, dès que, où, là, déjà, contrôle"
+- « cout, surete, surement » -> "coût, sûreté, sûrement"
+- « facade, francais, recu, efficace » -> "façade, français, reçu, efficace"
+
+Cette regle s'applique a TOUS les passages francophones du rapport : titres `##` et `###`, corps de texte, cellules de tableaux, citations, en-tete metadata, signature finale. Aucune exception sauf : noms officiels de reglements en EUR-Lex (qui suivent leurs propres conventions), codes normatifs (EN ISO, IEC), noms propres etrangers.
+
+En mode LANG:EN, cette regle ne s'applique pas (le rapport est integralement en EN-GB).
+
+## Autres regles typographiques
 - Guillemets francais pour les citations.
 - Convention numerique europeenne : 1 000,00 EUR (espace pour milliers, virgule decimale).
 - Titres en Markdown : ## pour sections principales, ### pour sous-sections.

@@ -5,7 +5,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * SECURITE : Cle API dans variables Vercel (JAMAIS dans le code)
  * CORS : Restreint a jeanpierrecharles.com + localhost dev
  * Usage : Checkout one-shot DIAGNOSTIC 250 EUR
- * Version : 1.3.0 -- 20260420T1445 CET -- webhookUrl dynamique VERCEL_ENV-aware (asset Rupture 2 FAI V&V preview)
+ * Version : 1.3.3 -- 20260427T1448 CET -- FIX L_T1158_01 locale Mollie dynamique selon lang (fr_FR / en_GB)
+ * Version : 1.3.2 -- 20260427T1320 CET -- FIX L_T1212_01 propagation invoice_number + ref dans redirectUrl (cross-origin sessionStorage perte preview cobaye-2-en)
+ * Version : 1.3.1 -- 20260424T1715 CET -- metadata allege (1kB limit Mollie) product_description 100c regulations 80c context null
  */
 
 // Selection automatique de la cle Mollie selon l'environnement Vercel
@@ -139,7 +141,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 value: productConfig.amount,
             },
             description,
-            redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`,
+            locale: langKey === 'en' ? 'en_GB' : 'fr_FR',
+            redirectUrl: `${baseUrl}/merci?product=${product}&lang=${langKey}`
+                + (invoice_number ? `&invoice=${encodeURIComponent(invoice_number)}` : '')
+                + (request_id ? `&ref=${encodeURIComponent(request_id)}` : ''),
             webhookUrl: `${WEBHOOK_BASE_URL}/api/mollie-webhook`,
             metadata: {
                 product,
@@ -153,11 +158,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 customer_company: customer_company || null,
                 sector: sector || null,
                 product_description: typeof product_description === 'string'
-                    ? product_description.slice(0, 450) : null,
+                    ? product_description.slice(0, 100) : null,
                 regulations: Array.isArray(regulations)
-                    ? regulations.join(', ').slice(0, 200) : null,
-                context: typeof context === 'string'
-                    ? context.slice(0, 300) : null,
+                    ? regulations.join(', ').slice(0, 80) : null,
+                context: null, // v1.3.1 -- donnees completes dans Supabase diagnostic_requests via request_id
                 invoice_number: invoice_number || null,
             },
         };

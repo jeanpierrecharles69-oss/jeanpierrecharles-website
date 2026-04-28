@@ -12,9 +12,12 @@ const LangContext = createContext<LangContextType | undefined>(undefined);
 // Patch P14 (14/04 T1005) : init lang depuis URL pour supporter deep-link /en
 // Si pathname commence par /en -> lang initial 'en', sinon 'fr'
 const getInitialLang = (): Lang => {
-    if (typeof window !== "undefined" && window.location.pathname.startsWith("/en")) {
-        return "en";
-    }
+    if (typeof window === "undefined") return "fr";
+    // P15 (25/04) : support ?lang=en query param pour redirect Mollie post-paiement
+    const params = new URLSearchParams(window.location.search);
+    const qLang = params.get("lang");
+    if (qLang === "en") return "en";
+    if (window.location.pathname.startsWith("/en")) return "en";
     return "fr";
 };
 

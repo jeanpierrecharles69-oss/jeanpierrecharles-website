@@ -64,7 +64,7 @@ const content = {
 export default function MerciPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { lang } = useLang();
+    const { lang, setLang } = useLang();
     const [isGenerating, setIsGenerating] = useState(false);
 
     // CHANGE-07 : fallback invoice number from URL param (email link support)
@@ -83,6 +83,12 @@ export default function MerciPage() {
     });
 
     const pageLang = (searchParams.get('lang') as 'fr' | 'en') || lang || 'fr';
+
+    // FIX i18n T1450 28/04 : sync LangContext from URL param so NavBar/Footer follow
+    useEffect(() => {
+        if (pageLang !== lang) setLang(pageLang);
+    }, [pageLang, lang, setLang]);
+
     const t = content[pageLang] || content.fr;
 
     const getDiagData = () => {

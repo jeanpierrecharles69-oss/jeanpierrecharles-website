@@ -47,11 +47,12 @@
 
 \documentclass[a4paper,11pt]{article}
 
-% ---------- Typographie UTF-8 française D48 ----------
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+% ---------- Typographie UTF-8 française D48 (XeLaTeX natif) ----------
+% NOTE: inputenc/fontenc/lmodern sont des paquets pdfLaTeX incompatibles avec
+% XeLaTeX. fontspec est le successeur officiel et lit l'UTF-8 nativement
+% (cf. fix MISSION-N11 PDF-PIPELINE 20260428T0945, mojibake "approuv├®").
+\usepackage{fontspec}
 \usepackage[french]{babel}
-\usepackage{lmodern}
 
 % ---------- Géométrie page ----------
 \usepackage[margin=2.5cm,top=3cm,bottom=3cm,headheight=15pt]{geometry}
@@ -94,9 +95,18 @@
 }
 
 % ---------- Tableaux ----------
+% Pandoc 3.x emet pour les longtable :
+%   \def\LTcaptype{none}                      -> redirige caption counter
+%   * \real{0.3333}                           -> calcul largeur col via calc
+% Sans calc + counter 'none' + array, XeLaTeX echoue avec "No counter 'none'
+% defined" (cf. fix MISSION-N11 PDF-PIPELINE PASS2 20260428T1015).
+\usepackage{calc}
+\usepackage{array}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{longtable}
+\providecommand{\real}[1]{#1}
+\newcounter{none}
 
 % ---------- Listes ----------
 \usepackage{enumitem}
