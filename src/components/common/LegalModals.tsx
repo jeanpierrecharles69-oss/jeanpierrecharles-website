@@ -79,7 +79,7 @@ export function CGVModal({ onClose, lang }: { onClose: () => void; lang: string 
                 <P>English version available upon request — please contact <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a></P>
                 <P>The French version below is the legally binding version.</P>
                 <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                {renderCGVContent()}
+                {renderCGVContent_FR()}
                 <CloseBtn label="Close" onClick={onClose} />
             </Overlay>
         );
@@ -91,15 +91,15 @@ export function CGVModal({ onClose, lang }: { onClose: () => void; lang: string 
                 Conditions G&eacute;n&eacute;rales de Vente
             </h2>
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
-                Version 1.1 — En vigueur &agrave; compter du 15 avril 2026
+                Version 1.2 — En vigueur &agrave; compter du 29 avril 2026
             </div>
-            {renderCGVContent()}
+            {renderCGVContent_FR()}
             <CloseBtn label="Fermer" onClick={onClose} />
         </Overlay>
     );
 }
 
-function renderCGVContent() {
+function renderCGVContent_FR() {
     return (
         <>
             <SectionTitle>Article 1 — Objet et champ d'application</SectionTitle>
@@ -133,8 +133,8 @@ function renderCGVContent() {
             <P>La commande s'effectue exclusivement en ligne. Le processus comprend : s&eacute;lection du service, saisie des informations d'identification, saisie des informations du diagnostic souhait&eacute;, acceptation expresse des CGV et de la Politique de Confidentialit&eacute;, paiement via Mollie. La commande est ferme et d&eacute;finitive &agrave; r&eacute;ception du paiement.</P>
 
             <SectionTitle>Article 5 — Modalit&eacute;s de paiement</SectionTitle>
-            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Conform&eacute;ment &agrave; l'article L441-10 du Code de commerce, sauf stipulation contraire n&eacute;goci&eacute;e entre les Parties et accept&eacute;e par &eacute;crit, le paiement est exigible imm&eacute;diatement &agrave; la commande. Aucun escompte n'est accord&eacute; pour paiement anticip&eacute;.</P>
-            <P>En cas de retard ou de d&eacute;faut de paiement : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire pour frais de recouvrement de 40,00 EUR (art. L441-10 Code de commerce).</P>
+            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Conform&eacute;ment &agrave; l'article L441-10 du Code de commerce, <strong>transposant la Directive 2011/7/UE du 16 f&eacute;vrier 2011 concernant la lutte contre le retard de paiement dans les transactions commerciales</strong>, sauf stipulation contraire n&eacute;goci&eacute;e entre les Parties et accept&eacute;e par &eacute;crit, le paiement est exigible imm&eacute;diatement &agrave; la commande. Aucun escompte n'est accord&eacute; pour paiement anticip&eacute;.</P>
+            <P>En cas de retard ou de d&eacute;faut de paiement : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire pour frais de recouvrement de 40,00 EUR (art. L441-10 Code de commerce ; art. 6 Directive 2011/7/UE).</P>
 
             <SectionTitle>Article 6 — Livraison du service DIAGNOSTIC</SectionTitle>
             <P>Rapport PDF livr&eacute; par email. Paiement avant 17h CET jour ouvr&eacute; : livraison le jour m&ecirc;me avant 19h CET. Apr&egrave;s 17h / week-end / jours f&eacute;ri&eacute;s : livraison avant 12h CET le jour ouvr&eacute; suivant.</P>
@@ -160,11 +160,25 @@ function renderCGVContent() {
 
             <SectionTitle>Article 11 — R&egrave;glement des litiges</SectionTitle>
             <P>
-                Avant toute action contentieuse, les Parties s'engagent &agrave; rechercher une solution amiable par voie de n&eacute;gociation directe. &Agrave; d&eacute;faut d'accord amiable dans un d&eacute;lai de trente (30) jours &agrave; compter de la notification du diff&eacute;rend, tout litige relatif &agrave; la formation, l'ex&eacute;cution ou l'interpr&eacute;tation des pr&eacute;sentes CGV rel&egrave;ve de la comp&eacute;tence exclusive des tribunaux fran&ccedil;ais du ressort du si&egrave;ge du Prestataire. La loi applicable est la loi fran&ccedil;aise.
+                Avant toute action contentieuse, les Parties s'engagent &agrave; rechercher une solution amiable par voie de n&eacute;gociation directe. &Agrave; d&eacute;faut d'accord amiable dans un d&eacute;lai de trente (30) jours &agrave; compter de la notification du diff&eacute;rend, tout litige relatif &agrave; la formation, l'ex&eacute;cution ou l'interpr&eacute;tation des pr&eacute;sentes CGV rel&egrave;ve de la <strong>comp&eacute;tence exclusive des tribunaux fran&ccedil;ais</strong> du ressort du si&egrave;ge du Prestataire, conform&eacute;ment &agrave; <strong>l'article 25 du R&egrave;glement (UE) n&deg; 1215/2012 du 12 d&eacute;cembre 2012 (Bruxelles I bis refonte)</strong> concernant la comp&eacute;tence judiciaire, la reconnaissance et l'ex&eacute;cution des d&eacute;cisions en mati&egrave;re civile et commerciale.
+            </P>
+            <P>
+                La loi applicable est la <strong>loi fran&ccedil;aise</strong>, conform&eacute;ment &agrave; <strong>l'article 3 du R&egrave;glement (CE) n&deg; 593/2008 du 17 juin 2008 (Rome I)</strong> sur la loi applicable aux obligations contractuelles, les Parties choisissant express&eacute;ment la loi fran&ccedil;aise comme loi r&eacute;gissant le pr&eacute;sent contrat.
             </P>
 
             <SectionTitle>Article 12 — Modifications</SectionTitle>
             <P>Le Prestataire se r&eacute;serve le droit de modifier les CGV. Les CGV applicables sont celles en vigueur &agrave; la date de la commande.</P>
+
+            <SectionTitle>Article 13 — Transparence IA (conformit&eacute; R&egrave;glement IA Act EU)</SectionTitle>
+            <P>
+                Conform&eacute;ment &agrave; <strong>l'article 50 du R&egrave;glement (UE) 2024/1689 du 13 juin 2024 (R&egrave;glement IA Act)</strong> &eacute;tablissant des r&egrave;gles harmonis&eacute;es concernant l'intelligence artificielle (entr&eacute;e en vigueur le 2 ao&ucirc;t 2026, application anticip&eacute;e &agrave; compter d'avril 2026 par le Prestataire), le Client est express&eacute;ment inform&eacute; que :
+            </P>
+            <ol style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
+                <li>Le rapport DIAGNOSTIC est <strong>g&eacute;n&eacute;r&eacute; avec l'assistance d'un syst&egrave;me d'intelligence artificielle</strong> (Claude Opus 4.6, d&eacute;velopp&eacute; par Anthropic PBC), sous la supervision qualifi&eacute;e et le contr&ocirc;le &eacute;ditorial de Jean-Pierre Charles.</li>
+                <li>Le pr&eacute;-diagnostic PULSE et l'AEGIS Intelligence Brain sont des <strong>syst&egrave;mes d'IA conversationnels</strong> bas&eacute;s sur Gemini Flash (d&eacute;velopp&eacute; par Google LLC) et Claude Opus.</li>
+                <li>Le contenu g&eacute;n&eacute;r&eacute; par IA refl&egrave;te une analyse r&eacute;glementaire fond&eacute;e sur les donn&eacute;es d'entra&icirc;nement et les prompts de configuration &eacute;tablis par le Prestataire ; il ne se substitue pas &agrave; une consultation juridique formelle ni &agrave; un avis officiel d'une autorit&eacute; de r&eacute;gulation (cf. Article 8).</li>
+                <li>Le Client conserve le droit de demander une revue humaine exclusive de tout rapport DIAGNOSTIC au tarif standard EXPERTISE TERRAIN (350,00 EUR/heure).</li>
+            </ol>
         </>
     );
 }
@@ -185,7 +199,7 @@ export function PrivacyModal({ onClose, lang }: { onClose: () => void; lang: str
                 <P>English version available upon request — please contact <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a></P>
                 <P>The French version below is the legally binding version.</P>
                 <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                {renderPrivacyContent()}
+                {renderPrivacyContent_FR()}
                 <CloseBtn label="Close" onClick={onClose} />
             </Overlay>
         );
@@ -199,13 +213,13 @@ export function PrivacyModal({ onClose, lang }: { onClose: () => void; lang: str
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
                 Version 1.1 — Responsable : Jean-Pierre Charles — contact@jeanpierrecharles.com — En vigueur &agrave; compter du 15 avril 2026
             </div>
-            {renderPrivacyContent()}
+            {renderPrivacyContent_FR()}
             <CloseBtn label="Fermer" onClick={onClose} />
         </Overlay>
     );
 }
 
-function renderPrivacyContent() {
+function renderPrivacyContent_FR() {
     return (
         <>
             <SectionTitle>1. Engagement RGPD</SectionTitle>
