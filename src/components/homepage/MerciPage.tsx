@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import jsPDF from 'jspdf';
 import { useLang } from '../homepage/LangContext';
 import { C } from '../homepage/constants';
 
@@ -101,118 +102,261 @@ export default function MerciPage() {
         return null;
     };
 
-    const handleDownloadInvoice = async () => {
+    // V350 FIX P0 (D_T1700_01) : refonte jsPDF natif vectoriel.
+    // Anciennement html2pdf.js + html2canvas scale=2 → CPU 100% main thread → freeze multi-tab Chrome (AMDEC C=900).
+    // jsPDF natif = ~50-200ms render, texte vectoriel sélectionnable, bundle -450KB. Pas de rasterisation HTML.
+    const handleDownloadInvoice = () => {
         if (isGenerating) return;
         setIsGenerating(true);
         try {
-            const html2pdf = (await import('html2pdf.js')).default;
             const diag = getDiagData();
             const dateStr = new Date().toLocaleDateString(pageLang === 'fr' ? 'fr-FR' : 'en-GB', {
                 year: 'numeric', month: 'long', day: 'numeric',
             });
             const dateISO = new Date().toISOString().split('T')[0];
-
             const isFr = pageLang === 'fr';
-            const wrapper = document.createElement('div');
-            wrapper.style.cssText = "font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:12px;color:#1e293b;max-width:700px";
 
-            wrapper.innerHTML = [
-                '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:16px;border-bottom:2px solid ' + C.accent + '">',
-                '  <div>',
-                '    <div style="font-size:20px;font-weight:800;color:' + C.accent + ';letter-spacing:-0.02em">AEGIS Intelligence</div>',
-                '    <div style="font-size:9px;color:#64748b;margin-top:4px">' + SELLER.forme + ' | SIREN ' + SELLER.siren + '</div>',
-                '  </div>',
-                '  <div style="text-align:right">',
-                '    <div style="font-size:16px;font-weight:700;color:' + C.text + '">' + (isFr ? 'FACTURE' : 'INVOICE') + '</div>',
-                '    <div style="font-size:10px;color:#64748b;margin-top:2px">' + invoiceNumber + '</div>',
-                '    <div style="font-size:10px;color:#64748b">' + dateStr + '</div>',
-                '  </div>',
-                '</div>',
-                '<div style="display:flex;justify-content:space-between;margin-bottom:28px;gap:40px">',
-                '  <div style="flex:1">',
-                '    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:6px">' + (isFr ? 'EMETTEUR' : 'FROM') + '</div>',
-                '    <div style="font-size:11px;line-height:1.6">',
-                '      <strong>' + SELLER.name + '</strong><br>',
-                '      ' + SELLER.trade + '<br>',
-                '      SIRET : ' + SELLER.siret + '<br>',
-                '      APE : ' + SELLER.ape + '<br>',
-                '      ' + SELLER.address + '<br>',
-                '      ' + SELLER.email,
-                '    </div>',
-                '  </div>',
-                '  <div style="flex:1">',
-                '    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:6px">' + (isFr ? 'CLIENT' : 'CUSTOMER') + '</div>',
-                '    <div style="font-size:11px;line-height:1.6;color:#475569">',
-                      (diag?.sector ? (isFr ? 'Secteur' : 'Sector') + ' : ' + diag.sector + '<br>' : ''),
-                      (diag?.product ? (isFr ? 'Produit' : 'Product') + ' : ' + diag.product + '<br>' : ''),
-                      (diag?.regs?.length ? (isFr ? 'Règlements' : 'Regulations') + ' : ' + diag.regs.join(', ') + '<br>' : ''),
-                      (diag?.context ? (isFr ? 'Contexte' : 'Context') + ' : ' + diag.context : ''),
-                '    </div>',
-                '  </div>',
-                '</div>',
-                '<table style="width:100%;border-collapse:collapse;margin-bottom:24px">',
-                '  <thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">',
-                '    <th style="text-align:left;padding:10px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b">Description</th>',
-                '    <th style="text-align:right;padding:10px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b">' + (isFr ? 'Montant' : 'Amount') + '</th>',
-                '  </tr></thead>',
-                '  <tbody><tr style="border-bottom:1px solid #e2e8f0">',
-                '    <td style="padding:12px;font-size:12px">',
-                '      <strong>' + (isFr ? 'Diagnostic Technique de Conformité Industrielle EU' : 'EU Industrial Compliance Technical Diagnostic') + '</strong><br>',
-                '      <span style="font-size:10px;color:#64748b">' + (isFr
-                    ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
-                    : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report') + '</span>',
-                '    </td>',
-                '    <td style="padding:12px;font-size:14px;font-weight:700;text-align:right;white-space:nowrap">250,00 EUR</td>',
-                '  </tr></tbody>',
-                '</table>',
-                '<div style="display:flex;justify-content:flex-end;margin-bottom:24px">',
-                '  <div style="width:240px">',
-                '    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:11px;color:#64748b;border-bottom:1px solid #e2e8f0">',
-                '      <span>' + (isFr ? 'Sous-total HT' : 'Subtotal excl. VAT') + '</span><span>250,00 EUR</span>',
-                '    </div>',
-                '    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:10px;color:#94a3b8;border-bottom:1px solid #e2e8f0">',
-                '      <span>TVA</span><span>0,00 EUR</span>',
-                '    </div>',
-                '    <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:14px;font-weight:800;color:' + C.text + '">',
-                '      <span>TOTAL</span><span>250,00 EUR</span>',
-                '    </div>',
-                '  </div>',
-                '</div>',
-                '<div style="background:#f8fafc;border-radius:8px;padding:14px 16px;margin-bottom:20px;border:1px solid #e2e8f0">',
-                '  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:6px">' + (isFr ? 'MENTIONS LÉGALES' : 'LEGAL NOTICES') + '</div>',
-                '  <div style="font-size:9px;color:#64748b;line-height:1.6">',
-                '    ' + SELLER.tva + '<br>',
-                '    ' + (isFr ? 'Paiement effectué via Mollie (paiement sécurisé EU).' : 'Payment processed via Mollie (secure EU payment).') + '<br>',
-                '    ' + (isFr ? 'Conditions : paiement comptant à la commande.' : 'Terms: payment due upon order.') + '<br>',
-                '    ' + (isFr ? 'Pénalités de retard : 3x taux intérêt légal (Art. L.441-10 C. com.).' : 'Late penalty: 3x legal interest rate (Art. L.441-10 C. com.).'),
-                '  </div>',
-                '</div>',
-                '<div style="text-align:center;font-size:9px;color:#94a3b8;padding-top:12px;border-top:1px solid #e2e8f0">',
-                '  AEGIS Intelligence | ' + SELLER.web + ' | ' + SELLER.email + ' | SIRET ' + SELLER.siret,
-                '</div>',
-            ].join('\n');
+            const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-            const filename = 'Facture_AEGIS_' + invoiceNumber + '_' + dateISO + '.pdf';
-            const opt = {
-                margin: [10, 12, 10, 12],
-                filename,
-                image: { type: 'jpeg' as const, quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+            // Hex → RGB tuple (jsPDF setTextColor/setDrawColor/setFillColor accept r,g,b numbers)
+            const rgb = (h: string): [number, number, number] => {
+                const c = h.replace('#', '');
+                return [
+                    parseInt(c.slice(0, 2), 16),
+                    parseInt(c.slice(2, 4), 16),
+                    parseInt(c.slice(4, 6), 16),
+                ];
             };
+            const setText = (h: string) => { const c = rgb(h); doc.setTextColor(c[0], c[1], c[2]); };
+            const setDraw = (h: string) => { const c = rgb(h); doc.setDrawColor(c[0], c[1], c[2]); };
+            const setFill = (h: string) => { const c = rgb(h); doc.setFillColor(c[0], c[1], c[2]); };
 
+            // Layout : A4 portrait 210x297mm, marges 12mm latérales / 10mm haut-bas (brief §3.2)
+            const PAGE_W = 210;
+            const ML = 12;
+            const MR = 12;
+            const MT = 10;
+            const RIGHT = PAGE_W - MR;
+            const CW = PAGE_W - ML - MR; // content width = 186mm
+
+            // === HEADER ===
+            let y = MT + 8;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            setText(C.accent);
+            doc.text('AEGIS Intelligence', ML, y);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            setText('#64748b'); // slate-500
+            doc.text(`${SELLER.forme} | SIREN ${SELLER.siren}`, ML, y + 4.5);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            setText(C.text);
+            doc.text(isFr ? 'FACTURE' : 'INVOICE', RIGHT, y, { align: 'right' });
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            setText('#64748b');
+            doc.text(invoiceNumber, RIGHT, y + 4.5, { align: 'right' });
+            doc.text(dateStr, RIGHT, y + 9, { align: 'right' });
+
+            // Accent line
+            y += 14;
+            setDraw(C.accent);
+            doc.setLineWidth(0.6);
+            doc.line(ML, y, RIGHT, y);
+            y += 9;
+
+            // === FROM / CUSTOMER blocks ===
+            const colW = (CW - 8) / 2;
+            const col2X = ML + colW + 8;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7);
+            setText('#94a3b8'); // slate-400
+            doc.text(isFr ? 'EMETTEUR' : 'FROM', ML, y);
+            doc.text(isFr ? 'CLIENT' : 'CUSTOMER', col2X, y);
+
+            // FROM block
+            let fy = y + 5;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            setText(C.text);
+            doc.text(SELLER.name, ML, fy);
+            fy += 4.5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            setText('#475569'); // slate-600
+            const fromLines = [
+                SELLER.trade,
+                `SIRET : ${SELLER.siret}`,
+                `APE : ${SELLER.ape}`,
+                SELLER.address,
+                SELLER.email,
+            ];
+            for (const line of fromLines) {
+                doc.text(line, ML, fy);
+                fy += 4.2;
+            }
+
+            // CUSTOMER block
+            let cy = y + 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            setText('#475569');
+            const custLines: string[] = [];
+            if (diag?.sector) custLines.push(`${isFr ? 'Secteur' : 'Sector'} : ${diag.sector}`);
+            if (diag?.product) custLines.push(`${isFr ? 'Produit' : 'Product'} : ${diag.product}`);
+            if (diag?.regs?.length) custLines.push(`${isFr ? 'Règlements' : 'Regulations'} : ${diag.regs.join(', ')}`);
+            if (diag?.context) custLines.push(`${isFr ? 'Contexte' : 'Context'} : ${diag.context}`);
+            if (custLines.length === 0) {
+                custLines.push(isFr ? 'Diagnostic Technique de Conformité' : 'Technical Compliance Diagnostic');
+            }
+            for (const line of custLines) {
+                const wrapped = doc.splitTextToSize(line, colW) as string[];
+                doc.text(wrapped, col2X, cy);
+                cy += 4.2 * wrapped.length;
+            }
+
+            y = Math.max(fy, cy) + 6;
+
+            // === TABLE ===
+            const tableHdrH = 7;
+            setFill('#f8fafc'); // slate-50
+            doc.rect(ML, y, CW, tableHdrH, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            setText('#64748b');
+            doc.text('DESCRIPTION', ML + 3, y + 4.7);
+            doc.text(isFr ? 'MONTANT' : 'AMOUNT', RIGHT - 3, y + 4.7, { align: 'right' });
+            y += tableHdrH;
+
+            setDraw('#e2e8f0'); // slate-200
+            doc.setLineWidth(0.3);
+            doc.line(ML, y, RIGHT, y);
+
+            // Row content
+            y += 5;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            setText(C.text);
+            doc.text(
+                isFr
+                    ? 'Diagnostic Technique de Conformité Industrielle EU'
+                    : 'EU Industrial Compliance Technical Diagnostic',
+                ML + 3, y
+            );
+            doc.setFontSize(13);
+            doc.text('250,00 EUR', RIGHT - 3, y, { align: 'right' });
+
+            y += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            setText('#64748b');
+            const rowDetail = isFr
+                ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
+                : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report';
+            const rowDetailWrapped = doc.splitTextToSize(rowDetail, CW - 60) as string[];
+            doc.text(rowDetailWrapped, ML + 3, y);
+            y += 4 * rowDetailWrapped.length + 3;
+
+            doc.line(ML, y, RIGHT, y);
+            y += 8;
+
+            // === TOTALS (right aligned) ===
+            const totLabelX = RIGHT - 65;
+            const totValueX = RIGHT;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            setText('#64748b');
+            doc.text(isFr ? 'Sous-total HT' : 'Subtotal excl. VAT', totLabelX, y);
+            doc.text('250,00 EUR', totValueX, y, { align: 'right' });
+            y += 2;
+            doc.line(totLabelX, y, totValueX, y);
+            y += 4;
+
+            doc.setFontSize(9);
+            setText('#94a3b8');
+            doc.text('TVA', totLabelX, y);
+            doc.text('0,00 EUR', totValueX, y, { align: 'right' });
+            y += 2;
+            doc.line(totLabelX, y, totValueX, y);
+            y += 5;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            setText(C.text);
+            doc.text('TOTAL', totLabelX, y);
+            doc.text('250,00 EUR', totValueX, y, { align: 'right' });
+
+            y += 10;
+
+            // === LEGAL BOX ===
+            const legalH = 28;
+            setFill('#f8fafc');
+            setDraw('#e2e8f0');
+            doc.setLineWidth(0.3);
+            doc.roundedRect(ML, y, CW, legalH, 2, 2, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7);
+            setText('#94a3b8');
+            doc.text(isFr ? 'MENTIONS LÉGALES' : 'LEGAL NOTICES', ML + 4, y + 5);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            setText('#64748b');
+            const legalLines = [
+                SELLER.tva,
+                isFr
+                    ? 'Paiement effectué via Mollie (paiement sécurisé EU).'
+                    : 'Payment processed via Mollie (secure EU payment).',
+                isFr
+                    ? 'Conditions : paiement comptant à la commande.'
+                    : 'Terms: payment due upon order.',
+                isFr
+                    ? 'Pénalités de retard : 3x taux intérêt légal (Art. L.441-10 C. com.).'
+                    : 'Late penalty: 3x legal interest rate (Art. L.441-10 C. com.).',
+            ];
+            let ly = y + 10;
+            for (const line of legalLines) {
+                const wrapped = doc.splitTextToSize(line, CW - 8) as string[];
+                doc.text(wrapped, ML + 4, ly);
+                ly += 4 * wrapped.length;
+            }
+
+            y += legalH + 5;
+
+            // === FOOTER ===
+            setDraw('#e2e8f0');
+            doc.setLineWidth(0.3);
+            doc.line(ML, y, RIGHT, y);
+            y += 4.5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            setText('#94a3b8');
+            doc.text(
+                `AEGIS Intelligence | ${SELLER.web} | ${SELLER.email} | SIRET ${SELLER.siret}`,
+                PAGE_W / 2, y, { align: 'center' }
+            );
+
+            // === SAVE / DOWNLOAD ===
+            const filename = `Facture_AEGIS_${invoiceNumber}_${dateISO}.pdf`;
             const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
             if (isMobile) {
                 try {
-                    const blob: Blob = await html2pdf().set(opt).from(wrapper).output('blob');
+                    const blob = doc.output('blob');
                     const blobUrl = URL.createObjectURL(blob);
                     window.open(blobUrl, '_blank');
                     setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
                 } catch {
-                    html2pdf().set(opt).from(wrapper).save();
+                    doc.save(filename);
                 }
             } else {
-                html2pdf().set(opt).from(wrapper).save();
+                doc.save(filename);
             }
         } catch (err) {
             console.error('Invoice generation error:', err);
