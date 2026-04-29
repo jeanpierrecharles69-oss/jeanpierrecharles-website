@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLang } from "./LangContext";
 import { C } from "./constants";
 import ContactModal from "../common/ContactModal";
@@ -14,6 +14,13 @@ export default function PricingSection() {
     const [showContact, setShowContact] = useState(false);
     const [showDiagForm, setShowDiagForm] = useState(false);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+    // FIX P0 v348 : ouverture déclenchée par AegisIntelligence (Brain) avec prefill sessionStorage
+    useEffect(() => {
+        const handler = () => setShowDiagForm(true);
+        window.addEventListener('aegis:openDiagForm', handler);
+        return () => window.removeEventListener('aegis:openDiagForm', handler);
+    }, []);
 
     const handleDiagnosticFormSubmit = async (data: DiagnosticFormData) => {
         if (checkoutLoading) return;

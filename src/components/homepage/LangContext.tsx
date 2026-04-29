@@ -30,8 +30,25 @@ export const LangProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         window.dispatchEvent(new CustomEvent('langChanged', { detail: { lang: newLang } }));
     };
 
+    // FIX P1-B v348 : sync document.title + meta description avec lang (SEO EN)
     useEffect(() => {
         document.documentElement.lang = lang;
+        const head = document.head;
+        if (lang === 'en') {
+            document.title = 'Jean-Pierre Charles | Industry 5.0 & EU Compliance Expert';
+        } else {
+            document.title = 'Jean-Pierre Charles | Expert Industrie 5.0 & Conformité UE';
+        }
+        const desc = lang === 'en'
+            ? 'R&D engineer expert in Industry 5.0 transformation, AI Act, mechatronics and EU regulatory compliance. 32 years of industrial experience across 6 international groups.'
+            : 'Ingénieur expert en transformation Industrie 5.0, IA Act, mécatronique et conformité réglementaire européenne. 32 ans d\'expérience industrielle dans 6 groupes internationaux.';
+        let metaDesc = head.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.setAttribute('name', 'description');
+            head.appendChild(metaDesc);
+        }
+        metaDesc.setAttribute('content', desc);
     }, [lang]);
 
     const value = {

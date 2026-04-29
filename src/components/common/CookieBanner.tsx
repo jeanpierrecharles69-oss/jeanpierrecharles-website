@@ -16,18 +16,27 @@ import { C } from '../homepage/constants';
  */
 const CookieBanner: React.FC = () => {
     const { t } = useLang();
-    const [isVisible, setIsVisible] = useState(false);
+    // FIX P1-F v348 : initial state = true → banner visible par défaut tant qu'aucune décision
+    // Évite le flicker "absent puis apparaît" sur visite fraiche (audit V347 ne le voyait pas)
+    const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         try {
             const consent = document.cookie
                 .split('; ')
                 .find(row => row.startsWith('cookie_consent='));
-            if (!consent) {
-                setIsVisible(true);
+            // Si une décision existe déjà, masquer le banner ; sinon le laisser visible
+            if (consent) {
+                setIsVisible(false);
             }
+            // Nettoyage clés legacy (audit P2-A)
+            try {
+                ['aegis_cookie_ai', 'aegis_consent_ai', 'aegis_ai_consent'].forEach(k => {
+                    if (localStorage.getItem(k) !== null) localStorage.removeItem(k);
+                });
+            } catch { /* localStorage indisponible */ }
         } catch {
-            setIsVisible(true);
+            // Échec lecture cookie : laisser banner visible (défaut sécurisé RGPD)
         }
     }, []);
 

@@ -63,6 +63,47 @@ const CloseBtn: React.FC<{ label: string; onClick: () => void }> = ({ label, onC
     </div>
 );
 
+/* Header notice EN — clause de prééminence linguistique (FR prevails) */
+const BindingNoticeEN: React.FC<{ context: 'GTS' | 'Privacy' }> = ({ context }) => (
+    <div
+        style={{
+            background: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 11,
+            color: '#78350f',
+            lineHeight: 1.6,
+            margin: '12px 0 16px',
+        }}
+        role="note"
+        aria-label="Binding language notice"
+    >
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            Official Translation — French version prevails
+        </div>
+        {context === 'GTS' ? (
+            <>
+                The original French version of these General Terms of Sale (Conditions G&eacute;n&eacute;rales de Vente) constitutes the sole binding legal document.
+                This English translation is provided for the convenience and understanding of non-French-speaking professional clients. In case of any discrepancy, ambiguity,
+                or contradiction between the French and English versions, the French version shall prevail in all legal proceedings before French courts.
+                <br />
+                For any legal question regarding these terms, please contact:{' '}
+                <a href="mailto:contact@jeanpierrecharles.com" style={{ color: '#92400e', fontWeight: 600 }}>contact@jeanpierrecharles.com</a>
+            </>
+        ) : (
+            <>
+                The original French version of this Privacy Policy is the sole binding legal document. This English translation is provided for the understanding
+                of non-French-speaking data subjects, in accordance with the GDPR transparency principle (Art. 12.1 Regulation (EU) 2016/679). In case of discrepancy,
+                the French version prevails.
+                <br />
+                Contact:{' '}
+                <a href="mailto:contact@jeanpierrecharles.com" style={{ color: '#92400e', fontWeight: 600 }}>contact@jeanpierrecharles.com</a>
+            </>
+        )}
+    </div>
+);
+
 /* ──────────────────────────────────────────────────────────
  * CGV Modal
  * ────────────────────────────────────────────────────────── */
@@ -76,10 +117,11 @@ export function CGVModal({ onClose, lang }: { onClose: () => void; lang: string 
                 <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1e293b', marginBottom: 12 }}>
                     General Terms of Sale
                 </h2>
-                <P>English version available upon request — please contact <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a></P>
-                <P>The French version below is the legally binding version.</P>
-                <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                {renderCGVContent()}
+                <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
+                    Version 1.2 — Effective from 29 April 2026
+                </div>
+                <BindingNoticeEN context="GTS" />
+                {renderCGVContent_EN()}
                 <CloseBtn label="Close" onClick={onClose} />
             </Overlay>
         );
@@ -91,15 +133,15 @@ export function CGVModal({ onClose, lang }: { onClose: () => void; lang: string 
                 Conditions G&eacute;n&eacute;rales de Vente
             </h2>
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
-                Version 1.1 — En vigueur &agrave; compter du 15 avril 2026
+                Version 1.2 — En vigueur &agrave; compter du 29 avril 2026
             </div>
-            {renderCGVContent()}
+            {renderCGVContent_FR()}
             <CloseBtn label="Fermer" onClick={onClose} />
         </Overlay>
     );
 }
 
-function renderCGVContent() {
+function renderCGVContent_FR() {
     return (
         <>
             <SectionTitle>Article 1 — Objet et champ d'application</SectionTitle>
@@ -133,8 +175,8 @@ function renderCGVContent() {
             <P>La commande s'effectue exclusivement en ligne. Le processus comprend : s&eacute;lection du service, saisie des informations d'identification, saisie des informations du diagnostic souhait&eacute;, acceptation expresse des CGV et de la Politique de Confidentialit&eacute;, paiement via Mollie. La commande est ferme et d&eacute;finitive &agrave; r&eacute;ception du paiement.</P>
 
             <SectionTitle>Article 5 — Modalit&eacute;s de paiement</SectionTitle>
-            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Conform&eacute;ment &agrave; l'article L441-10 du Code de commerce, sauf stipulation contraire n&eacute;goci&eacute;e entre les Parties et accept&eacute;e par &eacute;crit, le paiement est exigible imm&eacute;diatement &agrave; la commande. Aucun escompte n'est accord&eacute; pour paiement anticip&eacute;.</P>
-            <P>En cas de retard ou de d&eacute;faut de paiement : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire pour frais de recouvrement de 40,00 EUR (art. L441-10 Code de commerce).</P>
+            <P>Paiement en ligne par carte bancaire (CB, Visa, Mastercard, AMEX) ou virement SEPA via Mollie. Conform&eacute;ment &agrave; l'article L441-10 du Code de commerce, <strong>transposant la Directive 2011/7/UE du 16 f&eacute;vrier 2011 concernant la lutte contre le retard de paiement dans les transactions commerciales</strong>, sauf stipulation contraire n&eacute;goci&eacute;e entre les Parties et accept&eacute;e par &eacute;crit, le paiement est exigible imm&eacute;diatement &agrave; la commande. Aucun escompte n'est accord&eacute; pour paiement anticip&eacute;.</P>
+            <P>En cas de retard ou de d&eacute;faut de paiement : p&eacute;nalit&eacute;s au taux d'int&eacute;r&ecirc;t l&eacute;gal major&eacute; de 5 points + indemnit&eacute; forfaitaire pour frais de recouvrement de 40,00 EUR (art. L441-10 Code de commerce ; art. 6 Directive 2011/7/UE).</P>
 
             <SectionTitle>Article 6 — Livraison du service DIAGNOSTIC</SectionTitle>
             <P>Rapport PDF livr&eacute; par email. Paiement avant 17h CET jour ouvr&eacute; : livraison le jour m&ecirc;me avant 19h CET. Apr&egrave;s 17h / week-end / jours f&eacute;ri&eacute;s : livraison avant 12h CET le jour ouvr&eacute; suivant.</P>
@@ -160,11 +202,25 @@ function renderCGVContent() {
 
             <SectionTitle>Article 11 — R&egrave;glement des litiges</SectionTitle>
             <P>
-                Avant toute action contentieuse, les Parties s'engagent &agrave; rechercher une solution amiable par voie de n&eacute;gociation directe. &Agrave; d&eacute;faut d'accord amiable dans un d&eacute;lai de trente (30) jours &agrave; compter de la notification du diff&eacute;rend, tout litige relatif &agrave; la formation, l'ex&eacute;cution ou l'interpr&eacute;tation des pr&eacute;sentes CGV rel&egrave;ve de la comp&eacute;tence exclusive des tribunaux fran&ccedil;ais du ressort du si&egrave;ge du Prestataire. La loi applicable est la loi fran&ccedil;aise.
+                Avant toute action contentieuse, les Parties s'engagent &agrave; rechercher une solution amiable par voie de n&eacute;gociation directe. &Agrave; d&eacute;faut d'accord amiable dans un d&eacute;lai de trente (30) jours &agrave; compter de la notification du diff&eacute;rend, tout litige relatif &agrave; la formation, l'ex&eacute;cution ou l'interpr&eacute;tation des pr&eacute;sentes CGV rel&egrave;ve de la <strong>comp&eacute;tence exclusive des tribunaux fran&ccedil;ais</strong> du ressort du si&egrave;ge du Prestataire, conform&eacute;ment &agrave; <strong>l'article 25 du R&egrave;glement (UE) n&deg; 1215/2012 du 12 d&eacute;cembre 2012 (Bruxelles I bis refonte)</strong> concernant la comp&eacute;tence judiciaire, la reconnaissance et l'ex&eacute;cution des d&eacute;cisions en mati&egrave;re civile et commerciale.
+            </P>
+            <P>
+                La loi applicable est la <strong>loi fran&ccedil;aise</strong>, conform&eacute;ment &agrave; <strong>l'article 3 du R&egrave;glement (CE) n&deg; 593/2008 du 17 juin 2008 (Rome I)</strong> sur la loi applicable aux obligations contractuelles, les Parties choisissant express&eacute;ment la loi fran&ccedil;aise comme loi r&eacute;gissant le pr&eacute;sent contrat.
             </P>
 
             <SectionTitle>Article 12 — Modifications</SectionTitle>
             <P>Le Prestataire se r&eacute;serve le droit de modifier les CGV. Les CGV applicables sont celles en vigueur &agrave; la date de la commande.</P>
+
+            <SectionTitle>Article 13 — Transparence IA (conformit&eacute; R&egrave;glement IA Act EU)</SectionTitle>
+            <P>
+                Conform&eacute;ment &agrave; <strong>l'article 50 du R&egrave;glement (UE) 2024/1689 du 13 juin 2024 (R&egrave;glement IA Act)</strong> &eacute;tablissant des r&egrave;gles harmonis&eacute;es concernant l'intelligence artificielle (entr&eacute;e en vigueur le 2 ao&ucirc;t 2026, application anticip&eacute;e &agrave; compter d'avril 2026 par le Prestataire), le Client est express&eacute;ment inform&eacute; que :
+            </P>
+            <ol style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
+                <li>Le rapport DIAGNOSTIC est <strong>g&eacute;n&eacute;r&eacute; avec l'assistance d'un syst&egrave;me d'intelligence artificielle</strong> (Claude Opus 4.6, d&eacute;velopp&eacute; par Anthropic PBC), sous la supervision qualifi&eacute;e et le contr&ocirc;le &eacute;ditorial de Jean-Pierre Charles.</li>
+                <li>Le pr&eacute;-diagnostic PULSE et l'AEGIS Intelligence Brain sont des <strong>syst&egrave;mes d'IA conversationnels</strong> bas&eacute;s sur Gemini Flash (d&eacute;velopp&eacute; par Google LLC) et Claude Opus.</li>
+                <li>Le contenu g&eacute;n&eacute;r&eacute; par IA refl&egrave;te une analyse r&eacute;glementaire fond&eacute;e sur les donn&eacute;es d'entra&icirc;nement et les prompts de configuration &eacute;tablis par le Prestataire ; il ne se substitue pas &agrave; une consultation juridique formelle ni &agrave; un avis officiel d'une autorit&eacute; de r&eacute;gulation (cf. Article 8).</li>
+                <li>Le Client conserve le droit de demander une revue humaine exclusive de tout rapport DIAGNOSTIC au tarif standard EXPERTISE TERRAIN (350,00 EUR/heure).</li>
+            </ol>
         </>
     );
 }
@@ -182,10 +238,11 @@ export function PrivacyModal({ onClose, lang }: { onClose: () => void; lang: str
                 <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1e293b', marginBottom: 12 }}>
                     Privacy Policy (GDPR)
                 </h2>
-                <P>English version available upon request — please contact <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a></P>
-                <P>The French version below is the legally binding version.</P>
-                <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                {renderPrivacyContent()}
+                <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
+                    Version 1.1 — Controller: Jean-Pierre Charles — contact@jeanpierrecharles.com — Effective from 15 April 2026
+                </div>
+                <BindingNoticeEN context="Privacy" />
+                {renderPrivacyContent_EN()}
                 <CloseBtn label="Close" onClick={onClose} />
             </Overlay>
         );
@@ -199,13 +256,13 @@ export function PrivacyModal({ onClose, lang }: { onClose: () => void; lang: str
             <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 12 }}>
                 Version 1.1 — Responsable : Jean-Pierre Charles — contact@jeanpierrecharles.com — En vigueur &agrave; compter du 15 avril 2026
             </div>
-            {renderPrivacyContent()}
+            {renderPrivacyContent_FR()}
             <CloseBtn label="Fermer" onClick={onClose} />
         </Overlay>
     );
 }
 
-function renderPrivacyContent() {
+function renderPrivacyContent_FR() {
     return (
         <>
             <SectionTitle>1. Engagement RGPD</SectionTitle>
@@ -314,6 +371,218 @@ function renderPrivacyContent() {
 
             <SectionTitle>9. Contact</SectionTitle>
             <P>Email : contact@jeanpierrecharles.com — Courrier : Jean-Pierre Charles, 10 La Bertini&egrave;re, 86800 Terc&eacute;, FRANCE</P>
+        </>
+    );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * CGV EN v1.2 — Official translation (French version prevails)
+ * ────────────────────────────────────────────────────────── */
+
+function renderCGVContent_EN() {
+    return (
+        <>
+            <SectionTitle>Article 1 — Purpose and scope</SectionTitle>
+            <P>
+                These General Terms of Sale (hereinafter &laquo;&nbsp;GTS&nbsp;&raquo;) govern the contractual relationship between Jean-Pierre Charles, sole proprietor operating under the trade name &laquo;&nbsp;AEGIS Intelligence&nbsp;&raquo; (hereinafter &laquo;&nbsp;the Service Provider&nbsp;&raquo;), and any professional client within the meaning of the French Commercial Code, acting in the course of its industrial, commercial or service-providing activity (hereinafter &laquo;&nbsp;the Client&nbsp;&raquo;), wishing to benefit from the services offered through the website jeanpierrecharles.com.
+            </P>
+            <P>
+                The services offered are intended <strong>exclusively for private enterprises (B2B)</strong>. They are not intended for consumers within the meaning of the French Consumer Code. Any order from a consumer shall be refused and fully refunded. Extension to public bodies (B2G) and consumers (B2C) is planned under dedicated terms to be published later.
+            </P>
+            <P>
+                Any order placed implies unreserved acceptance of these GTS. The Client acknowledges having read them prior to the order, in accordance with article 1119 of the French Civil Code.
+            </P>
+
+            <SectionTitle>Article 2 — Services offered</SectionTitle>
+            <P>The Service Provider offers a range of regulatory expertise and intelligence services for European industrial SMEs and mid-cap companies:</P>
+            <ul style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
+                <li><strong>PULSE</strong>: free AI pre-diagnostic</li>
+                <li><strong>DIAGNOSTIC</strong>: premium PDF report with regulatory causal analysis (EUR 250.00 per report)</li>
+                <li><strong>WATCH</strong>: monthly subscription for continuous regulatory intelligence (EUR 150.00/month — not available at the effective date)</li>
+                <li><strong>FIELD EXPERTISE</strong>: tailored interventions (EUR 350.00/hour or EUR 2,500.00/month)</li>
+            </ul>
+
+            <SectionTitle>Article 3 — Pricing and VAT regime</SectionTitle>
+            <P>Prices are stated in euros (EUR). The Service Provider operates under the French VAT franchise scheme.</P>
+            <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '10px 14px', border: '1px solid #bae6fd', margin: '8px 0', fontSize: 11, fontWeight: 600, color: '#0369a1' }}>
+                VAT not applicable — Article 293 B of the French General Tax Code (CGI).
+            </div>
+            <P>The Service Provider reserves the right to modify its prices at any time. Services are invoiced at the rates in force on the date of the order.</P>
+
+            <SectionTitle>Article 4 — Order</SectionTitle>
+            <P>Orders are placed exclusively online. The process includes: service selection, identification information entry, diagnostic information entry, express acceptance of the GTS and Privacy Policy, payment via Mollie. The order is firm and final upon receipt of payment.</P>
+
+            <SectionTitle>Article 5 — Payment terms</SectionTitle>
+            <P>
+                Online payment by bank card (CB, Visa, Mastercard, AMEX) or SEPA transfer via Mollie. In accordance with article L441-10 of the French Commercial Code, <strong>transposing Directive 2011/7/EU of 16 February 2011 on combating late payment in commercial transactions</strong>, and unless otherwise agreed in writing between the Parties, payment is due immediately upon order. No discount is granted for early payment.
+            </P>
+            <P>
+                In case of late or default payment: penalties at the legal interest rate increased by 5 percentage points + a fixed indemnity for recovery costs of EUR 40.00 (art. L441-10 French Commercial Code; art. 6 Directive 2011/7/EU).
+            </P>
+
+            <SectionTitle>Article 6 — Delivery of the DIAGNOSTIC service</SectionTitle>
+            <P>PDF report delivered by email. Payment received before 5:00 PM CET on a business day: same-day delivery before 7:00 PM CET. After 5:00 PM CET / weekends / public holidays: delivery before 12:00 PM CET on the next business day.</P>
+
+            <SectionTitle>Article 7 — Right of withdrawal</SectionTitle>
+            <P>
+                This contract being concluded between professionals, the right of withdrawal provided for in articles L221-18 and following of the French Consumer Code does not apply, in accordance with article L221-3 of the same code.
+            </P>
+
+            <SectionTitle>Article 8 — Best-efforts obligation and liability</SectionTitle>
+            <P>
+                The Service Provider undertakes to provide a professional-quality regulatory expertise service, based on 32 years of industrial experience. This is a <strong>best-efforts obligation, not a result-based obligation</strong>. The DIAGNOSTIC report does not substitute for formal legal advice or an official opinion from a regulatory authority.
+            </P>
+            <P>
+                The Service Provider's liability is <strong>capped at the total amount paid by the Client</strong> for the relevant service. In accordance with article 1170 of the French Civil Code, this limitation of liability does not apply in case of gross negligence or wilful misconduct by the Service Provider, nor in case of breach of an essential obligation of the contract.
+            </P>
+
+            <SectionTitle>Article 9 — Intellectual property</SectionTitle>
+            <P>The DIAGNOSTIC report remains the intellectual property of the Service Provider. The Client benefits from a right of internal use. Public distribution, commercial reproduction or resale is prohibited without written consent.</P>
+
+            <SectionTitle>Article 10 — Personal data</SectionTitle>
+            <P>Personal data processing is governed by the Service Provider's Privacy Policy, available on the website.</P>
+
+            <SectionTitle>Article 11 — Dispute resolution</SectionTitle>
+            <P>
+                Before any litigation, the Parties undertake to seek an amicable solution through direct negotiation. Failing an amicable agreement within thirty (30) days from notification of the dispute, any dispute relating to the formation, performance or interpretation of these GTS shall fall under the <strong>exclusive jurisdiction of the French courts</strong> in the Service Provider's place of business, in accordance with <strong>article 25 of Regulation (EU) No 1215/2012 of 12 December 2012 (Brussels I bis Recast)</strong> on jurisdiction and the recognition and enforcement of judgments in civil and commercial matters.
+            </P>
+            <P>
+                The applicable law is <strong>French law</strong>, in accordance with <strong>article 3 of Regulation (EC) No 593/2008 of 17 June 2008 (Rome I)</strong> on the law applicable to contractual obligations, the Parties expressly choosing French law as the law governing this contract.
+            </P>
+            <P>
+                Contact for legal questions: <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a>
+            </P>
+
+            <SectionTitle>Article 12 — Modifications</SectionTitle>
+            <P>The Service Provider reserves the right to modify the GTS. The applicable GTS are those in force on the date of the order.</P>
+
+            <SectionTitle>Article 13 — AI transparency (EU AI Act compliance)</SectionTitle>
+            <P>
+                In accordance with <strong>article 50 of Regulation (EU) 2024/1689 of 13 June 2024 (EU AI Act)</strong> on harmonised rules concerning artificial intelligence (entry into force 2 August 2026, anticipated application from April 2026 by the Service Provider), the Client is expressly informed that:
+            </P>
+            <ol style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
+                <li>The DIAGNOSTIC report is <strong>generated with the assistance of an artificial intelligence system</strong> (Claude Opus 4.6, developed by Anthropic PBC), under the qualified supervision and editorial control of Jean-Pierre Charles.</li>
+                <li>The PULSE pre-diagnostic and the AEGIS Intelligence Brain are <strong>conversational AI systems</strong> based on Gemini Flash (developed by Google LLC) and Claude Opus.</li>
+                <li>The AI-generated content reflects regulatory analysis based on training data and configuration prompts established by the Service Provider; it does not substitute for formal legal advice or an official opinion from a regulatory authority (cross-reference Article 8).</li>
+                <li>The Client retains the right to request human-only review of any DIAGNOSTIC report at the standard FIELD EXPERTISE rate (EUR 350.00/hour).</li>
+            </ol>
+        </>
+    );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * Privacy EN — Official translation (French version prevails)
+ * ────────────────────────────────────────────────────────── */
+
+function renderPrivacyContent_EN() {
+    return (
+        <>
+            <SectionTitle>1. GDPR commitment</SectionTitle>
+            <P>The Service Provider commits to comply with Regulation (EU) 2016/679 of the European Parliament and Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data (GDPR), as well as French Law n&deg; 78-17 of 6 January 1978 (as amended) on data protection and freedoms.</P>
+
+            <SectionTitle>2. Data collected</SectionTitle>
+            <div style={{ overflowX: 'auto', margin: '8px 0' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+                    <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Category</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Data</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Legal basis</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Retention</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Identification</td>
+                            <td style={{ padding: '6px' }}>Email, name, company, country, city</td>
+                            <td style={{ padding: '6px' }}>Contract performance (Art. 6.1.b)</td>
+                            <td style={{ padding: '6px' }}>10 years (accounting)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Diagnostic</td>
+                            <td style={{ padding: '6px' }}>Sector, product, regulations, context</td>
+                            <td style={{ padding: '6px' }}>Contract performance (Art. 6.1.b)</td>
+                            <td style={{ padding: '6px' }}>10 years</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Brain conversations</td>
+                            <td style={{ padding: '6px' }}>AI messages</td>
+                            <td style={{ padding: '6px' }}>Consent (Art. 6.1.a)</td>
+                            <td style={{ padding: '6px' }}>Session only</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Payment</td>
+                            <td style={{ padding: '6px' }}>Banking data</td>
+                            <td style={{ padding: '6px' }}>Contract performance</td>
+                            <td style={{ padding: '6px' }}>Managed by Mollie</td>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: '6px' }}>Connection</td>
+                            <td style={{ padding: '6px' }}>IP, browser data</td>
+                            <td style={{ padding: '6px' }}>Legitimate interest (Art. 6.1.f)</td>
+                            <td style={{ padding: '6px' }}>12 months</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <SectionTitle>3. Purposes</SectionTitle>
+            <P>Contract performance, invoicing, support, legal obligations, service improvement (anonymised statistics). Your data is <strong>never</strong> used for third-party commercial prospecting, sold, rented or transferred.</P>
+
+            <SectionTitle>4. Data processors and transfers</SectionTitle>
+            <P>In accordance with articles 13.1.e and 28 of GDPR, the following technical processors act on behalf of the Service Provider. Each is bound by a Data Processing Agreement (DPA) within the meaning of GDPR article 28.</P>
+            <div style={{ overflowX: 'auto', margin: '8px 0' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+                    <thead>
+                        <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Processor</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Location</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Role</th>
+                            <th style={{ textAlign: 'left', padding: '8px 6px', fontWeight: 700, color: '#64748b' }}>Safeguards</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Vercel Inc.</td><td style={{ padding: '6px' }}>USA / EU edges</td>
+                            <td style={{ padding: '6px' }}>Hosting</td><td style={{ padding: '6px' }}>SCCs (EU 2021/914) + DPA Art. 28 GDPR</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Mollie B.V.</td><td style={{ padding: '6px' }}>Netherlands (EU)</td>
+                            <td style={{ padding: '6px' }}>Payments</td><td style={{ padding: '6px' }}>Native EU compliance + DPA Art. 28 GDPR</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Anthropic PBC</td><td style={{ padding: '6px' }}>USA</td>
+                            <td style={{ padding: '6px' }}>DIAGNOSTIC (Opus)</td><td style={{ padding: '6px' }}>SCCs (EU 2021/914) + DPA + opt-out training (zero retention)</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '6px' }}>Google LLC</td><td style={{ padding: '6px' }}>USA</td>
+                            <td style={{ padding: '6px' }}>Brain (Gemini)</td><td style={{ padding: '6px' }}>SCCs (EU 2021/914) + DPA Art. 28 GDPR</td>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: '6px' }}>Gandi SAS</td><td style={{ padding: '6px' }}>France</td>
+                            <td style={{ padding: '6px' }}>DNS &amp; email</td><td style={{ padding: '6px' }}>Native EU compliance + DPA Art. 28 GDPR</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <P>Data transfers to third countries (USA for Vercel, Anthropic, Google) are framed by Standard Contractual Clauses (SCCs) adopted by the European Commission via Implementing Decision (EU) 2021/914 of 4 June 2021, in accordance with articles 44-49 of GDPR.</P>
+
+            <SectionTitle>5. Your rights</SectionTitle>
+            <P>
+                In accordance with articles 15 to 22 of GDPR: right of access, right of rectification, right to erasure (right to be forgotten), right to restriction of processing, right to data portability, right to object, right to withdraw consent at any time, and right to lodge a complaint with the CNIL (French data protection authority designated under GDPR article 51, https://www.cnil.fr). Contact to exercise your rights: <a href="mailto:contact@jeanpierrecharles.com" style={{ color: C.accent }}>contact@jeanpierrecharles.com</a>. Response within thirty (30) days in accordance with GDPR article 12.3.
+            </P>
+
+            <SectionTitle>6. Cookies</SectionTitle>
+            <P>Single cookie: cookie_consent (AI choice, 12 months). No advertising, marketing or profiling cookies. No third-party cookies.</P>
+
+            <SectionTitle>7. Security</SectionTitle>
+            <P>TLS 1.3 encryption, API keys in encrypted environment variables, restricted access, CNIL notification within 72 hours in case of breach (GDPR Art. 33-34).</P>
+
+            <SectionTitle>8. Modifications</SectionTitle>
+            <P>Policy updated according to regulatory changes. Applicable version: the one in force on the date of your order.</P>
+
+            <SectionTitle>9. Contact</SectionTitle>
+            <P>Email: contact@jeanpierrecharles.com — Postal: Jean-Pierre Charles, 10 La Bertini&egrave;re, 86800 Terc&eacute;, FRANCE</P>
         </>
     );
 }

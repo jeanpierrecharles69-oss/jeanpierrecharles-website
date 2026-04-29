@@ -7,7 +7,6 @@ import { hasAIConsent } from '../common/CookieBanner';
 import { ChatMessage } from '../../types';
 import { PaperAirplaneIcon } from '../icons/PaperAirplaneIcon';
 import { SparklesIcon } from '../icons/SparklesIcon';
-import DocumentReportView from '../documents/DocumentReportView';
 import MarkdownRenderer from '../common/MarkdownRenderer';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -45,13 +44,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const [consent, setConsent] = useState(hasAIConsent());
-    const [showReport, setShowReport] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-    const [showDiagForm, setShowDiagForm] = useState(false);
-    const [diagSector, setDiagSector] = useState('');
-    const [diagProduct, setDiagProduct] = useState('');
-    const [diagRegs, setDiagRegs] = useState<string[]>([]);
-    const [diagContext, setDiagContext] = useState('');
     const chatEndRef = useRef<HTMLDivElement>(null);
     const chatZoneRef = useRef<HTMLDivElement>(null);
 
@@ -248,11 +241,23 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             }
         }
 
-        setDiagSector(matchedSector);
-        setDiagProduct('');
-        setDiagRegs(matchedRegs);
-        setDiagContext('');
-        setShowDiagForm(true);
+        // FIX P0 v348 : fusion vers PricingSection.DiagnosticCheckoutForm via sessionStorage
+        // (l'ancien chemin Brain envoyait un payload Mollie incomplet — root cause cobaye β)
+        const prefill = {
+            sector: matchedSector,
+            product: '',
+            regs: matchedRegs,
+            context: '',
+            lang,
+            timestamp: new Date().toISOString(),
+        };
+        try {
+            sessionStorage.setItem('aegis_brain_prefill', JSON.stringify(prefill));
+        } catch { /* sessionStorage indisponible */ }
+        window.dispatchEvent(new CustomEvent('aegis:openDiagForm'));
+        if (typeof onScrollToPricing === 'function') {
+            onScrollToPricing();
+        }
     };
 
     const handleExportConversationPDF = async () => {
@@ -569,204 +574,8 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 </div>
             </div>
 
-            {showDiagForm ? (
-                /* ── FORMULAIRE DIAGNOSTIC ── */
-                <div style={{ padding: '20px' }}>
-                    {/* Header formulaire */}
-                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: C.text, marginBottom: 4 }}>
-                            {t.diagTitle as string}
-                        </div>
-                        <div style={{ fontSize: 11, color: C.textMuted }}>
-                            {t.diagSub as string}
-                        </div>
-                    </div>
-
-                    {/* Secteur industriel */}
-                    <div style={{ marginBottom: 16 }}>
-                        <label style={{
-                            display: 'block', fontSize: 10, fontWeight: 700,
-                            textTransform: 'uppercase' as const, letterSpacing: '0.05em',
-                            color: C.textMuted, marginBottom: 6,
-                        }}>
-                            {t.diagSectorLabel as string}
-                        </label>
-                        <select
-                            value={diagSector}
-                            onChange={e => setDiagSector(e.target.value)}
-                            style={{
-                                width: '100%', padding: '10px 14px', fontSize: 13,
-                                borderRadius: 10, border: `1px solid ${C.border}`,
-                                background: C.surface, color: C.text,
-                                fontFamily: 'inherit', outline: 'none',
-                                appearance: 'none' as const,
-                            }}
-                        >
-                            <option value="">{t.diagSectorPlaceholder as string}</option>
-                            {(t.diagSectors as string[])?.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Type de produit */}
-                    <div style={{ marginBottom: 16 }}>
-                        <label style={{
-                            display: 'block', fontSize: 10, fontWeight: 700,
-                            textTransform: 'uppercase' as const, letterSpacing: '0.05em',
-                            color: C.textMuted, marginBottom: 6,
-                        }}>
-                            {t.diagProductLabel as string}
-                        </label>
-                        <input
-                            type="text"
-                            value={diagProduct}
-                            onChange={e => setDiagProduct(e.target.value)}
-                            placeholder={t.diagProductPlaceholder as string}
-                            style={{
-                                width: '100%', padding: '10px 14px', fontSize: 13,
-                                borderRadius: 10, border: `1px solid ${C.border}`,
-                                background: C.surface, color: C.text,
-                                fontFamily: 'inherit', outline: 'none',
-                            }}
-                        />
-                    </div>
-
-                    {/* Réglementations ciblées — chips */}
-                    <div style={{ marginBottom: 16 }}>
-                        <label style={{
-                            display: 'block', fontSize: 10, fontWeight: 700,
-                            textTransform: 'uppercase' as const, letterSpacing: '0.05em',
-                            color: C.textMuted, marginBottom: 8,
-                        }}>
-                            {t.diagRegsLabel as string}
-                        </label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            {['AI Act', 'Machines', 'ESPR', 'CRA', 'RGPD', 'Batteries', 'Data Act', 'CPR', 'NIS2', 'DORA'].map(reg => {
-                                const isSelected = diagRegs.includes(reg);
-                                return (
-                                    <button
-                                        key={reg}
-                                        onClick={() => {
-                                            setDiagRegs(prev =>
-                                                isSelected
-                                                    ? prev.filter(r => r !== reg)
-                                                    : [...prev, reg]
-                                            );
-                                        }}
-                                        style={{
-                                            fontSize: 11, fontWeight: 600,
-                                            padding: '5px 12px', borderRadius: 16,
-                                            border: `1px solid ${isSelected ? C.accent : C.border}`,
-                                            background: isSelected ? `${C.accent}12` : C.surface,
-                                            color: isSelected ? C.accent : C.textMuted,
-                                            cursor: 'pointer', transition: 'all 0.15s ease',
-                                        }}
-                                    >
-                                        {reg}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Contexte additionnel */}
-                    <div style={{ marginBottom: 20 }}>
-                        <label style={{
-                            display: 'block', fontSize: 10, fontWeight: 700,
-                            textTransform: 'uppercase' as const, letterSpacing: '0.05em',
-                            color: C.textMuted, marginBottom: 6,
-                        }}>
-                            {t.diagContextLabel as string}
-                        </label>
-                        <textarea
-                            value={diagContext}
-                            onChange={e => setDiagContext(e.target.value)}
-                            placeholder={t.diagContextPlaceholder as string}
-                            rows={3}
-                            style={{
-                                width: '100%', padding: '10px 14px', fontSize: 13,
-                                borderRadius: 10, border: `1px solid ${C.border}`,
-                                background: C.surface, color: C.text,
-                                fontFamily: 'inherit', outline: 'none',
-                                resize: 'vertical' as const,
-                            }}
-                        />
-                    </div>
-
-                    {/* Boutons : Générer + Retour */}
-                    <div style={{ display: 'flex', gap: 10, flexDirection: 'column' as const }}>
-                        <button
-                            onClick={() => {
-                                const diagData = {
-                                    sector: diagSector,
-                                    product: diagProduct,
-                                    regs: diagRegs,
-                                    context: diagContext,
-                                    lang,
-                                    timestamp: new Date().toISOString(),
-                                };
-                                try {
-                                    sessionStorage.setItem('aegis_diag_request', JSON.stringify(diagData));
-                                } catch { /* sessionStorage indisponible */ }
-
-                                fetch('/api/mollie-checkout', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        product: 'diagnostic',
-                                        lang,
-                                    }),
-                                })
-                                    .then(res => {
-                                        if (!res.ok) throw new Error(`Checkout HTTP ${res.status}`);
-                                        return res.json();
-                                    })
-                                    .then(data => {
-                                        if (data.checkoutUrl) {
-                                            window.location.href = data.checkoutUrl;
-                                        }
-                                    })
-                                    .catch(err => {
-                                        console.error('Checkout error:', err);
-                                        if (typeof onScrollToPricing === 'function') {
-                                            onScrollToPricing();
-                                        }
-                                    });
-                            }}
-                            disabled={!diagSector || !diagProduct || diagRegs.length === 0}
-                            style={{
-                                width: '100%', padding: '12px 20px',
-                                fontSize: 14, fontWeight: 700, borderRadius: 12,
-                                background: (!diagSector || !diagProduct || diagRegs.length === 0)
-                                    ? C.border : C.gradientBlue,
-                                color: (!diagSector || !diagProduct || diagRegs.length === 0)
-                                    ? C.textMuted : '#ffffff',
-                                border: 'none',
-                                cursor: (!diagSector || !diagProduct || diagRegs.length === 0)
-                                    ? 'not-allowed' : 'pointer',
-                                display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', gap: 8,
-                            }}
-                        >
-                            {t.diagSubmit as string}
-                        </button>
-                        <button
-                            onClick={() => setShowDiagForm(false)}
-                            style={{
-                                width: '100%', padding: '8px 16px',
-                                fontSize: 12, fontWeight: 500, borderRadius: 10,
-                                background: 'transparent', color: C.textMuted,
-                                border: `1px solid ${C.border}`, cursor: 'pointer',
-                            }}
-                        >
-                            ← {t.diagBack as string}
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                /* ── CHAT BRAIN EXISTANT ── */
-                <>
+            {/* ── CHAT BRAIN ── (FIX P0 v348 : formulaire interne supprimé, fusion DiagnosticCheckoutForm via sessionStorage) */}
+            <>
                     {/* ── STARTERS (si aucun message) ── */}
                     {messages.length === 0 && starters.length > 0 && (
                         <div style={{ padding: '12px 20px 0', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -853,7 +662,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                     </div>
 
                     {/* CTA DIAGNOSTIC — apparaît après au moins 1 réponse AEGIS */}
-                    {messages.length >= 2 && !isStreaming && !showDiagForm && (
+                    {messages.length >= 2 && !isStreaming && (
                         <div style={{
                             margin: '0 20px 8px',
                             padding: '12px 16px',
@@ -940,33 +749,15 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                         </button>
                     </div>
                 </>
-            )}
 
-            {/* ── CTA + SCROLL ── */}
+            {/* ── CTA + SCROLL ── (FIX P1-A v348 : modal "Diagnostic Technique" Hero supprimée — duplique PULSE) */}
             <div style={{
                 borderTop: `1px solid ${C.border}`,
                 padding: '10px 20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 flexWrap: 'wrap', gap: 8,
                 background: `${C.accent}04`,
             }}>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button
-                        onClick={() => setShowReport(true)}
-                        style={{
-                            fontSize: 10, fontWeight: 700, padding: '6px 14px',
-                            borderRadius: 20,
-                            background: `${C.emerald}12`,
-                            color: C.emerald,
-                            border: `1px solid ${C.emerald}30`,
-                            cursor: 'pointer',
-                            fontFamily: 'inherit',
-                            transition: 'all 0.2s',
-                        }}
-                    >
-                        {lang === 'en' ? '📄 Technical Compliance Diagnostic' : '📄 Diagnostic Technique de Conformité'}
-                    </button>
-                </div>
                 <button
                     onClick={onScrollToExpertise}
                     style={{
@@ -978,8 +769,6 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 </button>
             </div>
 
-            {/* ── REPORT MODAL ── */}
-            {showReport && <DocumentReportView onClose={() => setShowReport(false)} />}
         </div>
         </>
     );

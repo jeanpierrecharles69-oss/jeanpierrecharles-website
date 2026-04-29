@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { C } from './constants';
 import { useLang } from './LangContext';
 import { CGVModal, PrivacyModal } from '../common/LegalModals';
+
+// FIX P0 v348 : mapping shortcuts Brain (AegisIntelligence) → REGULATIONS REGULATIONS DiagnosticCheckoutForm
+const BRAIN_REG_MAP: Record<string, string> = {
+    'AI Act': 'AI Act',
+    'Machines': 'Règlement Machines 2023/1230',
+    'ESPR': 'ESPR / DPP',
+    'CRA': 'CRA (Cyber Resilience Act)',
+    'RGPD': 'RGPD',
+    'Batteries': 'Battery Regulation',
+    'Data Act': 'Data Act',
+    'NIS2': 'NIS2',
+    'DORA': 'DORA',
+    'CPR': 'Autre',
+};
 
 /* ──────────────────────────────────────────────────────────
  * Types
@@ -251,6 +265,29 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
     const [errors, setErrors] = useState<FieldErrors>({});
     const [submitted, setSubmitted] = useState(false);
 
+    /* ── Prefill depuis Brain (FIX P0 v348) ─────────── */
+    useEffect(() => {
+        try {
+            const raw = sessionStorage.getItem('aegis_brain_prefill');
+            if (!raw) return;
+            const data = JSON.parse(raw) as { sector?: string; product?: string; regs?: string[]; context?: string };
+            // Match secteur sur fr OU en (Brain stocke selon lang courante)
+            if (data.sector) {
+                const matched = SECTORS.find(s => s.fr === data.sector || s.en === data.sector);
+                if (matched) setSector(matched.en);
+            }
+            if (data.product) setProduct(data.product);
+            if (data.context) setContext(data.context);
+            if (Array.isArray(data.regs) && data.regs.length > 0) {
+                const mapped = data.regs
+                    .map(r => BRAIN_REG_MAP[r] || (REGULATIONS.includes(r) ? r : null))
+                    .filter((r): r is string => !!r && REGULATIONS.includes(r));
+                if (mapped.length > 0) setRegulations([...new Set(mapped)]);
+            }
+            sessionStorage.removeItem('aegis_brain_prefill');
+        } catch { /* sessionStorage indisponible ou JSON corrompu */ }
+    }, []);
+
     const validate = (): FieldErrors => {
         const e: FieldErrors = {};
         if (!email.trim()) e.email = t.required;
@@ -360,7 +397,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                         {t.title}
                     </h2>
 
-                    <form onSubmit={handleSubmit} noValidate>
+                    {/* FIX P1-C v348 : noValidate retiré → HTML native validation comme filet de sécurité si React échoue */}
+                    <form onSubmit={handleSubmit}>
 
                         {/* ── Section 1: Identification ───────── */}
                         <div style={sectionHeadingStyle}>{t.section1}</div>
@@ -374,6 +412,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                 onChange={e => { setEmail(e.target.value); revalidate(); }}
                                 style={err('email') ? inputErrorStyle : inputStyle}
                                 placeholder="name@company.com"
+                                required
+                                aria-required="true"
                             />
                             {err('email') && <div style={errorTextStyle}>{err('email')}</div>}
                         </div>
@@ -387,6 +427,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                     value={firstName}
                                     onChange={e => { setFirstName(e.target.value); revalidate(); }}
                                     style={err('firstName') ? inputErrorStyle : inputStyle}
+                                    required
+                                    aria-required="true"
                                 />
                                 {err('firstName') && <div style={errorTextStyle}>{err('firstName')}</div>}
                             </div>
@@ -397,6 +439,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                     value={lastName}
                                     onChange={e => { setLastName(e.target.value); revalidate(); }}
                                     style={err('lastName') ? inputErrorStyle : inputStyle}
+                                    required
+                                    aria-required="true"
                                 />
                                 {err('lastName') && <div style={errorTextStyle}>{err('lastName')}</div>}
                             </div>
@@ -410,6 +454,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                 value={company}
                                 onChange={e => { setCompany(e.target.value); revalidate(); }}
                                 style={err('company') ? inputErrorStyle : inputStyle}
+                                required
+                                aria-required="true"
                             />
                             {err('company') && <div style={errorTextStyle}>{err('company')}</div>}
                         </div>
@@ -422,6 +468,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                     value={country}
                                     onChange={e => { setCountry(e.target.value); revalidate(); }}
                                     style={err('country') ? inputErrorStyle : inputStyle}
+                                    required
+                                    aria-required="true"
                                 >
                                     {sortedCountries.map(c => (
                                         <option key={c.code} value={c.code}>{c[lang]}</option>
@@ -436,6 +484,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                     value={city}
                                     onChange={e => { setCity(e.target.value); revalidate(); }}
                                     style={err('city') ? inputErrorStyle : inputStyle}
+                                    required
+                                    aria-required="true"
                                 />
                                 {err('city') && <div style={errorTextStyle}>{err('city')}</div>}
                             </div>
@@ -451,6 +501,8 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                 value={sector}
                                 onChange={e => { setSector(e.target.value); revalidate(); }}
                                 style={err('sector') ? inputErrorStyle : inputStyle}
+                                required
+                                aria-required="true"
                             >
                                 <option value="">{t.sectorPlaceholder}</option>
                                 {SECTORS.map(s => (
@@ -472,6 +524,10 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
                                     resize: 'vertical',
                                     minHeight: 80,
                                 }}
+                                required
+                                aria-required="true"
+                                minLength={100}
+                                maxLength={500}
                             />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
                                 <div style={err('product') ? errorTextStyle : { fontSize: 11, color: C.textMuted }}>
