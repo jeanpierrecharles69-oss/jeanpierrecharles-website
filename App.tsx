@@ -23,11 +23,13 @@ function LangSync() {
   const location = useLocation();
   const { lang, setLang } = useLang();
   useEffect(() => {
-    const urlLang = location.pathname.startsWith("/en") ? "en" : "fr";
+    const params = new URLSearchParams(location.search);
+    const qLang = params.get('lang');
+    const urlLang = qLang === 'en' || location.pathname.startsWith("/en") ? "en" : "fr";
     if (urlLang !== lang) {
       setLang(urlLang);
     }
-  }, [location.pathname, lang, setLang]);
+  }, [location.pathname, location.search, lang, setLang]);
   return null;
 }
 

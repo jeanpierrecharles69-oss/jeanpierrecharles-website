@@ -85,10 +85,7 @@ export default function MerciPage() {
 
     const pageLang = (searchParams.get('lang') as 'fr' | 'en') || lang || 'fr';
 
-    // FIX i18n T1450 28/04 : sync LangContext from URL param so NavBar/Footer follow
-    useEffect(() => {
-        if (pageLang !== lang) setLang(pageLang);
-    }, [pageLang, lang, setLang]);
+    // V350 : lang sync handled by LangSync (App.tsx) — query param aware since V351 fix
 
     const t = content[pageLang] || content.fr;
 
