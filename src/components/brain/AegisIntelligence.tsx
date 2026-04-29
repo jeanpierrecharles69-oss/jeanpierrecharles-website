@@ -7,7 +7,6 @@ import { hasAIConsent } from '../common/CookieBanner';
 import { ChatMessage } from '../../types';
 import { PaperAirplaneIcon } from '../icons/PaperAirplaneIcon';
 import { SparklesIcon } from '../icons/SparklesIcon';
-import DocumentReportView from '../documents/DocumentReportView';
 import MarkdownRenderer from '../common/MarkdownRenderer';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -45,7 +44,6 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const [consent, setConsent] = useState(hasAIConsent());
-    const [showReport, setShowReport] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const chatZoneRef = useRef<HTMLDivElement>(null);
@@ -752,31 +750,14 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                     </div>
                 </>
 
-            {/* ── CTA + SCROLL ── */}
+            {/* ── CTA + SCROLL ── (FIX P1-A v348 : modal "Diagnostic Technique" Hero supprimée — duplique PULSE) */}
             <div style={{
                 borderTop: `1px solid ${C.border}`,
                 padding: '10px 20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 flexWrap: 'wrap', gap: 8,
                 background: `${C.accent}04`,
             }}>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button
-                        onClick={() => setShowReport(true)}
-                        style={{
-                            fontSize: 10, fontWeight: 700, padding: '6px 14px',
-                            borderRadius: 20,
-                            background: `${C.emerald}12`,
-                            color: C.emerald,
-                            border: `1px solid ${C.emerald}30`,
-                            cursor: 'pointer',
-                            fontFamily: 'inherit',
-                            transition: 'all 0.2s',
-                        }}
-                    >
-                        {lang === 'en' ? '📄 Technical Compliance Diagnostic' : '📄 Diagnostic Technique de Conformité'}
-                    </button>
-                </div>
                 <button
                     onClick={onScrollToExpertise}
                     style={{
@@ -788,8 +769,6 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                 </button>
             </div>
 
-            {/* ── REPORT MODAL ── */}
-            {showReport && <DocumentReportView onClose={() => setShowReport(false)} />}
         </div>
         </>
     );
