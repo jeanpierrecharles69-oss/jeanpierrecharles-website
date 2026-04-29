@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { C } from './constants';
 import { useLang } from './LangContext';
 import { CGVModal, PrivacyModal } from '../common/LegalModals';
+
+// FIX P0 v348 : mapping shortcuts Brain (AegisIntelligence) → REGULATIONS REGULATIONS DiagnosticCheckoutForm
+const BRAIN_REG_MAP: Record<string, string> = {
+    'AI Act': 'AI Act',
+    'Machines': 'Règlement Machines 2023/1230',
+    'ESPR': 'ESPR / DPP',
+    'CRA': 'CRA (Cyber Resilience Act)',
+    'RGPD': 'RGPD',
+    'Batteries': 'Battery Regulation',
+    'Data Act': 'Data Act',
+    'NIS2': 'NIS2',
+    'DORA': 'DORA',
+    'CPR': 'Autre',
+};
 
 /* ──────────────────────────────────────────────────────────
  * Types
@@ -250,6 +264,29 @@ export default function DiagnosticCheckoutForm({ onClose, onSubmit, isLoading }:
     /* ── Validation ────────────────────────────────── */
     const [errors, setErrors] = useState<FieldErrors>({});
     const [submitted, setSubmitted] = useState(false);
+
+    /* ── Prefill depuis Brain (FIX P0 v348) ─────────── */
+    useEffect(() => {
+        try {
+            const raw = sessionStorage.getItem('aegis_brain_prefill');
+            if (!raw) return;
+            const data = JSON.parse(raw) as { sector?: string; product?: string; regs?: string[]; context?: string };
+            // Match secteur sur fr OU en (Brain stocke selon lang courante)
+            if (data.sector) {
+                const matched = SECTORS.find(s => s.fr === data.sector || s.en === data.sector);
+                if (matched) setSector(matched.en);
+            }
+            if (data.product) setProduct(data.product);
+            if (data.context) setContext(data.context);
+            if (Array.isArray(data.regs) && data.regs.length > 0) {
+                const mapped = data.regs
+                    .map(r => BRAIN_REG_MAP[r] || (REGULATIONS.includes(r) ? r : null))
+                    .filter((r): r is string => !!r && REGULATIONS.includes(r));
+                if (mapped.length > 0) setRegulations([...new Set(mapped)]);
+            }
+            sessionStorage.removeItem('aegis_brain_prefill');
+        } catch { /* sessionStorage indisponible ou JSON corrompu */ }
+    }, []);
 
     const validate = (): FieldErrors => {
         const e: FieldErrors = {};
