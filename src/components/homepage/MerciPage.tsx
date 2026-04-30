@@ -19,14 +19,14 @@ const SELLER = {
     forme: 'Entrepreneur individuel',
 };
 
-const generateInvoiceNumber = (): string => {
+const generateInvoiceNumber = (prefix: 'AEGIS' | 'AEGIS-VEILLE' = 'AEGIS'): string => {
     const now = new Date();
     const y = now.getFullYear();
     const m = String(now.getMonth() + 1).padStart(2, '0');
     const d = String(now.getDate()).padStart(2, '0');
     const h = String(now.getHours()).padStart(2, '0');
     const min = String(now.getMinutes()).padStart(2, '0');
-    return `AEGIS-${y}${m}${d}-${h}${min}`;
+    return `${prefix}-${y}${m}${d}-${h}${min}`;
 };
 
 const content = {
@@ -44,6 +44,17 @@ const content = {
         contact: 'Une question ? Contactez-nous \u00e0',
         back: '\u2190 Retour \u00e0 l\'accueil',
         metaTitle: 'Merci \u2014 AEGIS Intelligence',
+        veilleTitle: 'Merci pour votre abonnement',
+        veilleSubtitle: 'Votre veille r\u00e9glementaire AEGIS d\u00e9marre imm\u00e9diatement.',
+        veilleSteps: [
+            { icon: '\u2705', text: 'Paiement re\u00e7u \u2014 confirmation envoy\u00e9e par e-mail' },
+            { icon: '\ud83d\udcdd', text: 'Votre facture est disponible ci-dessous' },
+            { icon: '\u2699\ufe0f', text: 'Configuration de votre p\u00e9rim\u00e8tre de veille en cours' },
+            { icon: '\ud83d\udd14', text: 'Premi\u00e8re alerte r\u00e9glementaire sous 48h' },
+        ],
+        veilleInvoiceDesc: 'Veille R\u00e9glementaire EU (1er mois)',
+        veilleInvoiceDetail: 'Monitoring expert 5+ r\u00e8glements, alertes personnalis\u00e9es, rapport mensuel',
+        veilleMetaTitle: 'Merci \u2014 Veille AEGIS Intelligence',
     },
     en: {
         title: 'Thank you for your order',
@@ -59,6 +70,17 @@ const content = {
         contact: 'Any questions? Contact us at',
         back: '\u2190 Back to home',
         metaTitle: 'Thank you \u2014 AEGIS Intelligence',
+        veilleTitle: 'Thank you for your subscription',
+        veilleSubtitle: 'Your AEGIS regulatory watch starts immediately.',
+        veilleSteps: [
+            { icon: '\u2705', text: 'Payment received \u2014 confirmation sent by email' },
+            { icon: '\ud83d\udcdd', text: 'Your invoice is available below' },
+            { icon: '\u2699\ufe0f', text: 'Your watch perimeter is being configured' },
+            { icon: '\ud83d\udd14', text: 'First regulatory alert within 48h' },
+        ],
+        veilleInvoiceDesc: 'EU Regulatory Watch (1st month)',
+        veilleInvoiceDetail: 'Expert monitoring of 5+ regulations, personalised alerts, monthly report',
+        veilleMetaTitle: 'Thank you \u2014 AEGIS Intelligence Watch',
     },
 };
 
@@ -68,19 +90,24 @@ export default function MerciPage() {
     const { lang, setLang } = useLang();
     const [isGenerating, setIsGenerating] = useState(false);
 
+    // V360 : product param (veille|diagnostic) — détermine titre/steps/facture
+    const urlProduct = searchParams.get('product');
+    const isVeille = urlProduct === 'veille';
+
     // CHANGE-07 : fallback invoice number from URL param (email link support)
     const urlInvoice = searchParams.get('invoice');
     const urlRef = searchParams.get('ref');
     const [invoiceNumber] = useState(() => {
         if (urlInvoice) return urlInvoice;
+        const sessionKey = isVeille ? 'aegis_veille_request' : 'aegis_diag_request';
         try {
-            const raw = sessionStorage.getItem('aegis_diag_request');
+            const raw = sessionStorage.getItem(sessionKey);
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (parsed?.invoice_number) return parsed.invoice_number;
             }
         } catch { /* sessionStorage unavailable */ }
-        return generateInvoiceNumber();
+        return generateInvoiceNumber(isVeille ? 'AEGIS-VEILLE' : 'AEGIS');
     });
 
     const pageLang = (searchParams.get('lang') as 'fr' | 'en') || lang || 'fr';
@@ -90,8 +117,9 @@ export default function MerciPage() {
     const t = content[pageLang] || content.fr;
 
     const getDiagData = () => {
+        const sessionKey = isVeille ? 'aegis_veille_request' : 'aegis_diag_request';
         try {
-            const raw = sessionStorage.getItem('aegis_diag_request');
+            const raw = sessionStorage.getItem(sessionKey);
             if (raw) return JSON.parse(raw);
         } catch { /* ignore parse errors */ }
         // Fallback : minimal data from URL params (CHANGE-07, email link support)
@@ -200,17 +228,42 @@ export default function MerciPage() {
 
             // CUSTOMER block
             let cy = y + 5;
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
-            setText('#475569');
             const custLines: string[] = [];
-            if (diag?.sector) custLines.push(`${isFr ? 'Secteur' : 'Sector'} : ${diag.sector}`);
-            if (diag?.product) custLines.push(`${isFr ? 'Produit' : 'Product'} : ${diag.product}`);
-            if (diag?.regs?.length) custLines.push(`${isFr ? 'Règlements' : 'Regulations'} : ${diag.regs.join(', ')}`);
-            if (diag?.context) custLines.push(`${isFr ? 'Contexte' : 'Context'} : ${diag.context}`);
-            if (custLines.length === 0) {
-                custLines.push(isFr ? 'Diagnostic Technique de Conformité' : 'Technical Compliance Diagnostic');
+
+            if (isVeille) {
+                // VEILLE : bloc client = nom + entreprise + email (per AC-8 brief T1500)
+                // Format facture standard B2B (vs DIAGNOSTIC qui montre le scope diagnostic)
+                if (diag?.name) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    setText(C.text);
+                    doc.text(diag.name as string, col2X, cy);
+                    cy += 4.5;
+                }
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                setText('#475569');
+                if (diag?.company) custLines.push(diag.company as string);
+                if (diag?.email) custLines.push(diag.email as string);
+                if (custLines.length === 0 && !diag?.name) {
+                    // Fallback URL-only (email link, sessionStorage perdu)
+                    custLines.push(isFr ? 'Client veille AEGIS' : 'AEGIS Watch customer');
+                }
+            } else {
+                // DIAGNOSTIC : comportement existant inchangé (AC-10 0 régression)
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                setText('#475569');
+                if (diag?.sector) custLines.push(`${isFr ? 'Secteur' : 'Sector'} : ${diag.sector}`);
+                if (diag?.sectors?.length) custLines.push(`${isFr ? 'Secteurs' : 'Sectors'} : ${diag.sectors.join(', ')}`);
+                if (diag?.product) custLines.push(`${isFr ? 'Produit' : 'Product'} : ${diag.product}`);
+                if (diag?.regs?.length) custLines.push(`${isFr ? 'Règlements' : 'Regulations'} : ${diag.regs.join(', ')}`);
+                if (diag?.context) custLines.push(`${isFr ? 'Contexte' : 'Context'} : ${diag.context}`);
+                if (custLines.length === 0) {
+                    custLines.push(isFr ? 'Diagnostic Technique de Conformité' : 'Technical Compliance Diagnostic');
+                }
             }
+
             for (const line of custLines) {
                 const wrapped = doc.splitTextToSize(line, colW) as string[];
                 doc.text(wrapped, col2X, cy);
@@ -234,28 +287,34 @@ export default function MerciPage() {
             doc.setLineWidth(0.3);
             doc.line(ML, y, RIGHT, y);
 
+            // V360 : montant et libellé selon produit (veille 150€ vs diagnostic 250€)
+            // VEILLE : utilise t.veilleInvoiceDesc/Detail (définis dans content[lang]) — alignement brief T1500 §3c
+            const amountLabel = isVeille ? '150,00 EUR' : '250,00 EUR';
+            const rowTitle = isVeille
+                ? t.veilleInvoiceDesc
+                : (isFr
+                    ? 'Diagnostic Technique de Conformité Industrielle EU'
+                    : 'EU Industrial Compliance Technical Diagnostic');
+            const rowDetailTxt = isVeille
+                ? t.veilleInvoiceDetail
+                : (isFr
+                    ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
+                    : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report');
+
             // Row content
             y += 5;
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);
             setText(C.text);
-            doc.text(
-                isFr
-                    ? 'Diagnostic Technique de Conformité Industrielle EU'
-                    : 'EU Industrial Compliance Technical Diagnostic',
-                ML + 3, y
-            );
+            doc.text(rowTitle, ML + 3, y);
             doc.setFontSize(13);
-            doc.text('250,00 EUR', RIGHT - 3, y, { align: 'right' });
+            doc.text(amountLabel, RIGHT - 3, y, { align: 'right' });
 
             y += 5;
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
             setText('#64748b');
-            const rowDetail = isFr
-                ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
-                : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report';
-            const rowDetailWrapped = doc.splitTextToSize(rowDetail, CW - 60) as string[];
+            const rowDetailWrapped = doc.splitTextToSize(rowDetailTxt, CW - 60) as string[];
             doc.text(rowDetailWrapped, ML + 3, y);
             y += 4 * rowDetailWrapped.length + 3;
 
@@ -270,7 +329,7 @@ export default function MerciPage() {
             doc.setFontSize(10);
             setText('#64748b');
             doc.text(isFr ? 'Sous-total HT' : 'Subtotal excl. VAT', totLabelX, y);
-            doc.text('250,00 EUR', totValueX, y, { align: 'right' });
+            doc.text(amountLabel, totValueX, y, { align: 'right' });
             y += 2;
             doc.line(totLabelX, y, totValueX, y);
             y += 4;
@@ -287,7 +346,7 @@ export default function MerciPage() {
             doc.setFontSize(14);
             setText(C.text);
             doc.text('TOTAL', totLabelX, y);
-            doc.text('250,00 EUR', totValueX, y, { align: 'right' });
+            doc.text(amountLabel, totValueX, y, { align: 'right' });
 
             y += 10;
 
@@ -311,9 +370,9 @@ export default function MerciPage() {
                 isFr
                     ? 'Paiement effectué via Mollie (paiement sécurisé EU).'
                     : 'Payment processed via Mollie (secure EU payment).',
-                isFr
-                    ? 'Conditions : paiement comptant à la commande.'
-                    : 'Terms: payment due upon order.',
+                isVeille
+                    ? (isFr ? 'Conditions : abonnement mensuel renouvelable par prélèvement.' : 'Terms: renewable monthly subscription by direct debit.')
+                    : (isFr ? 'Conditions : paiement comptant à la commande.' : 'Terms: payment due upon order.'),
                 isFr
                     ? 'Pénalités de retard : 3x taux intérêt légal (Art. L.441-10 C. com.).'
                     : 'Late penalty: 3x legal interest rate (Art. L.441-10 C. com.).',
@@ -382,10 +441,15 @@ export default function MerciPage() {
 
     useEffect(() => { window.scrollTo(0, 0); }, []);
 
+    const headerTitle = isVeille ? t.veilleTitle : t.title;
+    const headerSub = isVeille ? t.veilleSubtitle : t.subtitle;
+    const headerSteps = isVeille ? t.veilleSteps : t.steps;
+    const headerMetaTitle = isVeille ? t.veilleMetaTitle : t.metaTitle;
+
     return (
         <>
             <Helmet>
-                <title>{t.metaTitle}</title>
+                <title>{headerMetaTitle}</title>
                 <meta name="robots" content="noindex, nofollow" />
             </Helmet>
             <main className="max-w-2xl mx-auto px-4 sm:px-6 py-16" style={{ minHeight: '70vh' }}>
@@ -398,16 +462,16 @@ export default function MerciPage() {
                         fontSize: 36, marginBottom: 16,
                     }}>{'\ud83c\udf89'}</div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight" style={{ color: C.text }}>
-                        {t.title}
+                        {headerTitle}
                     </h1>
-                    <p className="text-sm mt-2" style={{ color: C.textMuted }}>{t.subtitle}</p>
+                    <p className="text-sm mt-2" style={{ color: C.textMuted }}>{headerSub}</p>
                 </div>
 
                 {/* Steps */}
                 <div className="rounded-2xl p-6 space-y-5" style={{
                     backgroundColor: C.surface, border: `1px solid ${C.border}`, boxShadow: C.shadowSoft,
                 }}>
-                    {t.steps.map((step, i) => (
+                    {headerSteps.map((step, i) => (
                         <div key={i} className="flex items-start gap-4">
                             <span className="text-xl flex-shrink-0 mt-0.5">{step.icon}</span>
                             <p className="text-sm font-medium" style={{ color: C.text }}>{step.text}</p>

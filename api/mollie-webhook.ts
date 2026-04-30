@@ -25,6 +25,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
     sendClientConfirmation,
     sendOpsNewOrder,
+    sendVeilleClientConfirmation,
+    sendVeilleOpsNewOrder,
     isAlreadyProcessed,
     markProcessed,
 } from './_lib/mailer.js';
@@ -86,6 +88,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             timestamp: new Date().toISOString(),
         }));
 
+        // V360 — branch dispatch product (veille vs diagnostic)
+        const isVeille = metadata.product === 'veille';
+        const targetTable = isVeille ? 'veille_requests' : 'diagnostic_requests';
+
         // Phase 2 ACTIVE : email pipeline on paid (C3-bis pattern)
         if (status === 'paid' && !isAlreadyProcessed(id)) {
             markProcessed(id);
@@ -97,7 +103,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (supabase && metadata.request_id) {
                 try {
                     const selectPromise = supabase
-                        .from('diagnostic_requests')
+                        .from(targetTable)
                         .select('status')
                         .eq('request_id', metadata.request_id)
                         .single();
@@ -117,6 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             event: 'webhook_idempotent_db_check',
                             payment_id: id,
                             request_id: metadata.request_id,
+                            product: metadata.product || 'diagnostic',
                             existing_status: existing.status,
                             timestamp: new Date().toISOString(),
                         }));
@@ -144,7 +151,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (supabase && metadata.request_id) {
                 try {
                     const updatePromise = supabase
-                        .from('diagnostic_requests')
+                        .from(targetTable)
                         .update({
                             status: 'paid',
                             paid_at: new Date().toISOString(),
@@ -167,6 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             context: 'mollie-webhook',
                             payment_id: id,
                             request_id: metadata.request_id,
+                            target_table: targetTable,
                             error: msg,
                             severity: 'warning',
                             timestamp: new Date().toISOString(),
@@ -177,12 +185,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             context: 'mollie-webhook',
                             payment_id: id,
                             request_id: metadata.request_id,
+                            target_table: targetTable,
                             new_status: 'paid',
                             timestamp: new Date().toISOString(),
                         }));
 
-                        // Night N7 Option β : INSERT pending_generations (Unique constraint request_id evite doublon)
-                        try {
+                        // Phase C auto-queue : signal post-UPDATE pour PS1 watchdog / n8n W4
+                        if (isVeille) {
+                            console.log(JSON.stringify({
+                                event: 'veille_ready_for_activation',
+                                request_id: metadata.request_id,
+                                invoice_number: metadata.invoice_number || null,
+                                timestamp: new Date().toISOString(),
+                            }));
+                        } else {
+                            console.log(JSON.stringify({
+                                event: 'diagnostic_ready_for_generation',
+                                request_id: metadata.request_id,
+                                invoice_number: metadata.invoice_number || null,
+                                lang: metadata.lang || 'fr',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+
+                        // Night N7 Option β : INSERT pending_generations (DIAGNOSTIC uniquement — pipeline PS1 Opus rapport)
+                        // V360 : VEILLE pas de pending_generations (Phase 1 = JP crée subscription Mollie manuellement)
+                        if (!isVeille) try {
                             const insertPromise = supabase
                                 .from('pending_generations')
                                 .insert({
@@ -259,7 +287,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 product: metadata.product_description || metadata.product || undefined,
                 lang: metadata.lang || undefined,
                 mode: metadata.mode || undefined,
-                amount: '250.00',
+                amount: isVeille ? '150.00' : '250.00',
                 sector: metadata.sector || undefined,
                 regulations: metadata.regulations
                     ? metadata.regulations.split(', ') : undefined,
@@ -267,11 +295,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 invoice_number: metadata.invoice_number || undefined,
             };
 
+            // V360 : dispatch mailers par produit (VEILLE templates dédiés vs DIAGNOSTIC existants)
+            const clientMailer = isVeille ? sendVeilleClientConfirmation : sendClientConfirmation;
+            const opsMailer = isVeille ? sendVeilleOpsNewOrder : sendOpsNewOrder;
+
             // Await with safety timeout 7s (Vercel function limit 10s)
             await Promise.race([
                 Promise.allSettled([
-                    sendClientConfirmation(emailData),
-                    sendOpsNewOrder(emailData),
+                    clientMailer(emailData),
+                    opsMailer(emailData),
                 ]).then(results => {
                     results.forEach((r, i) => {
                         const type = i === 0 ? 'client' : 'ops';
@@ -280,6 +312,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                                 event: 'mailer_failed',
                                 payment_id: id,
                                 request_id: metadata.request_id || null,
+                                product: metadata.product || 'diagnostic',
                                 recipient_type: type,
                                 error: (r.reason as Error)?.message || 'unknown',
                                 severity: 'critical',

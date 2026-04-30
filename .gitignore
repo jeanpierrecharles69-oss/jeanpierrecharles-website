@@ -33,3 +33,6 @@ _archives/
 !README.md
 !CLAUDE.md
 !DEPLOYMENT.md
+
+# ACDC Code working directory
+.claude/
