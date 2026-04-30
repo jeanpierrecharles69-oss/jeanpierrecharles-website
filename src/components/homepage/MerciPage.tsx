@@ -355,6 +355,24 @@ export default function MerciPage() {
             } else {
                 doc.save(filename);
             }
+
+            // V352 : Fire-and-forget invoice archive (Art. 293 B CGI — conservation fiscale 10 ans)
+            // Echec silencieux : le client a deja sa copie locale, l'archive serveur est best-effort.
+            // Pas d'await -> 0 impact UX. catch absorbe toute erreur reseau / endpoint DOWN.
+            try {
+                const dataUri = doc.output('datauristring');
+                const base64 = dataUri.split(',')[1] || '';
+                fetch('/api/invoice-archive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        invoice_number: invoiceNumber,
+                        request_id: urlRef || undefined,
+                        pdf_base64: base64,
+                        lang: pageLang,
+                    }),
+                }).catch(() => { /* archive failure ≠ client failure */ });
+            } catch { /* datauristring extraction failure → archive aborted, UX inchangee */ }
         } catch (err) {
             console.error('Invoice generation error:', err);
         } finally {
