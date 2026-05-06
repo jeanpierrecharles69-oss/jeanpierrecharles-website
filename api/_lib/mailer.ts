@@ -342,6 +342,147 @@ export async function sendClientDiagnostic(params: {
 }
 
 /**
+ * V360 — VEILLE client confirmation email (Phase 1 MVP).
+ * Inline HTML simple (pas de template lib touch). Calque emailWrapper visuel.
+ */
+export async function sendVeilleClientConfirmation(data: MailerPaymentData): Promise<void> {
+    const recipient = data.email || '';
+    if (!recipient || !isValidEmail(recipient)) {
+        logMailer({
+            event: 'mailer_skipped',
+            reason: 'invalid_email',
+            payment_id: data.payment_id,
+            timestamp: new Date().toISOString(),
+        });
+        return;
+    }
+
+    const isFr = data.lang !== 'en';
+    const amount = data.amount || '150.00';
+    const invoice = data.invoice_number || '';
+    const subject = isFr
+        ? `Confirmation de votre abonnement VEILLE AEGIS Intelligence`
+        : `Your AEGIS Intelligence VEILLE subscription confirmation`;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:'Segoe UI',system-ui,sans-serif;color:#0f172a;background:#f8fafc;margin:0;padding:20px">
+<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+<div style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);padding:28px 24px;text-align:center;color:#fff">
+<h1 style="margin:0;font-size:20px;font-weight:800">AEGIS Intelligence</h1>
+<p style="margin:6px 0 0;font-size:13px;opacity:0.85">${isFr ? 'Veille réglementaire EU continue' : 'EU continuous regulatory watch'}</p>
+</div>
+<div style="padding:28px 24px">
+<p style="font-size:14px">${isFr ? 'Bonjour,' : 'Hello,'}</p>
+<p style="font-size:14px">${isFr
+    ? 'Merci pour votre abonnement à la <strong>VEILLE AEGIS Intelligence</strong>. Votre 1er paiement de <strong>' + amount + ' EUR</strong> est confirmé.'
+    : 'Thank you for subscribing to the <strong>AEGIS Intelligence regulatory WATCH</strong>. Your 1st payment of <strong>EUR ' + amount + '</strong> is confirmed.'}</p>
+<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin:18px 0;font-size:13px">
+<strong>${isFr ? 'Démarrage immédiat' : 'Immediate start'}</strong><br>
+${isFr
+    ? 'Votre veille démarre dès aujourd\'hui. Première alerte sous 48h selon vos secteurs et règlements ciblés.'
+    : 'Your watch starts today. First alert within 48h based on your selected sectors and regulations.'}
+</div>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:12px;line-height:1.7">
+<strong>${isFr ? 'Référence facture' : 'Invoice reference'} :</strong> ${escapeBasicHtml(invoice)}<br>
+<strong>${isFr ? 'Montant' : 'Amount'} :</strong> ${amount} EUR/${isFr ? 'mois' : 'month'}<br>
+<strong>TVA :</strong> ${isFr ? 'Non applicable, art. 293 B CGI' : 'Not applicable, art. 293 B CGI'}
+</div>
+<p style="font-size:13px;color:#64748b;margin-top:24px">${isFr
+    ? 'Pour toute question : '
+    : 'Any questions : '}<a href="mailto:contact@jeanpierrecharles.com" style="color:#3b82f6;font-weight:600">contact@jeanpierrecharles.com</a></p>
+</div>
+<div style="padding:16px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8">
+AEGIS Intelligence | jeanpierrecharles.com | SIRET 522 794 700 00032<br>
+Entrepreneur individuel | TVA non applicable, art. 293 B du CGI
+</div>
+</div></body></html>`;
+
+    await getTransport().sendMail({
+        from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
+        to: recipient,
+        subject,
+        html,
+        text: htmlToPlainText(html),
+    });
+
+    logMailer({
+        event: 'mailer_sent',
+        payment_id: data.payment_id,
+        request_id: data.request_id || null,
+        recipient_type: 'client_veille',
+        recipient_masked: maskEmail(recipient),
+        timestamp: new Date().toISOString(),
+    });
+}
+
+/**
+ * V360 — VEILLE ops new order notification (Phase 1 MVP).
+ * Action requise JP : créer subscription récurrente manuellement dans Mollie dashboard.
+ */
+export async function sendVeilleOpsNewOrder(data: MailerPaymentData): Promise<void> {
+    const reqShort = (data.request_id || 'N/A').slice(0, 8);
+    const amount = data.amount || '150.00';
+    const subject = `[AEGIS] Nouvel abonnement VEILLE #REQ-${reqShort} — Action: créer subscription Mollie`;
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:'Segoe UI',system-ui,sans-serif;color:#0f172a;background:#f8fafc;margin:0;padding:20px">
+<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+<div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:24px;text-align:center;color:#fff">
+<h1 style="margin:0;font-size:18px;font-weight:800">[AEGIS] Nouvel abonnement VEILLE</h1>
+<p style="margin:6px 0 0;font-size:12px;opacity:0.9">#REQ-${escapeBasicHtml(reqShort)}</p>
+</div>
+<div style="padding:24px">
+<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:14px;margin-bottom:18px;color:#92400e;font-size:13px;line-height:1.6">
+<strong>Action requise (Phase 1 manuelle) :</strong><br>
+1. Ouvrir Mollie dashboard → Customers<br>
+2. Créer customer + mandate via le payment ${escapeBasicHtml(data.payment_id)}<br>
+3. Créer subscription récurrente : ${amount} EUR / mois<br>
+4. Email client : configuration veille effective + 1ère alerte sous 48h
+</div>
+<table style="width:100%;font-size:13px;line-height:1.8">
+<tr><td style="width:140px;color:#64748b;font-weight:600">Client</td><td>${escapeBasicHtml(data.customer_name || 'Non fourni')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Email</td><td>${escapeBasicHtml(data.email || 'Non fourni')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Entreprise</td><td>${escapeBasicHtml(data.customer_company || 'Non fourni')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Secteurs</td><td>${escapeBasicHtml(data.sector || 'Non fourni')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Règlements</td><td>${escapeBasicHtml(Array.isArray(data.regulations) ? data.regulations.join(', ') : (data.regulations || 'Non fourni'))}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Montant</td><td><strong>${amount} EUR / mois</strong></td></tr>
+<tr><td style="color:#64748b;font-weight:600">Payment ID</td><td><code>${escapeBasicHtml(data.payment_id)}</code></td></tr>
+<tr><td style="color:#64748b;font-weight:600">Request ID</td><td><code>${escapeBasicHtml(data.request_id || 'N/A')}</code></td></tr>
+<tr><td style="color:#64748b;font-weight:600">Mode</td><td>${escapeBasicHtml(data.mode || 'N/A')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Facture</td><td>${escapeBasicHtml(data.invoice_number || 'N/A')}</td></tr>
+</table>
+</div>
+<div style="padding:14px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8">
+Email automatique AEGIS Intelligence Pipeline V360 — VEILLE Phase 1 manuelle
+</div>
+</div></body></html>`;
+
+    await getTransport().sendMail({
+        from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
+        to: OPS_NOTIFY_EMAIL,
+        subject,
+        html,
+        text: htmlToPlainText(html),
+    });
+
+    logMailer({
+        event: 'mailer_sent',
+        payment_id: data.payment_id,
+        request_id: data.request_id || null,
+        recipient_type: 'ops_veille',
+        timestamp: new Date().toISOString(),
+    });
+}
+
+function escapeBasicHtml(str: string): string {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+/**
  * Send pre-checkout notification to ops JP (best-effort).
  * Never blocks caller — caller must .catch(() => {}).
  */

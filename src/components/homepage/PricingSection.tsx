@@ -4,22 +4,35 @@ import { C } from "./constants";
 import ContactModal from "../common/ContactModal";
 import DiagnosticCheckoutForm from "./DiagnosticCheckoutForm";
 import type { DiagnosticFormData } from "./DiagnosticCheckoutForm";
+import VeilleSubscriptionForm from "./VeilleSubscriptionForm";
+import type { VeilleFormData } from "./VeilleSubscriptionForm";
 
 const MOLLIE_CHECKOUT_URL = '/api/mollie-checkout';
 const DIAGNOSTIC_REQUEST_URL = '/api/diagnostic-request';
+const MOLLIE_SUBSCRIPTION_URL = '/api/mollie-subscription';
+const VEILLE_REQUEST_URL = '/api/veille-request';
 
 export default function PricingSection() {
     const { t, lang } = useLang();
     const [activeTier, setActiveTier] = useState(0);
     const [showContact, setShowContact] = useState(false);
     const [showDiagForm, setShowDiagForm] = useState(false);
+    const [showVeilleForm, setShowVeilleForm] = useState(false);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
+    const [veilleLoading, setVeilleLoading] = useState(false);
 
     // FIX P0 v348 : ouverture déclenchée par AegisIntelligence (Brain) avec prefill sessionStorage
     useEffect(() => {
         const handler = () => setShowDiagForm(true);
         window.addEventListener('aegis:openDiagForm', handler);
         return () => window.removeEventListener('aegis:openDiagForm', handler);
+    }, []);
+
+    // V360 : ouverture programmatique du formulaire VEILLE depuis ailleurs (Brain, CTA, etc.)
+    useEffect(() => {
+        const handler = () => setShowVeilleForm(true);
+        window.addEventListener('aegis:openVeilleForm', handler);
+        return () => window.removeEventListener('aegis:openVeilleForm', handler);
     }, []);
 
     const handleDiagnosticFormSubmit = async (data: DiagnosticFormData) => {
@@ -95,6 +108,77 @@ export default function PricingSection() {
         }
     };
 
+    const handleVeilleFormSubmit = async (data: VeilleFormData) => {
+        if (veilleLoading) return;
+        setVeilleLoading(true);
+        try {
+            // Step 1: POST veille-request → get request_id + invoice_number
+            const reqRes = await fetch(VEILLE_REQUEST_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...data, lang }),
+            });
+            if (!reqRes.ok) {
+                const err = await reqRes.json().catch(() => ({}));
+                throw new Error(err.error || `Request HTTP ${reqRes.status}`);
+            }
+            const { request_id, invoice_number } = await reqRes.json();
+
+            // Save to sessionStorage for MerciPage invoice
+            try {
+                sessionStorage.setItem('aegis_veille_request', JSON.stringify({
+                    request_id,
+                    invoice_number,
+                    sectors: data.sectors,
+                    regs: data.regulations,
+                    context: data.context,
+                    email: data.email,
+                    company: data.company,
+                    name: `${data.firstName} ${data.lastName}`,
+                }));
+            } catch { /* sessionStorage unavailable */ }
+
+            // Step 2: POST mollie-subscription with request_id + customer info
+            const checkoutRes = await fetch(MOLLIE_SUBSCRIPTION_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product: 'veille',
+                    lang,
+                    email: data.email,
+                    request_id,
+                    customer_name: `${data.firstName} ${data.lastName}`,
+                    customer_company: data.company,
+                    sector: data.sectors.join(', '),
+                    regulations: data.regulations,
+                    context: data.context,
+                    invoice_number,
+                }),
+            });
+            if (!checkoutRes.ok) {
+                throw new Error(`Subscription HTTP ${checkoutRes.status}`);
+            }
+            const checkoutData = await checkoutRes.json();
+            if (checkoutData.checkoutUrl) {
+                window.location.href = checkoutData.checkoutUrl;
+            } else {
+                console.error('No checkout URL returned:', checkoutData);
+                alert(lang === 'fr'
+                    ? 'Erreur lors du paiement. Veuillez réessayer ou nous contacter à contact@jeanpierrecharles.com'
+                    : 'Payment error. Please try again or contact us at contact@jeanpierrecharles.com');
+                setShowVeilleForm(false);
+            }
+        } catch (err) {
+            console.error('Veille subscription error:', err);
+            alert(lang === 'fr'
+                ? 'Erreur lors du paiement. Veuillez réessayer ou nous contacter à contact@jeanpierrecharles.com'
+                : 'Payment error. Please try again or contact us at contact@jeanpierrecharles.com');
+            setShowVeilleForm(false);
+        } finally {
+            setVeilleLoading(false);
+        }
+    };
+
     const scrollToHero = () => {
         document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -104,10 +188,14 @@ export default function PricingSection() {
             scrollToHero();
         } else if (tierName === 'DIAGNOSTIC') {
             setShowDiagForm(true);
+        } else if (tierName === 'VEILLE' || tierName === 'WATCH') {
+            setShowVeilleForm(true);
         } else {
             setShowContact(true);
         }
     };
+
+    const isVeilleTier = (name: string) => name === 'VEILLE' || name === 'WATCH';
 
     return (
         <>
@@ -198,14 +286,14 @@ export default function PricingSection() {
                                     backgroundColor: isActive ? tier.color : "transparent",
                                     color: isActive ? "#fff" : tier.color,
                                     border: isActive ? "none" : `1px solid ${tier.color}30`,
-                                    opacity: (checkoutLoading && tier.name === 'DIAGNOSTIC') ? 0.6 : 1,
-                                    cursor: (checkoutLoading && tier.name === 'DIAGNOSTIC') ? 'wait' : 'pointer',
+                                    opacity: ((checkoutLoading && tier.name === 'DIAGNOSTIC') || (veilleLoading && isVeilleTier(tier.name))) ? 0.6 : 1,
+                                    cursor: ((checkoutLoading && tier.name === 'DIAGNOSTIC') || (veilleLoading && isVeilleTier(tier.name))) ? 'wait' : 'pointer',
                                 }}
                                 aria-label={tier.cta}
-                                disabled={checkoutLoading && tier.name === 'DIAGNOSTIC'}
+                                disabled={(checkoutLoading && tier.name === 'DIAGNOSTIC') || (veilleLoading && isVeilleTier(tier.name))}
                                 onClick={() => handleTierCta(tier.name)}
                             >
-                                {(checkoutLoading && tier.name === 'DIAGNOSTIC')
+                                {((checkoutLoading && tier.name === 'DIAGNOSTIC') || (veilleLoading && isVeilleTier(tier.name)))
                                     ? (lang === 'fr' ? 'Redirection...' : 'Redirecting...')
                                     : tier.cta}
                             </button>
@@ -220,6 +308,13 @@ export default function PricingSection() {
                     onClose={() => { setShowDiagForm(false); setCheckoutLoading(false); }}
                     onSubmit={handleDiagnosticFormSubmit}
                     isLoading={checkoutLoading}
+                />
+            )}
+            {showVeilleForm && (
+                <VeilleSubscriptionForm
+                    onClose={() => { setShowVeilleForm(false); setVeilleLoading(false); }}
+                    onSubmit={handleVeilleFormSubmit}
+                    isLoading={veilleLoading}
                 />
             )}
             {showContact && <ContactModal onClose={() => setShowContact(false)} lang={lang} />}

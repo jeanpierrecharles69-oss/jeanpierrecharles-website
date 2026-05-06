@@ -185,11 +185,11 @@ export const i18n = {
                 name: "VEILLE", price: "150\u20ac", period: "/mois", badge: "COMPLIANCE CONTINUE", annual: "", color: C.gold,
                 tagline: "Votre vigilance réglementaire en continu",
                 features: [
-                    "Alertes réglementaires personnalisées",
-                    "Monitoring 5+ règlements en continu",
-                    "Dashboard compliance temps réel",
-                    "Rapports mensuels automatisés",
-                    "Notification des changements sous 48h",
+                    "Alertes réglementaires personnalisées par email",
+                    "Monitoring expert 5+ règlements EU",
+                    "Rapport mensuel d'intelligence réglementaire",
+                    "Analyse Pearl causale des mutations détectées",
+                    "Session Q&A trimestrielle incluse (30 min)",
                 ],
                 notIncluded: [
                     "Interventions sur site",
@@ -574,11 +574,11 @@ export const i18n = {
                 name: "WATCH", price: "\u20ac150", period: "/month", badge: "CONTINUOUS COMPLIANCE", annual: "", color: C.gold,
                 tagline: "Your continuous regulatory vigilance",
                 features: [
-                    "Personalised regulatory alerts",
-                    "Continuous monitoring of 5+ regulations",
-                    "Real-time compliance dashboard",
-                    "Automated monthly reports",
-                    "Change notification within 48h",
+                    "Personalised regulatory alerts by email",
+                    "Expert monitoring of 5+ EU regulations",
+                    "Monthly regulatory intelligence report",
+                    "Pearl causal analysis of detected changes",
+                    "Quarterly Q&A session included (30 min)",
                 ],
                 notIncluded: [
                     "On-site interventions",
