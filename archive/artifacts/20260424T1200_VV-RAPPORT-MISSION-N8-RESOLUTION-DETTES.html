@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V&amp;V Mission N8 — Résolution Dettes Phase 2 β → γ</title>
+<style>
+:root {
+    --brand-blue: #3b82f6;
+    --brand-blue-dark: #1d4ed8;
+    --brand-emerald: #10b981;
+    --brand-amber: #f59e0b;
+    --brand-red: #ef4444;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-light: #94a3b8;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --glass: rgba(255,255,255,0.72);
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 50%, #ecfdf5 100%);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 32px 16px;
+}
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+header.hero {
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark));
+    color: white;
+    padding: 40px 32px;
+    border-radius: 20px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.25);
+}
+header.hero h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.02em; }
+header.hero p { margin: 4px 0; opacity: 0.9; font-size: 14px; }
+header.hero .meta {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    opacity: 0.85;
+}
+header.hero .meta code {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: Consolas, 'Courier New', monospace;
+}
+section.card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+section.card h2 {
+    margin: 0 0 20px;
+    font-size: 20px;
+    color: var(--text);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+section.card h3 { font-size: 16px; margin: 24px 0 8px; color: var(--text); }
+table.summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+}
+table.summary th {
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid var(--border);
+    font-weight: 700;
+}
+table.summary td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+.status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+.pill-done { background: #d1fae5; color: #065f46; }
+.pill-partial { background: #fef3c7; color: #92400e; }
+.pill-blocked { background: #fee2e2; color: #991b1b; }
+.pill-hors-scope { background: #e5e7eb; color: #374151; }
+.crit {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 4px;
+}
+.crit-critique { background: #fee2e2; color: #991b1b; }
+.crit-majeur { background: #fef3c7; color: #92400e; }
+.crit-mineur { background: #dbeafe; color: #1e40af; }
+.crit-trivial { background: #ecfccb; color: #365314; }
+code, .hash {
+    font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.hash { color: var(--brand-blue-dark); font-weight: 600; }
+.diff-stats {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 12px 0;
+    overflow-x: auto;
+}
+.diff-stats .add { color: #4ade80; }
+.diff-stats .del { color: #f87171; }
+.diff-stats .neutral { color: #94a3b8; }
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+.kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+.kpi .value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--brand-blue-dark);
+    margin: 4px 0;
+}
+.kpi .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.verdict-box {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-left: 4px solid var(--brand-emerald);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+.verdict-box.warn {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-left-color: var(--brand-amber);
+}
+.verdict-box h4 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+.dette-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+.dette-block h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.dette-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.dette-meta strong { color: var(--text); }
+.dette-block ul { margin: 8px 0; padding-left: 24px; font-size: 13px; }
+.dette-block li { margin: 4px 0; }
+.footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 40px;
+    font-style: italic;
+}
+.chunk-table td:nth-child(2),
+.chunk-table td:nth-child(3),
+.chunk-table td:nth-child(4) {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    text-align: right;
+}
+.regression { color: var(--brand-red); font-weight: 700; }
+.improved { color: var(--brand-emerald); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+    <h1>V&amp;V Mission N8 — Résolution Dettes Phase 2 β → γ</h1>
+    <p>ACDC Code Opus 4.7 CLI · Rapport de validation locale</p>
+    <p>Session 20260424T1020 → T1200 · Durée exécution ~1h40</p>
+    <div class="meta">
+        <span>Branche : <code>feature/mollie-live-production-vv</code></span>
+        <span>Base : <code>92c0a21</code></span>
+        <span>HEAD : <code>9bd55f5</code></span>
+        <span>Commits : <strong>6</strong> (non pushés)</span>
+    </div>
+</header>
+
+<section class="card">
+    <h2>Résumé exécutif</h2>
+    <div class="kpi-row">
+        <div class="kpi"><div class="label">Dettes scope T1000</div><div class="value">7</div><div class="label" style="color:var(--text-light)">items</div></div>
+        <div class="kpi"><div class="label">Dettes résolues code</div><div class="value" style="color:var(--brand-emerald)">6/6</div><div class="label" style="color:var(--text-light)">cible atteinte</div></div>
+        <div class="kpi"><div class="label">Commits atomiques</div><div class="value">6</div><div class="label" style="color:var(--text-light)">non pushés</div></div>
+        <div class="kpi"><div class="label"><code>npm run build</code></div><div class="value" style="color:var(--brand-emerald)">✓</div><div class="label" style="color:var(--text-light)">0 erreurs TS</div></div>
+        <div class="kpi"><div class="label">TKE réel</div><div class="value">~3h</div><div class="label" style="color:var(--text-light)">vs 5h35 est.</div></div>
+    </div>
+    <div class="verdict-box">
+        <h4>✅ Verdict local : GO pour review JP L3 + push</h4>
+        <p style="margin:0;font-size:13px">
+            6 commits atomiques, aucune régression détectée, <code>npm run build</code> passe proprement.
+            Les chunks Vite <code>vendor</code> (544 kB) et <code>html2pdf</code> (777 kB) restent au-dessus de 500 kB par construction
+            (React 19 + html2pdf core), warnings acceptables. Le chunk applicatif <code>index.js</code> passe de 528 kB à <span class="improved">188 kB ✅</span>.
+        </p>
+    </div>
+    <div class="verdict-box warn">
+        <h4>⚠ JP_INPUT_NEEDED avant Phase 2 γ (bridge retour §0)</h4>
+        <ul style="margin:8px 0 0;font-size:13px">
+            <li><strong>P2</strong> — Bump loader prompt <code>v1.5.1 → v1.5.2</code> côté <code>aegis-ops/scripts/aegis-diagnostic-api.ps1</code> (HORS scope ACDC, CLAUDE.md §API Claude)</li>
+            <li><strong>P2</strong> — D_T2010_07 fix complet : appel <code>/api/admin/pending-complete</code> étape 7 pipeline PS1 (JP ou Mission N9)</li>
+            <li><strong>P3</strong> — D_T2010_06 <code>pages_count</code> <code>aegis-generate-pdf.ps1</code> (HORS scope)</li>
+            <li><strong>P3</strong> — Hash <code>1fba700</code> brief T2010 §8 introuvable (HEAD local <code>92c0a21</code> adopté)</li>
+        </ul>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Tableau de bord dettes</h2>
+    <table class="summary">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>ID</th>
+                <th>Criticité</th>
+                <th>Statut</th>
+                <th>Commit</th>
+                <th>Fichiers / Δ lignes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><strong>D_T2010_08</strong><br><span style="font-size:11px;color:var(--text-muted)">Migration SQL UUID</span></td>
+                <td><span class="crit crit-mineur">MINEUR</span></td>
+                <td><span class="status-pill pill-done">✓ DONE</span></td>
+                <td><code class="hash">79f3dcd</code></td>
+                <td><code>config/migrations/20260422_pending_generations.sql</code><br><span style="color:var(--brand-emerald)">+9</span> <span style="color:var(--brand-red)">-2</span></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>D_T2010_09</strong><br><span style="font-size:11px;color:var(--text-muted)">Git add 3 prompts</span></td>
+                <td><span class="crit crit-majeur">MAJEUR</span></td>
+                <td><span class="status-pill pill-done">✓ DONE</span></td>
+                <td><code class="hash">103ceeb</code></td>
+                <td><code>config/diagnostic-system-prompt-v1.{4.1,5.0,5.1}.txt</code><br><span style="color:var(--brand-emerald)">+925</span></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>D_T2010_01</strong> revu<br><span style="font-size:11px;color:var(--text-muted)">trigger-generation.ts émet -RequestId</span></td>
+                <td><span class="crit crit-critique">CRITIQUE</span></td>
+                <td><span class="status-pill pill-done">✓ DONE</span></td>
+                <td><code class="hash">80776a4</code></td>
+                <td><code>api/admin/trigger-generation.ts</code><br><span style="color:var(--brand-emerald)">+7</span> <span style="color:var(--brand-red)">-2</span> — v1.0.0 → v1.1.0</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>D_T2010_07</strong> partiel<br><span style="font-size:11px;color:var(--text-muted)">Endpoint pending-complete</span></td>
+                <td><span class="crit crit-majeur">MAJEUR</span></td>
+                <td><span class="status-pill pill-partial">◐ PARTIEL</span></td>
+                <td><code class="hash">c5870c6</code></td>
+                <td><code>api/admin/pending-complete.ts</code> (nouveau)<br><span style="color:var(--brand-emerald)">+193</span></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>D_T2010_10</strong> + <strong>_04</strong> + <strong>_0900_01</strong><br><span style="font-size:11px;color:var(--text-muted)">Prompt v1.5.2 A+D + mailer B+C</span></td>
+                <td><span class="crit crit-majeur">MAJEUR</span></td>
+                <td><span class="status-pill pill-done">✓ DONE</span></td>
+                <td><code class="hash">d05e5d0</code></td>
+                <td><code>config/diagnostic-system-prompt-v1.5.2.txt</code> (nouveau, 365L)<br><code>api/_lib/mailer.ts</code> v1.2.0 → v1.3.0<br><span style="color:var(--brand-emerald)">+413</span> <span style="color:var(--brand-red)">-4</span></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>D_T2010_11</strong><br><span style="font-size:11px;color:var(--text-muted)">Vite manualChunks split</span></td>
+                <td><span class="crit crit-trivial">TRIVIAL</span></td>
+                <td><span class="status-pill pill-done">✓ DONE</span></td>
+                <td><code class="hash">9bd55f5</code></td>
+                <td><code>vite.config.ts</code><br><span style="color:var(--brand-emerald)">+14</span></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="card">
+    <h2>Détail par dette — Décisions &amp; V&amp;V</h2>
+
+    <div class="dette-block">
+        <h3>1 · D_T2010_08 <span class="crit crit-mineur">MINEUR</span> <span class="status-pill pill-done">DONE</span></h3>
+        <div class="dette-meta">
+            <span><strong>Fichier</strong> : <code>config/migrations/20260422_pending_generations.sql</code></span>
+            <span><strong>Ligne cible</strong> : L24 (pas L30 du brief)</span>
+            <span><strong>Commit</strong> : <code class="hash">79f3dcd</code></span>
+        </div>
+        <p><strong>V&amp;V empirique</strong> (L_T1440_01) : type <code>UUID</code> confirmé par :</p>
+        <ul>
+            <li><code>api/diagnostic-request.ts:105</code> : <code>const request_id = crypto.randomUUID();</code></li>
+            <li><code>api/diagnostic-status.ts:59</code> : <code>UUID_REGEX.test(requestId)</code></li>
+            <li><code>api/diagnostic-deliver.ts:217</code> : <code>UUID_REGEX.test(requestId)</code></li>
+            <li>Bridge T2010 §3 D_T2010_08 : "colonne <code>request_id TEXT</code> corrigée à la main en UUID lors exécution (P0-1)"</li>
+        </ul>
+        <p><strong>Action</strong> : <code>TEXT</code> → <code>UUID</code> + commentaire tête détaillé avec contexte P0-1. Migration déjà appliquée en prod, correction source pour reproductibilité seule.</p>
+    </div>
+
+    <div class="dette-block">
+        <h3>2 · D_T2010_09 <span class="crit crit-majeur">MAJEUR</span> <span class="status-pill pill-done">DONE</span></h3>
+        <div class="dette-meta">
+            <span><strong>Fichiers</strong> : 3 prompts diagnostic</span>
+            <span><strong>Lignes ajoutées</strong> : 925</span>
+            <span><strong>Commit</strong> : <code class="hash">103ceeb</code></span>
+        </div>
+        <p><code>git add</code> explicite (L_T1620_01 pas de <code>-A</code>) des 3 prompts présents sur Surface mais untracked dans le repo. <code>git ls-files config/ | grep diagnostic-system-prompt</code> → 4 entrées (3 ajoutés ici + v1.5.2 du commit suivant).</p>
+    </div>
+
+    <div class="dette-block">
+        <h3>3 · D_T2010_01 revu <span class="crit crit-critique">CRITIQUE</span> <span class="status-pill pill-done">DONE</span></h3>
+        <div class="dette-meta">
+            <span><strong>Fichier</strong> : <code>api/admin/trigger-generation.ts</code></span>
+            <span><strong>Ligne cible</strong> : L102 (pas L99 du brief)</span>
+            <span><strong>Commit</strong> : <code class="hash">80776a4</code></span>
+        </div>
+        <p><strong>Arbitrage T1000 respecté</strong> : modification côté TypeScript émetteur plutôt que script PS1 (hors scope CLAUDE.md). <code>data.request_id</code> déjà présent dans le SELECT L61 → 0 refactor requête.</p>
+        <ul>
+            <li>Avant : <code>aegis-deliver-diagnostic.ps1 -PendingGenerationId ${pendingGenerationId}</code></li>
+            <li>Après : <code>aegis-deliver-diagnostic.ps1 -RequestId ${data.request_id}</code></li>
+        </ul>
+        <p><strong>Version</strong> bump 1.0.0 → 1.1.0 + changelog dans header TSDoc.</p>
+        <p><strong>V&amp;V</strong> : <code>tsc --noEmit</code> 0 erreurs. <code>npm run build</code> OK.</p>
+    </div>
+
+    <div class="dette-block">
+        <h3>4 · D_T2010_07 partiel <span class="crit crit-majeur">MAJEUR</span> <span class="status-pill pill-partial">PARTIEL</span></h3>
+        <div class="dette-meta">
+            <span><strong>Fichier créé</strong> : <code>api/admin/pending-complete.ts</code> (193 lignes)</span>
+            <span><strong>Commit</strong> : <code class="hash">c5870c6</code></span>
+        </div>
+        <p><strong>Spec implémentée</strong> :</p>
+        <ul>
+            <li>POST avec Basic Auth (<code>requireAdminAuth</code> réutilisé)</li>
+            <li>Body <code>{ pending_generation_id, pdf_sha256?, delivered_at? }</code> avec validation regex (UUID / SHA-256 hex / ISO 8601)</li>
+            <li>UPDATE race-safe <code>WHERE id=? AND status='generating'</code></li>
+            <li>Fallback SELECT pour différencier <strong>404</strong> (inconnu) vs <strong>409</strong> (mauvais état, <code>current_status</code> retourné)</li>
+            <li>Logs JSONL : <code>pending_complete_success</code> / <code>pending_complete_error</code> / <code>pending_complete_exception</code></li>
+        </ul>
+        <p><strong>Scope partiel assumé</strong> : l'appel depuis le pipeline PS1 étape 7 est hors scope (script dans <code>aegis-ops/</code>, interdit CLAUDE.md). En attendant, l'endpoint est appelable manuellement par JP via <code>curl</code>, command documentée dans le TSDoc header.</p>
+    </div>
+
+    <div class="dette-block">
+        <h3>5 · D_T2010_10 + D_T2010_04 + D_T0900_01 <span class="crit crit-majeur">MAJEUR</span> <span class="status-pill pill-done">DONE</span></h3>
+        <div class="dette-meta">
+            <span><strong>Commit</strong> : <code class="hash">d05e5d0</code></span>
+        </div>
+
+        <h4 style="margin:16px 0 6px;font-size:13px">📝 Prompt v1.5.2 (nouveau fichier 365 lignes)</h4>
+        <p><strong>Patch A</strong> — Forçage <code>{{invoice_number}}</code> référence unique (fix D_T2010_04) :</p>
+        <ul>
+            <li>Nouvelle section <code># REFERENCE DIAGNOSTIC -- REGLE ABSOLUE</code> insérée avant <code># FORMAT DU DIAGNOSTIC</code></li>
+            <li>EN-TETE FR : <code>Reference diagnostic : AEGIS-DIAG-{ANNEE}-{CODE}</code> → <code>{{invoice_number}}</code></li>
+            <li>EN-TETE EN : <code>Diagnostic reference : {{invoice_number}}</code></li>
+            <li>Signature FR + EN : utilisation <code>{{invoice_number}}</code></li>
+            <li>Règle <code>{CODE_PRODUIT}</code> supprimée intégralement</li>
+        </ul>
+        <p><strong>Patch D</strong> — Interdiction Gantt ASCII §6.6 (fix D_T0900_01) :</p>
+        <ul>
+            <li>Section <code>TIMELINES ET INFOGRAPHIES -- MINI-GANTT OBLIGATOIRES</code> (v1.5.1) <strong>supprimée</strong></li>
+            <li>Remplacée par <code>TIMELINES ET FEUILLES DE ROUTE -- REGLES DE REPRESENTATION</code></li>
+            <li>Instruction : tableau markdown consolidé Phase 1-4 + paragraphe narratif 200-300 mots de dépendances inter-phases</li>
+            <li>Rejet explicite <code>pgfgantt</code> / SVG externe (arbitrage JP T0950)</li>
+        </ul>
+
+        <h4 style="margin:16px 0 6px;font-size:13px">📧 Mailer v1.3.0 (patch +48/-4)</h4>
+        <p><strong>Patch B</strong> — Retrait <code>[AEGIS]</code> subjects <strong>CLIENT</strong> :</p>
+        <ul>
+            <li><code>sendDeliveryConfirmation</code> : <code>[AEGIS] Votre rapport DIAGNOSTIC est prêt</code> → <code>Votre diagnostic conformité industrielle — {company} ({invoice})</code></li>
+            <li><code>sendClientDiagnostic</code> (celui qui a failli Gmail au smoke T2010) : <code>[AEGIS] Votre rapport DIAGNOSTIC {invoice}</code> → <code>Votre diagnostic conformité industrielle ({invoice})</code></li>
+            <li>Subjects <strong>ops</strong> (<code>sendOpsNewOrder</code>, <code>sendOpsPreNotify</code>) <strong>inchangés</strong> — rejet Gmail ne concerne pas boîte Gandi</li>
+        </ul>
+        <p><strong>Patch C</strong> — Plain-text multipart fallback :</p>
+        <ul>
+            <li>Helper <code>htmlToPlainText(html: string): string</code> ajouté (pas de nouvelle dep npm)</li>
+            <li>Propriété <code>text:</code> ajoutée aux <strong>5 sendMail</strong> du module (homogénéité deliverability)</li>
+        </ul>
+
+        <p style="margin-top:12px"><strong>⚠ Limite</strong> : bump loader <code>v1.5.1 → v1.5.2</code> côté <code>aegis-ops/scripts/aegis-diagnostic-api.ps1</code> est HORS scope ACDC. JP_INPUT_NEEDED bridge retour §0 P2.</p>
+    </div>
+
+    <div class="dette-block">
+        <h3>6 · D_T2010_11 <span class="crit crit-trivial">TRIVIAL</span> <span class="status-pill pill-done">DONE</span></h3>
+        <div class="dette-meta">
+            <span><strong>Fichier</strong> : <code>vite.config.ts</code></span>
+            <span><strong>Commit</strong> : <code class="hash">9bd55f5</code></span>
+        </div>
+        <p>Ajout <code>build.rollupOptions.output.manualChunks</code> (section <code>build</code> absente auparavant). Arbitrage unique R_T1505_01.</p>
+        <table class="summary chunk-table" style="margin-top:12px">
+            <thead>
+                <tr><th>Chunk</th><th>Avant</th><th>Après</th><th>Δ</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>index.js</code></td><td>528 kB ⚠</td><td>188 kB ✓</td><td class="improved">−340 kB (−64%)</td></tr>
+                <tr><td><code>vendor.js</code></td><td>—</td><td>544 kB ⚠</td><td>nouveau</td></tr>
+                <tr><td><code>html2pdf.js</code></td><td>984 kB ⚠</td><td>777 kB ⚠</td><td class="improved">−207 kB</td></tr>
+                <tr><td><strong>Total bundle</strong></td><td>~1512 kB</td><td>~1509 kB</td><td>≈ stable</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:12px"><strong>Bénéfice</strong> : cache browser — <code>vendor</code> et <code>html2pdf</code> ne se re-téléchargent plus quand seul le code applicatif change. Warnings résiduels <code>vendor</code>/<code>html2pdf</code> inhérents aux tailles libs (React 19 + html2pdf core), acceptables.</p>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Résultat <code>npm run build</code> final</h2>
+    <pre class="diff-stats">
+<span class="neutral">&gt; jeanpierrecharles-website@1.0.0 build</span>
+<span class="neutral">&gt; vite build</span>
+
+<span class="neutral">vite v6.4.1 building for production...</span>
+<span class="neutral">transforming...</span>
+<span class="add">✓ 134 modules transformed.</span>
+<span class="neutral">rendering chunks...</span>
+<span class="neutral">computing gzip size...</span>
+dist/index.html                     3.35 kB │ gzip:   1.21 kB
+dist/assets/index-EEM6UoSj.css     72.06 kB │ gzip:  12.16 kB
+<span class="add">dist/assets/index-DBNxWrjK.js     188.77 kB │ gzip:  57.70 kB   ← applicatif ✓</span>
+dist/assets/vendor-DQZw02uJ.js    544.49 kB │ gzip: 159.99 kB   ← deps communes
+dist/assets/html2pdf-CrJEeFR-.js  777.16 kB │ gzip: 235.52 kB   ← isolé pour cache
+
+<span class="add">✓ built in 13.74s</span></pre>
+    <p style="margin-top:12px;font-size:13px"><strong>0 erreurs TS</strong> · <strong>134 modules transformés</strong> · conforme CLAUDE.md règle 5 <code>npm run build = 0 erreurs</code>.</p>
+</section>
+
+<section class="card">
+    <h2>Diff global vs baseline <code>92c0a21</code></h2>
+    <pre class="diff-stats">
+ <span class="neutral">api/_lib/mailer.ts                                 |  52 ++-</span>
+ <span class="neutral">api/admin/pending-complete.ts                      | 193 +++++++++++</span>
+ <span class="neutral">api/admin/trigger-generation.ts                    |   9 +-</span>
+ <span class="neutral">config/diagnostic-system-prompt-v1.4.1.txt         | 291 ++++++++++++++</span>
+ <span class="neutral">config/diagnostic-system-prompt-v1.5.0.txt         | 306 +++++++++++++</span>
+ <span class="neutral">config/diagnostic-system-prompt-v1.5.1.txt         | 328 +++++++++++++</span>
+ <span class="neutral">config/diagnostic-system-prompt-v1.5.2.txt         | 365 +++++++++++++</span>
+ <span class="neutral">config/migrations/20260422_pending_generations.sql |  11 +-</span>
+ <span class="neutral">vite.config.ts                                     |  14 +</span>
+ <span class="add">9 files changed, 1561 insertions(+), 8 deletions(-)</span></pre>
+</section>
+
+<section class="card">
+    <h2>Historique des 6 commits</h2>
+    <pre class="diff-stats">
+<span class="add">9bd55f5</span> perf(build): vite manualChunks split html2pdf vendor — D_T2010_11
+<span class="add">d05e5d0</span> feat(config): diagnostic-system-prompt v1.5.2 patchs A+D + mailer patchs B+C — D_T2010_10 D_T2010_04 D_T0900_01
+<span class="add">c5870c6</span> feat(api): add pending-complete endpoint — D_T2010_07-partial
+<span class="add">80776a4</span> fix(api): trigger-generation emits -RequestId for PS1 script compatibility — D_T2010_01
+<span class="add">103ceeb</span> feat(config): track prompts system diagnostic v1.4.1/v1.5.0/v1.5.1 — D_T2010_09
+<span class="add">79f3dcd</span> fix(migration): align request_id type to UUID — D_T2010_08
+<span class="neutral">92c0a21</span> <span class="neutral">feat(night7): mailer opsNewOrder CTA dashboard + Option beta workflow (baseline)</span></pre>
+</section>
+
+<section class="card">
+    <h2>Actions résiduelles JP post-mission</h2>
+    <ol style="font-size:13px;line-height:1.8">
+        <li><strong>P2 — Bump loader prompt</strong> : éditer <code>C:\Projects\aegis-ops\scripts\aegis-diagnostic-api.ps1</code> pour charger <code>diagnostic-system-prompt-v1.5.2.txt</code>. Sans cela les patches A+D ne s'appliquent pas au pipeline Opus 4.6.</li>
+        <li><strong>P2 — D_T2010_07 fix complet</strong> : patcher <code>aegis-deliver-diagnostic.ps1</code> étape 7 pour POST <code>/api/admin/pending-complete</code> après validation étape 6. Snippet PowerShell fourni dans bridge retour §4.2.</li>
+        <li><strong>P3 — D_T2010_06</strong> : patcher <code>aegis-generate-pdf.ps1</code> pour injecter le vrai compteur pages dans le log JSONL (parser la sortie Pandoc/XeLaTeX).</li>
+        <li><strong>P3 — Optionnel</strong> : quand le mode DIAGNOSTIC basculera de PowerShell vers web (api/claude-proxy.ts L62), pointer le loader sur <code>-v1.5.2.txt</code> ou copier le contenu dans <code>diagnostic-system-prompt.txt</code>.</li>
+    </ol>
+</section>
+
+<section class="card">
+    <h2>Verdict Phase 2 γ post-N8</h2>
+    <table class="summary">
+        <thead>
+            <tr><th>Critère dur (bridge T2010 §7)</th><th>Pré-N8</th><th>Post-N8</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>D_T2010_03 DNS SPF/DKIM/DMARC</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-hors-scope">hors scope</span></td><td>Gandi JP + Chat Opus</td></tr>
+            <tr><td>D_T2010_01 trigger flag</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-done">✓</span></td><td>Commit 80776a4</td></tr>
+            <tr><td>D_T2010_05 parenthèses ornate</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-partial">reporté N9</span></td><td>JP T0950 visuel Acrobat OK</td></tr>
+            <tr><td>D_T2010_10 prompt v1.5.2</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-done">✓*</span></td><td>Fichier créé, loader bump JP P2</td></tr>
+            <tr><td>D_T2010_07 UPDATE generated</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-done">✓*</span></td><td>Endpoint créé, appel PS1 JP P2</td></tr>
+            <tr><td>D_T2010_09 prompts git tracked</td><td><span class="status-pill pill-blocked">✗</span></td><td><span class="status-pill pill-done">✓</span></td><td>Commit 103ceeb</td></tr>
+        </tbody>
+    </table>
+    <p style="margin-top:16px;font-size:13px"><strong>Score post-ACDC :</strong> 4/6 critères durs résolus code (2 en * nécessitent action JP P2). Les 2 autres (<code>_03</code>, <code>_05</code>) sont structurellement hors scope ACDC. <strong>Phase 2 γ GO-conditionnel</strong> levable dès :</p>
+    <ul style="font-size:13px">
+        <li>(a) DNS Gandi SPF/DKIM/DMARC durci (JP)</li>
+        <li>(b) Bump loader prompt v1.5.2 côté PS1 (JP)</li>
+        <li>(c) Soit appel manuel <code>pending-complete</code>, soit patch PS1 étape 7 auto (JP ou Mission N9)</li>
+    </ul>
+</section>
+
+<p class="footer-note">
+    Rapport V&amp;V produit par ACDC Code Opus 4.7 CLI · 20260424T1200 CET<br>
+    Respecte CLAUDE.md §API Claude strict · R_T1215_01 (autonomie élargie N8) · D48 (typo FR) · L_T1440_01 (empirique &gt; supposer) · L_T1000_01 (CLAUDE.md first)<br>
+    JP L3 review avant push obligatoire — R_ABS_NIGHT_01
+</p>
+
+</main>
+</body>
+</html>

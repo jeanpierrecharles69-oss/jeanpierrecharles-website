@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V&amp;V Rapport DETTE6 v3.4.5 — AEGIS Intelligence</title>
+<style>
+:root {
+    --blue: #3b82f6;
+    --blue-dark: #1d4ed8;
+    --emerald: #10b981;
+    --red: #ef4444;
+    --text: #0f172a;
+    --muted: #64748b;
+    --light: #94a3b8;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; }
+.header-bar { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff; padding: 32px 24px; text-align: center; }
+.header-bar h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+.header-bar .sub { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 6px; }
+.container { max-width: 900px; margin: 0 auto; padding: 24px; }
+.section { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.section h2 { font-size: 16px; font-weight: 700; color: var(--blue); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.03em; }
+.badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-pass { background: #d1fae5; color: #065f46; }
+.badge-info { background: #dbeafe; color: #1e40af; }
+.badge-warn { background: #fef3c7; color: #92400e; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); background: var(--bg); border-bottom: 2px solid var(--border); }
+td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'Cascadia Code', 'Fira Code', monospace; }
+.test-card { background: var(--bg); border-radius: 12px; border: 1px solid var(--border); padding: 16px; margin: 12px 0; }
+.test-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.test-card .url { font-size: 11px; color: var(--muted); word-break: break-all; }
+.checklist { list-style: none; padding: 0; }
+.checklist li { padding: 4px 0; font-size: 13px; }
+.checklist li::before { content: '\2705'; margin-right: 8px; }
+.checklist li.fail::before { content: '\274c'; }
+.email-preview { max-width: 600px; margin: 16px auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); }
+.file-ref { font-size: 11px; color: var(--light); margin-top: 8px; }
+.separator { border: none; border-top: 2px solid var(--border); margin: 32px 0; }
+.timestamp { font-size: 11px; color: var(--light); text-align: center; margin-top: 32px; padding: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+    <h1>Rapport V&amp;V — DETTE6 Pipeline Email v3.4.5</h1>
+    <div class="sub">AEGIS Intelligence | ACDC Code | 20260416T1445 CET</div>
+</div>
+
+<div class="container">
+
+<!-- SYNTHESE -->
+<div class="section">
+    <h2>Synthese V&amp;V</h2>
+    <table>
+        <thead><tr><th>Phase</th><th>Tests</th><th>Pass</th><th>Fail</th><th>Statut</th></tr></thead>
+        <tbody>
+            <tr><td>Phase 1 — Build</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1 — Revue code idempotence</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1 — Revue code isolation</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1 — Revue code MerciPage</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1.5 — MerciPage FR params</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1.5 — MerciPage defaut</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1.5 — MerciPage EN params</td><td>1</td><td>1</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td>Phase 1.5 — Email templates</td><td>4</td><td>4</td><td>0</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr style="font-weight:700"><td>TOTAL</td><td>11</td><td>11</td><td>0</td><td><span class="badge badge-pass">11/11 PASS</span></td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px">Console errors : <strong>0</strong> sur l'ensemble des tests.</p>
+</div>
+
+<hr class="separator">
+
+<!-- TEST 1 : BUILD -->
+<div class="section">
+    <h2>Test 1 — Build TypeScript</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> npm run build</h3>
+        <div style="background:#0f172a;color:#e2e8f0;padding:16px;border-radius:8px;font-family:monospace;font-size:12px;margin-top:12px;line-height:1.8">
+            <span style="color:#94a3b8">&gt;</span> vite build<br>
+            <span style="color:#3b82f6">vite v6.4.1</span> building for production...<br>
+            <span style="color:#10b981">134 modules transformed.</span><br>
+            dist/index.html &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.27 kB<br>
+            dist/assets/index-*.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 72.06 kB<br>
+            dist/assets/index-*.js &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 528.22 kB<br>
+            dist/assets/html2pdf-*.js &nbsp;&nbsp;&nbsp; 984.60 kB<br>
+            <span style="color:#10b981">built in 7.04s</span><br>
+            <br>
+            <span style="color:#10b981;font-weight:700">0 erreurs TypeScript</span>
+        </div>
+    </div>
+</div>
+
+<!-- TEST 2 : IDEMPOTENCE -->
+<div class="section">
+    <h2>Test 2 — Revue code idempotence (C3/DETTE7)</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> markProcessed avant envois</h3>
+        <ul class="checklist">
+            <li><code>mailer.ts:62</code> — <code>isAlreadyProcessed(paymentId)</code> : check Set</li>
+            <li><code>mailer.ts:66</code> — <code>markProcessed(paymentId)</code> : add to Set</li>
+            <li><code>mollie-webhook.ts:81</code> — <code>!isAlreadyProcessed(id)</code> : guard AVANT envois</li>
+            <li><code>mollie-webhook.ts:82</code> — <code>markProcessed(id)</code> : enregistre AVANT envois</li>
+            <li><code>mollie-webhook.ts:126-131</code> — branche <code>else if (status === 'paid')</code> : log <code>mailer_skipped_idempotent</code></li>
+        </ul>
+        <div class="file-ref">Fichiers : api/_lib/mailer.ts, api/mollie-webhook.ts</div>
+    </div>
+</div>
+
+<!-- TEST 3 : ISOLATION ERREURS -->
+<div class="section">
+    <h2>Test 3 — Revue code isolation erreurs (C0f/C4)</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> Promise.allSettled + race + return 200</h3>
+        <ul class="checklist">
+            <li><code>mollie-webhook.ts:97</code> — <code>await Promise.race([...])</code> : synchrone</li>
+            <li><code>mollie-webhook.ts:98</code> — <code>Promise.allSettled([...])</code> : ne throw jamais</li>
+            <li><code>mollie-webhook.ts:104</code> — <code>r.status === 'rejected'</code> : log <code>mailer_failed</code>, pas de throw</li>
+            <li><code>mollie-webhook.ts:117-124</code> — timeout safety 7s : log <code>mailer_timeout_safety</code>, resolve</li>
+            <li><code>mollie-webhook.ts:134-135</code> — <code>return res.status(200)</code> TOUJOURS atteint</li>
+            <li><code>mollie-webhook.ts:137-141</code> — catch global retourne aussi 200</li>
+        </ul>
+        <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:#92400e">
+            <strong>Budget temps :</strong> SMTP 3s+3s = 6s max en parallele &rarr; race 7s garde-fou &rarr; Vercel function 10s = marge 3s
+        </div>
+    </div>
+</div>
+
+<!-- TEST 4 : MERCIPAGE PARAMS -->
+<div class="section">
+    <h2>Test 4 — Revue code MerciPage URL params (C1)</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> Fallback URL params + optional chaining</h3>
+        <ul class="checklist">
+            <li><code>MerciPage.tsx:71</code> — <code>searchParams.get('invoice')</code> : lit param URL</li>
+            <li><code>MerciPage.tsx:72</code> — <code>searchParams.get('ref')</code> : lit param URL</li>
+            <li><code>MerciPage.tsx:73</code> — <code>urlInvoice || generateInvoiceNumber()</code> : fallback</li>
+            <li><code>MerciPage.tsx:78-85</code> — <code>getDiagData()</code> : sessionStorage d'abord, puis <code>{ ref: urlRef }</code></li>
+            <li><code>MerciPage.tsx:123-127</code> — <code>diag?.sector</code>, <code>diag?.product</code>, <code>diag?.regs?.length</code>, <code>diag?.context</code> : optional chaining</li>
+        </ul>
+    </div>
+</div>
+
+<hr class="separator">
+
+<!-- TEST 6 : MERCIPAGE FR LIVE -->
+<div class="section">
+    <h2>Test 6 — MerciPage FR avec URL params (LIVE)</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> CHANGE-07 valide dynamiquement</h3>
+        <div class="url"><code>http://localhost:5173/merci?product=diagnostic&amp;lang=fr&amp;invoice=AEGIS-TEST-1415&amp;ref=test-vv-345</code></div>
+    </div>
+    <ul class="checklist" style="margin-top:12px">
+        <li>Page affiche correctement — pas de crash, pas de page blanche</li>
+        <li>Numero facture = <strong>AEGIS-TEST-1415</strong> (URL param, pas genere)</li>
+        <li>Bouton "Telecharger ma facture PDF" present et style (gradient bleu)</li>
+        <li>4 etapes affichees avec icones</li>
+        <li>Console errors : 0</li>
+    </ul>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px"><em>Screenshot capture via Claude Preview MCP T1438. Page responsive, design glass/light preserve.</em></p>
+</div>
+
+<!-- TEST 7 : MERCIPAGE DEFAUT -->
+<div class="section">
+    <h2>Test 7 — MerciPage sans params (comportement par defaut)</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> Pas de regression</h3>
+        <div class="url"><code>http://localhost:5173/merci?product=diagnostic&amp;lang=fr</code></div>
+    </div>
+    <ul class="checklist" style="margin-top:12px">
+        <li>Numero facture = <strong>AEGIS-20260416-1438</strong> (genere par <code>generateInvoiceNumber()</code>)</li>
+        <li>Comportement par defaut intact — meme rendu qu'avant CHANGE-07</li>
+        <li>Bouton facture PDF present et fonctionnel</li>
+        <li>Console errors : 0</li>
+    </ul>
+</div>
+
+<!-- TEST 8 : MERCIPAGE EN -->
+<div class="section">
+    <h2>Test 8 — MerciPage EN avec URL params</h2>
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> i18n EN + URL params</h3>
+        <div class="url"><code>http://localhost:5173/merci?product=diagnostic&amp;lang=en&amp;invoice=AEGIS-TEST-EN&amp;ref=test-en-345</code></div>
+    </div>
+    <ul class="checklist" style="margin-top:12px">
+        <li>"Thank you for your order" (EN correct)</li>
+        <li>Invoice # = <strong>AEGIS-TEST-EN</strong> (URL param)</li>
+        <li>"Download my invoice PDF" (EN)</li>
+        <li>"Any questions? Contact us at" (EN)</li>
+        <li>Console errors : 0</li>
+    </ul>
+</div>
+
+<hr class="separator">
+
+<!-- TEST 9 : EMAIL TEMPLATES -->
+<div class="section">
+    <h2>Test 9 — Rendu email templates (4 templates)</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        Templates generes en HTML pur et rendus via navigateur. Verification par accessibility snapshot DOM (21,336 caracteres analyses).
+    </p>
+
+    <!-- 9A Client FR -->
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> 9A — Client Confirmation FR</h3>
+        <div style="font-size:12px;color:var(--muted)">Fonction : <code>clientConfirmationHtml(data, 'fr')</code></div>
+        <div class="email-preview">
+            <div style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);padding:24px 20px;text-align:center">
+                <div style="color:#fff;font-size:18px;font-weight:800">AEGIS Intelligence</div>
+                <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px">Diagnostic de Conformite Industrielle EU</div>
+            </div>
+            <div style="padding:20px;font-size:13px;line-height:1.6">
+                <div style="text-align:center;margin-bottom:16px">
+                    <span style="display:inline-block;padding:4px 12px;background:#10b98118;color:#10b981;border-radius:16px;font-weight:700;font-size:12px">Paiement confirme</span>
+                    <h3 style="margin:10px 0 4px;font-size:17px">Merci pour votre commande !</h3>
+                    <p style="color:#64748b;font-size:12px">Votre diagnostic AEGIS est en cours de preparation.</p>
+                </div>
+                <table style="width:100%;border-collapse:collapse;margin:12px 0">
+                    <thead><tr style="background:#f8fafc"><th style="text-align:left;padding:6px 8px;font-size:9px;color:#64748b;border-bottom:1px solid #e2e8f0">DESCRIPTION</th><th style="text-align:right;padding:6px 8px;font-size:9px;color:#64748b;border-bottom:1px solid #e2e8f0">MONTANT</th></tr></thead>
+                    <tbody><tr><td style="padding:8px;font-size:11px;border-bottom:1px solid #e2e8f0"><strong>Diagnostic Technique Conformite EU</strong><br><span style="font-size:10px;color:#94a3b8">Analyse multi-niveaux, rapport PDF premium</span></td><td style="text-align:right;padding:8px;font-weight:700;font-size:13px;border-bottom:1px solid #e2e8f0">250.00 EUR</td></tr></tbody>
+                </table>
+                <div style="text-align:center;margin:16px 0">
+                    <a href="#" style="display:inline-block;padding:10px 24px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;text-decoration:none;border-radius:20px;font-weight:700;font-size:12px">Telecharger votre facture</a>
+                </div>
+                <div style="background:#f8fafc;border-radius:8px;padding:10px;font-size:10px;border:1px solid #e2e8f0;line-height:1.6">
+                    <div style="font-size:9px;font-weight:700;color:#94a3b8;margin-bottom:4px">EMETTEUR</div>
+                    <strong>Jean-Pierre CHARLES</strong> | AEGIS Intelligence<br>
+                    SIRET : 522 794 700 00032 | APE : 7112B<br>
+                    10 La Bertiniere, 86800 Terce, FRANCE
+                </div>
+            </div>
+            <div style="padding:12px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:9px;color:#94a3b8">
+                AEGIS Intelligence | jeanpierrecharles.com | SIRET 522 794 700 00032
+            </div>
+        </div>
+        <ul class="checklist" style="margin-top:8px;font-size:12px">
+            <li>Header gradient bleu AEGIS</li>
+            <li>Badge "Paiement confirme" vert</li>
+            <li>Tableau facture : description + montant 250.00 EUR</li>
+            <li>Bouton CTA "Telecharger votre facture"</li>
+            <li>Section emetteur SELLER complete (SIRET, adresse, TVA art. 293 B)</li>
+            <li>Footer legal</li>
+        </ul>
+    </div>
+
+    <!-- 9B Client EN -->
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> 9B — Client Confirmation EN</h3>
+        <div style="font-size:12px;color:var(--muted)">Fonction : <code>clientConfirmationHtml(data, 'en')</code></div>
+        <ul class="checklist" style="margin-top:8px;font-size:12px">
+            <li>Snapshot DOM confirme : "Payment confirmed", "Thank you for your order!"</li>
+            <li>"EU Industrial Compliance Technical Diagnostic"</li>
+            <li>"Subtotal excl. VAT" / "AMOUNT" (EN)</li>
+            <li>"ORDER DETAILS" / "Reference: REQ-a1b2c3d4" / "Date: 16 April 2026"</li>
+            <li>"Download your invoice" CTA button</li>
+            <li>"FROM" section avec SELLER complet</li>
+            <li>"Any questions?" + lien email</li>
+        </ul>
+    </div>
+
+    <!-- 9C Ops New Order -->
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> 9C — Ops New Order</h3>
+        <div style="font-size:12px;color:var(--muted)">Fonction : <code>opsNewOrderHtml(data)</code></div>
+        <div class="email-preview">
+            <div style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);padding:20px 16px;text-align:center">
+                <div style="color:#fff;font-size:16px;font-weight:800">[AEGIS] Nouvelle Commande</div>
+                <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:4px">DIAGNOSTIC #REQ-a1b2c3d4</div>
+            </div>
+            <div style="padding:16px;font-size:12px;line-height:1.6">
+                <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:11px">
+                    <strong style="color:#92400e">Action requise :</strong>
+                    <span style="color:#92400e"> Produire le rapport sous 24h ouvrees.</span>
+                </div>
+                <table style="width:100%;font-size:11px;line-height:1.7">
+                    <tr><td style="width:100px;color:#64748b;font-weight:600">Nom</td><td>Marie Dupont</td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Email</td><td>client.test@gmail.com</td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Entreprise</td><td>Acme Pharma SAS</td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Secteur</td><td>Cosmetiques / Dermatologie</td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Payment ID</td><td><code style="font-size:10px">tr_3wGV87jDD7WFcRKyLMuPJ</code></td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Montant</td><td><strong>250.00 EUR</strong></td></tr>
+                    <tr><td style="color:#64748b;font-weight:600">Mode</td><td>LIVE</td></tr>
+                </table>
+            </div>
+        </div>
+        <ul class="checklist" style="margin-top:8px;font-size:12px">
+            <li>Alerte "Action requise" en jaune</li>
+            <li>Donnees client completes (nom, email, entreprise, secteur)</li>
+            <li>Reglementations en badges (EU Cosmetics, REACH, CLP, GMP ISO 22716)</li>
+            <li>Contexte additionnel</li>
+            <li>Donnees paiement (payment_id, request_id, montant, mode, timestamp)</li>
+        </ul>
+    </div>
+
+    <!-- 9D Ops Pre-Notify -->
+    <div class="test-card">
+        <h3><span class="badge badge-pass">PASS</span> 9D — Ops Pre-Notify</h3>
+        <div style="font-size:12px;color:var(--muted)">Fonction : <code>opsPreNotifyHtml(data)</code></div>
+        <ul class="checklist" style="margin-top:8px;font-size:12px">
+            <li>Header gris "[AEGIS] Tentative Checkout" + nom entreprise</li>
+            <li>Message explicatif pre-checkout</li>
+            <li>Request ID, email, entreprise, secteur, produit (tronque 200 chars)</li>
+            <li>Footer "Pre-notification checkout"</li>
+        </ul>
+    </div>
+</div>
+
+<hr class="separator">
+
+<!-- CORRECTIONS CONTRE-EXPERTISE -->
+<div class="section">
+    <h2>Corrections contre-expertise integrees</h2>
+    <table>
+        <thead><tr><th>Ref</th><th>Correction</th><th>Implementation</th><th>Statut</th></tr></thead>
+        <tbody>
+            <tr><td>C1</td><td>MerciPage URL params</td><td>CHANGE-07 : <code>searchParams.get('invoice')</code> fallback</td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+            <tr><td>C2</td><td>sendOpsFailureAlert boucle</td><td>Supprime. Log JSON structure seul</td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+            <tr><td>C3-bis</td><td>Fire-and-forget Vercel</td><td><code>await Promise.race([allSettled, timeout 7s])</code></td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+            <tr><td>C4</td><td>Tests V&amp;V insuffisants</td><td>11 tests Phase 1 + 1.5</td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+            <tr><td>M2</td><td>Kill switch pre-notify</td><td><code>OPS_PRENOTIFY_ENABLED</code> env var</td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+            <tr><td>M3</td><td>health.ts version</td><td>3.4.2 &rarr; 3.4.5</td><td><span class="badge badge-pass">RESOLU</span></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- DETTES -->
+<div class="section">
+    <h2>Dettes gravees v3.4.6</h2>
+    <table>
+        <thead><tr><th>Ref</th><th>Description</th><th>Priorite</th></tr></thead>
+        <tbody>
+            <tr><td><span class="badge badge-warn">DETTE7</span></td><td>Idempotence persistante Vercel KV</td><td>Haute</td></tr>
+            <tr><td><span class="badge badge-info">DETTE8</span></td><td>PDF facture attache email</td><td>Moyenne</td></tr>
+            <tr><td><span class="badge badge-info">DETTE9</span></td><td>Retry async SMTP (queue + backoff)</td><td>Basse</td></tr>
+            <tr><td><span class="badge badge-info">DETTE10</span></td><td>Enrichir facture MerciPage depuis URL (stockage server-side)</td><td>Moyenne</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="timestamp">
+    Rapport genere par ACDC Code (Claude Code CLI Opus 4.6) | 20260416T1445 CET<br>
+    Mission DETTE6 v3.4.5 | R_T1215_01 autonomie | R_T1155_01 surete end-to-end
+</div>
+
+</div>
+</body>
+</html>

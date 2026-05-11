@@ -45,6 +45,16 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
     const [isStreaming, setIsStreaming] = useState(false);
     const [consent, setConsent] = useState(hasAIConsent());
     const [isExporting, setIsExporting] = useState(false);
+    // M3.5 PULSE email gate (S2 Mission N11) -- email persistant en sessionStorage
+    // pour eviter de re-demander a chaque export PDF dans la meme session.
+    const [pulseEmail, setPulseEmail] = useState<string | null>(() => {
+        if (typeof window === 'undefined') return null;
+        try { return sessionStorage.getItem('aegis_pulse_lead_email'); } catch { return null; }
+    });
+    const [pulseGateOpen, setPulseGateOpen] = useState(false);
+    const [pulseEmailInput, setPulseEmailInput] = useState('');
+    const [pulseSubmitting, setPulseSubmitting] = useState(false);
+    const [pulseError, setPulseError] = useState<string | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
     const chatZoneRef = useRef<HTMLDivElement>(null);
 
@@ -260,7 +270,9 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
         }
     };
 
-    const handleExportConversationPDF = async () => {
+    // S2 Mission N11 : runExportPdf = corps historique de handleExportConversationPDF.
+    // handleExportConversationPDF devient un wrapper avec gate email (M3.5).
+    const runExportPdf = async () => {
         if (messages.length === 0 || isExporting) return;
         setIsExporting(true);
 
@@ -463,6 +475,62 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             console.error('PDF export error:', err);
         } finally {
             setIsExporting(false);
+        }
+    };
+
+    // M3.5 PULSE email gate (S2 Mission N11) : si pas d'email connu en session,
+    // ouvrir la modal au lieu de declencher l'export. Sinon export direct.
+    const handleExportConversationPDF = () => {
+        if (messages.length === 0 || isExporting) return;
+        if (!pulseEmail) {
+            setPulseError(null);
+            setPulseEmailInput('');
+            setPulseGateOpen(true);
+            return;
+        }
+        runExportPdf();
+    };
+
+    // POST email + dernier contexte vers /api/pulse-lead, puis declenche l'export.
+    // Echec serveur silencieux (UX prime) : on garde l'email cote client et on exporte.
+    const submitPulseLead = async () => {
+        const email = pulseEmailInput.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setPulseError(lang === 'fr'
+                ? 'Email invalide. Utilisez votre email professionnel.'
+                : 'Invalid email. Use your professional email.');
+            return;
+        }
+        setPulseSubmitting(true);
+        setPulseError(null);
+        try {
+            const lastUserMessage = messages.filter(m => m.role === 'user').slice(-1)[0]?.content || '';
+            const res = await fetch('/api/pulse-lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    query_context: lastUserMessage.slice(0, 500),
+                    lang,
+                }),
+            });
+            if (!res.ok && res.status !== 409) {
+                // Echec serveur : on continue en local pour ne pas bloquer l'utilisateur.
+                console.warn('pulse-lead non-2xx:', res.status);
+            }
+            try { sessionStorage.setItem('aegis_pulse_lead_email', email); } catch { /* ignore */ }
+            setPulseEmail(email);
+            setPulseGateOpen(false);
+            setPulseEmailInput('');
+            await runExportPdf();
+        } catch (e) {
+            console.error('pulse-lead submit error:', e);
+            setPulseError(lang === 'fr'
+                ? 'Erreur reseau. Reessayez ou contactez-nous.'
+                : 'Network error. Try again or contact us.');
+        } finally {
+            setPulseSubmitting(false);
         }
     };
 
@@ -770,6 +838,122 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             </div>
 
         </div>
+
+        {/* M3.5 PULSE email gate (S2 Mission N11) : capture email avant export PDF */}
+        {pulseGateOpen && (
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pulse-gate-title"
+                onClick={() => !pulseSubmitting && setPulseGateOpen(false)}
+                style={{
+                    position: 'fixed', inset: 0, zIndex: 10000,
+                    background: 'rgba(15,23,42,0.55)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 16,
+                    fontFamily: 'inherit',
+                }}
+            >
+                <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        background: C.surface,
+                        borderRadius: 16,
+                        boxShadow: C.shadowLg,
+                        border: `1px solid ${C.border}`,
+                        maxWidth: 440, width: '100%',
+                        padding: '28px 24px 22px',
+                    }}
+                >
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 10,
+                        background: `${C.accent}12`, color: C.accent,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 22, marginBottom: 14,
+                    }}>📥</div>
+                    <h2
+                        id="pulse-gate-title"
+                        style={{ fontSize: 18, fontWeight: 800, color: C.text, marginBottom: 6, lineHeight: 1.3 }}
+                    >
+                        {lang === 'fr' ? 'Recevoir l\'analyse PDF' : 'Receive the PDF analysis'}
+                    </h2>
+                    <p style={{ fontSize: 13, color: C.textSecondary, lineHeight: 1.55, marginBottom: 16 }}>
+                        {lang === 'fr'
+                            ? 'Indiquez votre email professionnel pour télécharger l\'analyse préliminaire et recevoir un suivi personnalisé.'
+                            : 'Provide your professional email to download the preliminary analysis and receive personalised follow-up.'}
+                    </p>
+                    <form
+                        onSubmit={(e) => { e.preventDefault(); if (!pulseSubmitting) submitPulseLead(); }}
+                    >
+                        <input
+                            type="email"
+                            inputMode="email"
+                            autoComplete="email"
+                            required
+                            autoFocus
+                            value={pulseEmailInput}
+                            onChange={(e) => { setPulseEmailInput(e.target.value); if (pulseError) setPulseError(null); }}
+                            placeholder={lang === 'fr' ? 'votre@entreprise.eu' : 'you@company.eu'}
+                            disabled={pulseSubmitting}
+                            style={{
+                                width: '100%', boxSizing: 'border-box',
+                                padding: '11px 14px', fontSize: 14,
+                                border: `1px solid ${pulseError ? C.rose : C.borderStrong}`,
+                                borderRadius: 10,
+                                background: pulseSubmitting ? C.surfaceAlt : C.surface,
+                                color: C.text, fontFamily: 'inherit',
+                                outline: 'none',
+                            }}
+                        />
+                        {pulseError && (
+                            <div style={{ fontSize: 12, color: C.rose, marginTop: 6 }}>{pulseError}</div>
+                        )}
+                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                            <button
+                                type="button"
+                                onClick={() => setPulseGateOpen(false)}
+                                disabled={pulseSubmitting}
+                                style={{
+                                    flex: '0 0 auto', padding: '10px 16px',
+                                    fontSize: 13, fontWeight: 600, borderRadius: 10,
+                                    background: 'transparent', color: C.textSecondary,
+                                    border: `1px solid ${C.borderStrong}`,
+                                    cursor: pulseSubmitting ? 'not-allowed' : 'pointer',
+                                    fontFamily: 'inherit',
+                                    opacity: pulseSubmitting ? 0.5 : 1,
+                                }}
+                            >
+                                {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={pulseSubmitting || pulseEmailInput.trim().length === 0}
+                                style={{
+                                    flex: 1, padding: '10px 16px',
+                                    fontSize: 13, fontWeight: 700, borderRadius: 10,
+                                    background: C.gradientBlue, color: '#fff',
+                                    border: 'none',
+                                    cursor: (pulseSubmitting || pulseEmailInput.trim().length === 0) ? 'not-allowed' : 'pointer',
+                                    fontFamily: 'inherit',
+                                    opacity: (pulseSubmitting || pulseEmailInput.trim().length === 0) ? 0.6 : 1,
+                                }}
+                            >
+                                {pulseSubmitting
+                                    ? (lang === 'fr' ? 'Envoi…' : 'Submitting…')
+                                    : (lang === 'fr' ? 'Continuer & télécharger' : 'Continue & download')}
+                            </button>
+                        </div>
+                    </form>
+                    <p style={{ fontSize: 10.5, color: C.textMuted, marginTop: 14, lineHeight: 1.5 }}>
+                        {lang === 'fr'
+                            ? 'Email utilisé uniquement pour le suivi de votre demande. Pas de spam. RGPD Art. 6.1.a — consentement.'
+                            : 'Email used only to follow up on your request. No spam. GDPR Art. 6.1.a — consent.'}
+                    </p>
+                </div>
+            </div>
+        )}
         </>
     );
 };

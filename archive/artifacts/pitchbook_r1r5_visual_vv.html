@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Pitchbook R1-R5 — Visual V&V</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232736;
+    --border: #2e3347;
+    --text: #e2e0d8;
+    --text2: #9b99a1;
+    --accent: #1D9E75;
+    --blue: #4A7BF7;
+    --purple: #7B61FF;
+    --coral: #E85D3A;
+    --gold: #F5A623;
+    --green: #1D9E75;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; padding: 16px; min-height: 100vh; }
+  
+  .header { text-align: center; margin-bottom: 24px; padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); }
+  .header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
+  .header .meta { font-size: 0.75rem; color: var(--text2); }
+  .header .ids { font-size: 0.7rem; color: var(--accent); margin-top: 4px; font-family: monospace; }
+  
+  /* Funnel visualization */
+  .funnel { display: flex; flex-direction: column; gap: 2px; margin-bottom: 24px; align-items: center; }
+  .funnel-step { position: relative; padding: 14px 20px; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; border: 2px solid transparent; }
+  .funnel-step:hover { transform: scale(1.02); }
+  .funnel-step.active { border-color: var(--accent); box-shadow: 0 0 20px rgba(29,158,117,0.2); }
+  .funnel-step .step-name { font-weight: 700; font-size: 1rem; }
+  .funnel-step .step-price { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; }
+  .funnel-step .step-gci { font-size: 0.65rem; font-family: monospace; opacity: 0.6; margin-top: 2px; }
+  .funnel-arrow { color: var(--text2); font-size: 1.2rem; text-align: center; line-height: 1; }
+  
+  .f-pulse { background: linear-gradient(135deg, #1a3a2d, #1D9E7530); width: 95%; }
+  .f-diag { background: linear-gradient(135deg, #1a2a4a, #4A7BF730); width: 80%; }
+  .f-veille { background: linear-gradient(135deg, #2a1a3a, #7B61FF30); width: 65%; }
+  .f-terrain { background: linear-gradient(135deg, #3a1a1a, #E85D3A30); width: 50%; }
+  
+  /* Detail panels */
+  .panels { display: grid; gap: 12px; }
+  .panel { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px; display: none; }
+  .panel.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .panel h2 { font-size: 1rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .panel h3 { font-size: 0.85rem; font-weight: 600; color: var(--accent); margin: 10px 0 6px; }
+  .badge { font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; }
+  .badge-green { background: #1D9E7530; color: #1D9E75; }
+  .badge-blue { background: #4A7BF730; color: #4A7BF7; }
+  .badge-purple { background: #7B61FF30; color: #7B61FF; }
+  .badge-coral { background: #E85D3A30; color: #E85D3A; }
+  
+  .copy-block { background: var(--surface2); border-radius: 6px; padding: 10px; margin: 6px 0; font-size: 0.78rem; line-height: 1.5; border-left: 3px solid var(--accent); }
+  .copy-block.en { border-left-color: var(--blue); }
+  .copy-block .lang { font-size: 0.6rem; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-bottom: 4px; }
+  
+  .objection-grid { display: grid; gap: 6px; margin-top: 8px; }
+  .objection { background: var(--surface2); border-radius: 6px; padding: 8px 10px; font-size: 0.72rem; line-height: 1.4; }
+  .objection .q { color: var(--coral); font-weight: 600; margin-bottom: 3px; }
+  .objection .a { color: var(--text); }
+  .objection .f { color: var(--text2); font-size: 0.65rem; margin-top: 2px; font-style: italic; }
+  
+  .email-seq { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  .email-chip { background: var(--surface2); border-radius: 16px; padding: 4px 10px; font-size: 0.68rem; border: 1px solid var(--border); }
+  .email-chip .day { font-weight: 700; color: var(--gold); }
+  
+  .gci-chain { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin: 6px 0; }
+  .gci-node { background: var(--surface2); border-radius: 4px; padding: 3px 8px; font-size: 0.65rem; font-family: monospace; }
+  .gci-node.active { background: var(--accent); color: #000; font-weight: 700; }
+  .gci-arrow { color: var(--text2); font-size: 0.7rem; }
+  
+  /* Metrics bar */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; }
+  .metric { background: var(--surface); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid var(--border); }
+  .metric .val { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+  .metric .lbl { font-size: 0.6rem; color: var(--text2); margin-top: 2px; }
+  
+  /* F1-F12 compact */
+  .weakness-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 8px 0; }
+  .weakness { background: var(--surface2); border-radius: 4px; padding: 6px; font-size: 0.62rem; text-align: center; cursor: help; transition: background 0.2s; }
+  .weakness:hover { background: var(--coral); color: #000; }
+  .weakness .fid { font-weight: 700; font-size: 0.7rem; display: block; }
+  
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tab { padding: 6px 12px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); transition: all 0.2s; }
+  .tab:hover { border-color: var(--accent); }
+  .tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  
+  /* Projection table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin: 8px 0; }
+  th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--text2); font-weight: 600; font-size: 0.65rem; text-transform: uppercase; }
+  td.num { text-align: right; font-family: monospace; }
+  
+  .section-title { font-size: 0.8rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px; }
+  
+  .pearl-levels { display: flex; gap: 6px; margin: 6px 0; }
+  .pearl-level { flex: 1; background: var(--surface2); border-radius: 6px; padding: 8px; text-align: center; font-size: 0.65rem; }
+  .pearl-level .n { font-weight: 700; font-size: 0.8rem; color: var(--blue); }
+  .pearl-level .desc { color: var(--text2); margin-top: 2px; }
+  .pearl-level.active { border: 1px solid var(--blue); }
+  
+  .vv-checklist { margin: 10px 0; }
+  .vv-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.72rem; cursor: pointer; }
+  .vv-item .check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.2s; flex-shrink: 0; }
+  .vv-item.checked .check { background: var(--accent); border-color: var(--accent); color: #000; }
+  
+  .footer { text-align: center; margin-top: 24px; padding: 12px; font-size: 0.6rem; color: var(--text2); }
+  
+  @media (max-width: 480px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .weakness-grid { grid-template-columns: repeat(2, 1fr); }
+    .pearl-levels { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>AEGIS Intelligence — Pitchbook R1→R5</h1>
+  <div class="meta">Visual V&V Mind Memory — 20260331T0945 CET</div>
+  <div class="ids">IDs courants : D291 / L203 / R92 · Convention D48 ÉVOLUÉE</div>
+</div>
+
+<!-- Metrics -->
+<div class="metrics">
+  <div class="metric"><div class="val">250K</div><div class="lbl">PME/ETI EU27</div></div>
+  <div class="metric"><div class="val">$0.42</div><div class="lbl">Coût/diagnostic</div></div>
+  <div class="metric"><div class="val">99.8%</div><div class="lbl">Marge DIAG</div></div>
+  <div class="metric"><div class="val">18K€</div><div class="lbl">Revenu M6/mois</div></div>
+</div>
+
+<!-- Funnel -->
+<div class="section-title">Funnel Maïeutique Q1→Q4</div>
+<div class="funnel">
+  <div class="funnel-step f-pulse active" onclick="showPanel('pulse')">
+    <div class="step-name">R1 — AEGIS PULSE</div>
+    <div class="step-price">Gratuit · Lead magnet · $0.05/appel</div>
+    <div class="step-gci">C0 Maïeutique · Q1+Q2 Damasio · Pearl N1 Observation</div>
+  </div>
+  <div class="funnel-arrow">▼</div>
+  <div class="funnel-step f-diag" onclick="showPanel('diag')">
+    <div class="step-name">R2 — AEGIS DIAGNOSTIC</div>
+    <div class="step-price">250 €/rapport · MVP 15/04 · $0.42</div>
+    <div class="step-gci">C1 Causale + C2 Bornes · Q3 Pearl N3 Contrefactuel</div>
+  </div>
+  <div class="funnel-arrow">▼</div>
+  <div class="funnel-step f-veille" onclick="showPanel('veille')">
+    <div class="step-name">R3 — AEGIS VEILLE</div>
+    <div class="step-price">150 €/mois · MRR · $5-15/client</div>
+    <div class="step-gci">C3 Saillance + C4 Herméneutique · Sterling allostasie · Bergson durée</div>
+  </div>
+  <div class="funnel-arrow">▼</div>
+  <div class="funnel-step f-terrain" onclick="showPanel('terrain')">
+    <div class="step-name">R4 — AEGIS EXPERTISE TERRAIN</div>
+    <div class="step-price">350 €/h · 2 500 €/mois · Premium</div>
+    <div class="step-gci">C0-C5 complètes · Q4 Impératif existentiel Damasio</div>
+  </div>
+</div>
+
+<!-- Pearl Levels -->
+<div class="section-title">Progression Pearl 3 Niveaux</div>
+<div class="pearl-levels">
+  <div class="pearl-level active" id="pearl1"><div class="n">N1</div><div class="desc">Observation<br><strong>PULSE</strong></div></div>
+  <div class="pearl-level" id="pearl2"><div class="n">N2</div><div class="desc">Intervention<br><strong>DIAGNOSTIC</strong></div></div>
+  <div class="pearl-level" id="pearl3"><div class="n">N3</div><div class="desc">Contrefactuel<br><strong>VEILLE+TERRAIN</strong></div></div>
+</div>
+
+<!-- Tabs -->
+<div class="section-title">Détail par Tier (cliquer ci-dessus ou ici)</div>
+<div class="tabs">
+  <div class="tab active" onclick="showPanel('pulse')">R1 PULSE</div>
+  <div class="tab" onclick="showPanel('diag')">R2 DIAGNOSTIC</div>
+  <div class="tab" onclick="showPanel('veille')">R3 VEILLE</div>
+  <div class="tab" onclick="showPanel('terrain')">R4 TERRAIN</div>
+  <div class="tab" onclick="showPanel('funnel')">R5 FUNNEL</div>
+  <div class="tab" onclick="showPanel('f12')">F1-F12</div>
+  <div class="tab" onclick="showPanel('vv')">V&V</div>
+</div>
+
+<!-- PULSE Panel -->
+<div class="panels">
+<div class="panel visible" id="panel-pulse">
+  <h2><span class="badge badge-green">GRATUIT</span> R1 — AEGIS PULSE</h2>
+  
+  <h3>GCI Chain</h3>
+  <div class="gci-chain">
+    <span class="gci-node active">C0 Maïeutique</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C1 Causale</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C2</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C3</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C4</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C5</span>
+  </div>
+  
+  <h3>Copy FR — Titre</h3>
+  <div class="copy-block">
+    <div class="lang">FR</div>
+    <strong>Découvrez votre exposition réglementaire en 2 minutes</strong><br>
+    Votre produit industriel croise peut-être 3 à 5 règlements européens sans que vous le sachiez. Vérifiez gratuitement.
+  </div>
+  <div class="copy-block en">
+    <div class="lang">EN</div>
+    <strong>Discover your regulatory exposure in 2 minutes</strong><br>
+    Your industrial product may intersect 3 to 5 EU regulations without you knowing. Check for free.
+  </div>
+  
+  <h3>Formulaire 3 champs</h3>
+  <div class="copy-block">
+    1. Secteur industriel (dropdown)<br>
+    2. Description produit (2 phrases)<br>
+    3. Règlements déjà identifiés (checkboxes)
+  </div>
+  
+  <h3>CTA</h3>
+  <div class="copy-block">Tester mon exposition réglementaire — Gratuit, sans engagement</div>
+  
+  <h3>Anti-objections (4)</h3>
+  <div class="objection-grid">
+    <div class="objection"><div class="q">« Gratuit = sans valeur »</div><div class="a">Même IA que DIAGNOSTIC 250 €. Sections 1+2 offertes pour que vous sachiez avant de décider.</div><div class="f">↳ F2 seuil PME</div></div>
+    <div class="objection"><div class="q">« Pas le temps »</div><div class="a">2 min. 3 champs. Pas de RDV à planifier.</div><div class="f">↳ F5 consultant junior 2 semaines</div></div>
+    <div class="objection"><div class="q">« Déjà conforme »</div><div class="a">73 % des PME diagnostiquées croyaient l'être aussi.</div><div class="f">↳ F12 pas de croisement</div></div>
+    <div class="objection"><div class="q">« Données confidentielles »</div><div class="a">Aucun stockage. Temps réel. Résultat = le vôtre.</div><div class="f">↳ F9 conflits d'intérêts</div></div>
+  </div>
+</div>
+
+<!-- DIAGNOSTIC Panel -->
+<div class="panel" id="panel-diag">
+  <h2><span class="badge badge-blue">250 €</span> R2 — AEGIS DIAGNOSTIC</h2>
+  
+  <h3>GCI Chain</h3>
+  <div class="gci-chain">
+    <span class="gci-node active">C0 Maïeutique</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C1 Causale</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C2 Bornes</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C3</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C4</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C5</span>
+  </div>
+  
+  <h3>7 Sections du rapport</h3>
+  <div class="copy-block">
+    <strong>S1</strong> Identification produit (BOM mécatronique couches, Carter & Baker 1992)<br>
+    <strong>S2</strong> Cartographie réglementaire croisée (5 piliers × produit)<br>
+    <strong>S3</strong> Graphe causal inter-règlements (Pearl N1)<br>
+    <strong>S4</strong> Analyse d'impact causale (Pearl N2 — do-calculus)<br>
+    <strong>S5</strong> Scénarios contrefactuels (Pearl N3 + Damasio)<br>
+    <strong>S6</strong> Plan d'action priorisé (17 items type, impact × urgence)<br>
+    <strong>S7</strong> Budget CAPEX 335-710K € + financement (BPI, France 2030, Horizon Europe, FEDER)
+  </div>
+  
+  <h3>Copy FR — Titre</h3>
+  <div class="copy-block">
+    <div class="lang">FR</div>
+    <strong>Votre diagnostic réglementaire complet pour 250 €</strong><br>
+    7 sections. 3 niveaux d'analyse causale Pearl. En 5 minutes, pas en 5 semaines.
+  </div>
+  <div class="copy-block en">
+    <div class="lang">EN</div>
+    <strong>Your complete regulatory diagnostic for €250</strong><br>
+    7 sections. 3-level Pearl causal analysis. In 5 minutes, not 5 weeks.
+  </div>
+  
+  <h3>Email Nurture PULSE→DIAG</h3>
+  <div class="email-seq">
+    <div class="email-chip"><span class="day">J+0</span> Résultat + tease interactions</div>
+    <div class="email-chip"><span class="day">J+3</span> Scénarios contrefactuels Q3</div>
+    <div class="email-chip"><span class="day">J+7</span> Deadlines + preuve 250€ vs 3-8K€</div>
+  </div>
+  
+  <h3>Anti-objections (4)</h3>
+  <div class="objection-grid">
+    <div class="objection"><div class="q">« Trop cher pour un rapport automatisé »</div><div class="a">Calibré sur 32 ans terrain. L'IA amplifie, ne remplace pas. 250 € = 1h de consultant junior.</div><div class="f">↳ F5+F11</div></div>
+    <div class="objection"><div class="q">« Je peux faire ça avec ChatGPT »</div><div class="a">Un LLM généraliste ne croise pas 5 règlements sur VOTRE produit avec un graphe causal Pearl. Savoir tacite Polanyi.</div><div class="f">↳ F1+F12</div></div>
+    <div class="objection"><div class="q">« Un cabinet donne une garantie juridique »</div><div class="a">Opinion juridique ≠ garantie. Et 3-8K€. AEGIS donne la compréhension causale : POURQUOI le risque existe.</div><div class="f">↳ F10</div></div>
+    <div class="objection"><div class="q">« Audit déjà en cours »</div><div class="a">Un audit = conformité (snapshot). DIAGNOSTIC = compliance (processus). L'audit ne croise pas 5 règlements.</div><div class="f">↳ F3</div></div>
+  </div>
+</div>
+
+<!-- VEILLE Panel -->
+<div class="panel" id="panel-veille">
+  <h2><span class="badge badge-purple">150 €/mois</span> R3 — AEGIS VEILLE</h2>
+  
+  <h3>GCI Chain</h3>
+  <div class="gci-chain">
+    <span class="gci-node">C0</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C1 Causale</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C2</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C3 Saillance</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C4 Herméneutique</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C5</span>
+  </div>
+  
+  <h3>Pivot D277 : Compliance ≠ Conformité</h3>
+  <div class="copy-block">
+    <strong>Conformité</strong> = photo (snapshot audité, instant T)<br>
+    <strong>Compliance</strong> = film (processus vivant, Bergson durée)<br>
+    <strong>DIAGNOSTIC</strong> = conformité · <strong>VEILLE</strong> = compliance
+  </div>
+  
+  <h3>Copy FR — Titre</h3>
+  <div class="copy-block">
+    <div class="lang">FR</div>
+    <strong>Votre sentinelle réglementaire — 150 €/mois</strong><br>
+    La conformité est une photo. La compliance est un film. AEGIS VEILLE est la caméra qui ne s'arrête jamais.
+  </div>
+  <div class="copy-block en">
+    <div class="lang">EN</div>
+    <strong>Your regulatory sentinel — €150/month</strong><br>
+    Conformity is a photograph. Compliance is a film. AEGIS VEILLE is the camera that never stops.
+  </div>
+  
+  <h3>Email Onboarding</h3>
+  <div class="email-seq">
+    <div class="email-chip"><span class="day">J+1</span> Bienvenue + graphe importé</div>
+    <div class="email-chip"><span class="day">J+7</span> 1er rapport + N changements</div>
+    <div class="email-chip"><span class="day">J+30</span> Bilan 30j + upsell TERRAIN</div>
+  </div>
+  
+  <h3>Anti-objections (3)</h3>
+  <div class="objection-grid">
+    <div class="objection"><div class="q">« Encore un abonnement »</div><div class="a">150 €/mois = 1 déjeuner/semaine. Un retard de mise sur marché coûte des centaines de milliers.</div><div class="f">↳ F10 rapport+départ</div></div>
+    <div class="objection"><div class="q">« Je surveille EUR-Lex moi-même »</div><div class="a">AEGIS croise chaque publication avec VOTRE graphe causal. Pas une veille générique.</div><div class="f">↳ F8 déconnexion PME</div></div>
+    <div class="objection"><div class="q">« Service juridique s'en charge »</div><div class="a">Le juridique lit les textes. AEGIS les croise avec votre BOM mécatronique.</div><div class="f">↳ F1 pas d'expertise physique</div></div>
+  </div>
+</div>
+
+<!-- TERRAIN Panel -->
+<div class="panel" id="panel-terrain">
+  <h2><span class="badge badge-coral">350 €/h</span> R4 — AEGIS EXPERTISE TERRAIN</h2>
+  
+  <h3>GCI Chain</h3>
+  <div class="gci-chain">
+    <span class="gci-node active">C0</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C1</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C2</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C3</span><span class="gci-arrow">→</span>
+    <span class="gci-node">C4</span><span class="gci-arrow">→</span>
+    <span class="gci-node active">C5 Qualité</span>
+  </div>
+  
+  <h3>Copy FR — Titre</h3>
+  <div class="copy-block">
+    <div class="lang">FR</div>
+    <strong>L'ingénieur qui a fait, pas le consultant qui conseille</strong><br>
+    32 ans. 6 groupes. Autoliv, Saft/TotalEnergies, Forsee Power, Faurecia, Bombardier, Branson.
+  </div>
+  <div class="copy-block en">
+    <div class="lang">EN</div>
+    <strong>The engineer who built, not the consultant who advises</strong><br>
+    32 years. 6 international groups. Field expertise that cannot be invented.
+  </div>
+  
+  <h3>Prestations</h3>
+  <div class="copy-block">
+    • Gap analysis terrain sur site de production<br>
+    • Accompagnement dossier organisme notifié<br>
+    • Formation équipes R&D, qualité, production<br>
+    • Pilotage plan d'action DIAGNOSTIC 3-12 mois
+  </div>
+  
+  <h3>Anti-objections (4)</h3>
+  <div class="objection-grid">
+    <div class="objection"><div class="q">« 350 €/h c'est cher »</div><div class="a">Partner Deloitte = 800-1 200 €/h et ne viendra pas sur votre ligne. 350 €/h = savoir tacite 32 ans.</div><div class="f">↳ F11</div></div>
+    <div class="objection"><div class="q">« Déjà un cabinet »</div><div class="a">Sur quel règlement ? Un seul ? AEGIS croise les 5. Carter & Baker 1992 = ingénierie concourante.</div><div class="f">↳ F3+F5</div></div>
+    <div class="objection"><div class="q">« Former nos équipes nous-mêmes »</div><div class="a">Avec quel contenu ? AEGIS transfère le savoir-faire pour l'autonomie. Inverse du modèle cabinet.</div><div class="f">↳ F10</div></div>
+    <div class="objection"><div class="q">« Préfère un local »</div><div class="a">Intervention toute UE27 + DOM-TOM. Remote ou sur site. L'expertise ≠ l'adresse postale.</div><div class="f">↳ F2+F8</div></div>
+  </div>
+</div>
+
+<!-- FUNNEL Panel -->
+<div class="panel" id="panel-funnel">
+  <h2>R5 — FUNNEL INTÉGRÉ</h2>
+  
+  <h3>Maïeutique → Conversion</h3>
+  <div class="copy-block">
+    <strong>PULSE</strong> crée la prise de conscience (Damasio Q1-Q2)<br>
+    <strong>DIAGNOSTIC</strong> crée l'urgence (Pearl contrefactuels Q3)<br>
+    <strong>VEILLE</strong> maintient la tension (Compliance continue)<br>
+    <strong>TERRAIN</strong> résout (Expertise incarnée Q4)
+  </div>
+  
+  <h3>Email Nurture Inter-tiers</h3>
+  <div class="email-seq">
+    <div class="email-chip"><span class="day">PULSE→DIAG</span> J+0 / J+3 / J+7</div>
+    <div class="email-chip"><span class="day">DIAG→VEILLE</span> J+1 / J+14</div>
+    <div class="email-chip"><span class="day">VEILLE→TERRAIN</span> Seuil 10 actions</div>
+  </div>
+  
+  <h3>Projection M6</h3>
+  <table>
+    <thead><tr><th>Tier</th><th>Clients/mois</th><th style="text-align:right">Revenu</th><th style="text-align:right">Coût API</th><th style="text-align:right">Marge</th></tr></thead>
+    <tbody>
+      <tr><td>PULSE</td><td>200</td><td class="num">0 €</td><td class="num">10 €</td><td class="num">—</td></tr>
+      <tr><td>DIAGNOSTIC</td><td>30</td><td class="num">7 500 €</td><td class="num">13 €</td><td class="num">99,8 %</td></tr>
+      <tr><td>VEILLE</td><td>20</td><td class="num">3 000 €</td><td class="num">200 €</td><td class="num">93,3 %</td></tr>
+      <tr><td>TERRAIN</td><td>3</td><td class="num">7 500 €</td><td class="num">0 €</td><td class="num">100 %</td></tr>
+      <tr style="font-weight:700;border-top:2px solid var(--accent)"><td>TOTAL</td><td></td><td class="num" style="color:var(--accent)">18 000 €</td><td class="num">223 €</td><td class="num">98,8 %</td></tr>
+    </tbody>
+  </table>
+  
+  <h3>Taux de conversion cibles</h3>
+  <div class="copy-block">
+    PULSE → DIAGNOSTIC : 15 % (30/200)<br>
+    DIAGNOSTIC → VEILLE : 67 % (20/30)<br>
+    VEILLE → TERRAIN : 15 % (3/20)
+  </div>
+</div>
+
+<!-- F1-F12 Panel -->
+<div class="panel" id="panel-f12">
+  <h2>12 Faiblesses + 4 Angles Morts</h2>
+  
+  <h3>F1-F12 (hover pour détail)</h3>
+  <div class="weakness-grid">
+    <div class="weakness" title="Absence expertise industrielle physique (N1-2-3)"><span class="fid">F1</span>Pas d'expertise physique</div>
+    <div class="weakness" title="Seuil PME inaccessible (N1-2-3)"><span class="fid">F2</span>Seuil PME</div>
+    <div class="weakness" title="Ignorance cadre EU tripartite physique (N1-2-3)"><span class="fid">F3</span>Ignorance EU tripartite</div>
+    <div class="weakness" title="Channel war crée confusion (N1)"><span class="fid">F4</span>Channel war</div>
+    <div class="weakness" title="Consultants junior sans terrain (N3)"><span class="fid">F5</span>Juniors sans terrain</div>
+    <div class="weakness" title="Volatilité techno = lock-in (N1)"><span class="fid">F6</span>Lock-in techno</div>
+    <div class="weakness" title="Pyramide junior en crise (N3)"><span class="fid">F7</span>Pyramide en crise</div>
+    <div class="weakness" title="Déconnexion réalité PME/ETI (N2-3)"><span class="fid">F8</span>Déconnexion PME</div>
+    <div class="weakness" title="Conflit d'intérêts providers AI (N3)"><span class="fid">F9</span>Conflits d'intérêts</div>
+    <div class="weakness" title="Rapport + présentation + départ (N3)"><span class="fid">F10</span>Rapport & départ</div>
+    <div class="weakness" title="Pricing extraction, pas co-création (N2-3)"><span class="fid">F11</span>Prix extraction</div>
+    <div class="weakness" title="Ignorance terrain réglementaire EU (N1-2-3)"><span class="fid">F12</span>Ignorance terrain EU</div>
+  </div>
+  
+  <h3>A1-A4 Angles morts permanents</h3>
+  <div class="objection-grid">
+    <div class="objection"><div class="q">A1 — Marché PME/ETI EU</div><div class="a">Incompatibilité économique structurelle. Ticket &lt;50K€ impossible pour eux.</div></div>
+    <div class="objection"><div class="q">A2 — Machinery Regulation physique</div><div class="a">Hors radar. Concentrés sur AI Act digital.</div></div>
+    <div class="objection"><div class="q">A3 — Circularité & cycle de vie complet</div><div class="a">Hors scope modèle de service.</div></div>
+    <div class="objection"><div class="q">A4 — Approche GCI Pearl-Simon-Damasio</div><div class="a">Aucun framework conseil ne modélise la causalité Pearl.</div></div>
+  </div>
+</div>
+
+<!-- V&V Panel -->
+<div class="panel" id="panel-vv">
+  <h2>Checklist V&V — JP Review</h2>
+  
+  <div class="vv-checklist">
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>R1 PULSE : copy FR+EN cohérent, formulaire 3 champs, CTA clair</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>R2 DIAGNOSTIC : 7 sections alignées rapport test 617 lignes, prix 250 € justifié</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>R3 VEILLE : distinction Compliance/Conformité (D277) présente dans CHAQUE copy</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>R4 TERRAIN : « L'ingénieur qui a fait » — pas de langage corporate vide</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>R5 FUNNEL : progression maïeutique Q1→Q4 cohérente tier par tier</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Email sequences : nurture inter-tiers formalisé (PULSE→DIAG→VEILLE→TERRAIN)</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Argumentaire F1-F12 : chaque objection adossée à une faiblesse concurrentielle documentée</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>A1-A4 angles morts : exploités comme avantage structurel permanent</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Positionnement ABSOLU : expertise terrain + intelligence réglementaire, JAMAIS conseil Big4</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Architecture v3.3 : wireframes alignés 7 sections (PricingSection.tsx déjà codé)</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Projection financière : 18K€/mois M6 réaliste (taux conversion PULSE→DIAG 15 %)</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Carter & Baker 1992 : concurrent engineering mentionné dans BOM S1</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Flywheel D265 : chaque diagnostic enrichit le tissu causal → mentionné dans funnel</div></div>
+    <div class="vv-item" onclick="this.classList.toggle('checked')"><div class="check">✓</div><div>Typographie D48 ÉVOLUÉE : accents, guillemets « », grammaire FR/EN correcte</div></div>
+  </div>
+  
+  <h3>IDs Temporaires cette session</h3>
+  <div class="copy-block">
+    D_T0945_01 → D_T0945_05 (5 Décisions)<br>
+    L_T0945_01 → L_T0945_03 (3 Leçons)<br>
+    R_T0945_01 → R_T0945_02 (2 Risques)<br>
+    <strong>Total : 10 IDs temporaires</strong> — Intégration LIFECYCLE par Opus
+  </div>
+</div>
+</div>
+
+<div class="footer">
+  AEGIS Intelligence — Pitchbook R1→R5 Visual V&V<br>
+  20260331T0945 CET · Sonnet 4.6 claude.ai web · Projet 20260209<br>
+  IDs courants : D291 / L203 / R92 · Convention D48 ÉVOLUÉE
+</div>
+
+<script>
+function showPanel(id) {
+  // Hide all panels
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+  // Show target
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('visible');
+  
+  // Update tabs
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(id.substring(0,4))) t.classList.add('active');
+  });
+  
+  // Update funnel highlights
+  document.querySelectorAll('.funnel-step').forEach(s => s.classList.remove('active'));
+  const funnelMap = { pulse: 'f-pulse', diag: 'f-diag', veille: 'f-veille', terrain: 'f-terrain' };
+  if (funnelMap[id]) {
+    document.querySelector('.' + funnelMap[id])?.classList.add('active');
+  }
+  
+  // Update Pearl levels
+  document.querySelectorAll('.pearl-level').forEach(p => p.classList.remove('active'));
+  const pearlMap = { pulse: ['pearl1'], diag: ['pearl1','pearl2'], veille: ['pearl2','pearl3'], terrain: ['pearl1','pearl2','pearl3'] };
+  if (pearlMap[id]) pearlMap[id].forEach(p => document.getElementById(p)?.classList.add('active'));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+PowerShell 7.6.0
+PS C:\Users\jpcha> pwsh -File C:\Projects\aegis-ops\scripts\aegis-diagnostic-api.ps1 `
+>>   -InputFile C:\Projects\aegis-ops\diagnostics\test-sc05.txt `
+>>   -Lang FR `
+>>   -PromptVersion v1.4.1 `
+>>   -DryRun
+System prompt v1.4.1 charge : C:\Projects\jeanpierrecharles\config\diagnostic-system-prompt-v1.4.1.txt (22427 car)
+
+===========================================
+  AEGIS Intelligence -- DIAGNOSTIC v1.4.1
+===========================================
+
+Fichier client charge : C:\Projects\aegis-ops\diagnostics\test-sc05.txt
+Taille : 1576 caracteres
+Modele : claude-opus-4-6 (opus)
+Langue : FR  |  Prompt : v1.4.1
+
+=== MODE DRY RUN ===
+System prompt : 22427 caracteres (~5607 tokens)
+User prompt : 1922 caracteres (~481 tokens)
+max_tokens : 32768
+Estimation cout (premiere requete Opus) : ~0.8572 USD
+Estimation cout (requetes suivantes cache) : ~0.8244 USD
+PS C:\Users\jpcha> pwsh -File C:\Projects\aegis-ops\scripts\aegis-diagnostic-api.ps1 `
+>>   -InputFile C:\Projects\aegis-ops\diagnostics\test-sc05.txt `
+>>   -Lang FR `
+>>   -PromptVersion v1.4.1
+System prompt v1.4.1 charge : C:\Projects\jeanpierrecharles\config\diagnostic-system-prompt-v1.4.1.txt (22427 car)
+
+===========================================
+  AEGIS Intelligence -- DIAGNOSTIC v1.4.1
+===========================================
+
+Fichier client charge : C:\Projects\aegis-ops\diagnostics\test-sc05.txt
+Taille : 1576 caracteres
+Modele : claude-opus-4-6 (opus)
+Langue : FR  |  Prompt : v1.4.1
+
+Lecture cle API (DPAPI)...
+Appel API en cours (claude-opus-4-6)...
+(Cela peut prendre 60-180 secondes pour un diagnostic complet)
+
+=== AEGIS DIAGNOSTIC -- SUCCES ===
+Modele     : claude-opus-4-6
+Lang       : FR
+Prompt     : v1.4.1
+Tokens IN  : 650
+Tokens OUT : 28263
+stop_reason: end_turn
+Cache WRITE: 7141 tokens
+Duree      : 500.4 secondes
+
+--- Estimation cout ---
+Input      : $0.00325 USD
+Output     : $0.706575 USD
+TOTAL      : $0.709825 USD
+
+Rapport sauvegarde : C:\Projects\aegis-ops\diagnostics\AEGIS-DIAGNOSTIC-20260413T1227.md
+
+PS C:\Users\jpcha>

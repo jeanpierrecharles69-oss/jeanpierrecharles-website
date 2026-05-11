@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>AEGIS Intelligence — Note de présentation V4 — Banque (3 p.)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fafaf8;--card:#ffffff;--ink:#1a1a1a;--ink-soft:#3a3a3a;--muted:#6b6b6b;
+    --line:#e8e4dc;--primary:#0f2a44;--primary-soft:#1e4068;--accent:#8b6f47;
+    --success:#2d6a4f;--warn:#b8843a;--danger:#8b3a3a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{font-family:'Inter',-apple-system,sans-serif;font-size:10.5pt;line-height:1.45;color:var(--ink);background:#eee;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Source Serif 4',Georgia,serif;font-weight:600;letter-spacing:-.01em;color:var(--primary);}
+
+  /* PAGE A4 */
+  .page{
+    width:210mm;min-height:297mm;background:#fff;margin:12mm auto;padding:14mm 16mm;
+    box-shadow:0 2px 12px rgba(0,0,0,.08);position:relative;
+    display:flex;flex-direction:column;
+  }
+  .page-num{position:absolute;bottom:8mm;right:16mm;font-family:'JetBrains Mono',monospace;font-size:9pt;color:var(--muted);}
+  .page-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--primary);padding-bottom:6pt;margin-bottom:10pt;}
+  .brand{font-family:'Source Serif 4',serif;font-size:16pt;font-weight:700;color:var(--primary);letter-spacing:-.01em;}
+  .brand small{display:block;font-family:'Inter',sans-serif;font-size:8.5pt;font-weight:500;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;margin-top:1pt;}
+  .head-meta{text-align:right;font-size:8.5pt;color:var(--muted);line-height:1.5;}
+  .head-meta strong{color:var(--ink);}
+
+  h1.title{font-size:15pt;color:var(--primary);margin-bottom:3pt;}
+  h2{font-size:11.5pt;color:var(--primary);margin:10pt 0 4pt;border-left:3px solid var(--accent);padding-left:7pt;line-height:1.2;}
+  h3{font-size:10pt;color:var(--primary-soft);margin:6pt 0 3pt;font-weight:600;}
+  p{margin-bottom:5pt;color:var(--ink-soft);}
+  p strong{color:var(--ink);font-weight:600;}
+  ul,ol{margin:3pt 0 5pt 16pt;color:var(--ink-soft);}
+  li{margin-bottom:2pt;}
+
+  .narrative{font-family:'Source Serif 4',serif;font-size:10.5pt;line-height:1.5;color:var(--ink);padding:7pt 10pt;border-left:3px solid var(--primary);background:#f7f5f0;font-style:italic;margin:6pt 0;}
+
+  /* TABLES */
+  table{width:100%;border-collapse:collapse;font-size:9pt;margin:5pt 0;}
+  th,td{padding:4pt 6pt;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:var(--primary);color:#fff;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:.04em;}
+  td.num,th.num{font-family:'JetBrains Mono',monospace;text-align:right;font-variant-numeric:tabular-nums;}
+  tr.total td{font-weight:700;background:#f5f1e8;border-top:1px solid var(--accent);}
+  .tnote{font-size:8pt;color:var(--muted);font-style:italic;margin-top:2pt;}
+
+  /* METRIC TILES */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:5pt;margin:6pt 0;}
+  .tile{background:#f7f5f0;border-left:3px solid var(--primary);padding:6pt 8pt;}
+  .tile.s{border-left-color:var(--success);}
+  .tile.a{border-left-color:var(--accent);}
+  .tile.w{border-left-color:var(--warn);}
+  .tile-l{font-size:7.5pt;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;line-height:1.3;}
+  .tile-v{font-family:'Source Serif 4',serif;font-size:13pt;color:var(--primary);font-weight:600;line-height:1.1;margin-top:2pt;}
+  .tile-s{font-size:8pt;color:var(--muted);margin-top:1pt;line-height:1.3;}
+
+  /* CALLOUTS */
+  .box{background:#f5f1e8;border-left:3px solid var(--accent);padding:7pt 10pt;margin:6pt 0;font-size:9.5pt;line-height:1.5;}
+  .box-t{font-family:'Source Serif 4',serif;font-weight:600;color:var(--primary);margin-bottom:3pt;font-size:10pt;}
+  .box.s{background:#eef4ef;border-left-color:var(--success);}
+  .box.s .box-t{color:var(--success);}
+  .box.w{background:#fdf6ed;border-left-color:var(--warn);}
+  .box.w .box-t{color:var(--warn);}
+
+  /* TWO COL */
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:10pt;margin:5pt 0;}
+
+  /* FUNNEL COMPACT */
+  .funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:4pt;margin:5pt 0;}
+  .ftier{background:#fff;border:1px solid var(--line);border-top:3px solid var(--primary);padding:5pt 7pt;font-size:9pt;}
+  .ftier.t1{border-top-color:#94a3b8;} .ftier.t2{border-top-color:var(--accent);}
+  .ftier.t3{border-top-color:var(--primary);} .ftier.t4{border-top-color:var(--success);}
+  .ftier-n{font-family:'Source Serif 4',serif;font-weight:700;color:var(--primary);font-size:10pt;}
+  .ftier-p{font-family:'JetBrains Mono',monospace;color:var(--primary);font-weight:600;font-size:9.5pt;margin-top:2pt;}
+  .ftier-d{color:var(--muted);font-size:8pt;line-height:1.4;margin-top:2pt;}
+
+  /* SIGNATURE */
+  .sig{margin-top:auto;padding-top:8pt;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-end;font-size:8.5pt;color:var(--muted);}
+  .sig strong{color:var(--ink);}
+  .conf{display:inline-block;font-size:7pt;letter-spacing:.18em;text-transform:uppercase;padding:2pt 6pt;border:1px solid var(--accent);color:var(--accent);font-weight:600;}
+
+  @media print{
+    @page{size:A4;margin:0;}
+    html,body{background:#fff;}
+    .page{margin:0;box-shadow:none;page-break-after:always;width:210mm;height:297mm;}
+    .page:last-child{page-break-after:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== PAGE 1 — VUE D'ENSEMBLE ====== -->
+<section class="page">
+  <div class="page-head">
+    <div class="brand">AEGIS Intelligence<small>Note de présentation — Discussion bancaire</small></div>
+    <div class="head-meta">
+      <strong>Jean-Pierre Charles</strong>, fondateur<br>
+      4 mai 2026 — Version 4 (3 p.)<br>
+      <span class="conf">Confidentiel</span>
+    </div>
+  </div>
+
+  <h1 class="title">Vue d'ensemble — AEGIS et son contexte</h1>
+
+  <div class="narrative">« La conformité industrielle n'est pas un problème de documentation. C'est un problème de connaissance. »</div>
+
+  <h2>L'entreprise</h2>
+  <p><strong>AEGIS Intelligence</strong> est une plateforme d'expertise et d'intelligence réglementaire continue (EISaaS) pour les PME et ETI industrielles d'Europe et de ses régions ultrapériphériques. Elle associe <strong>32 années d'expérience R&amp;D terrain</strong> du fondateur (Autoliv, Saft/TotalEnergies, Forsee Power, Faurecia, Bombardier, Branson) et les modèles d'IA de frontière. Elle couvre simultanément les <strong>cinq règlements européens structurants</strong> entrant en application entre janvier 2027 et août 2028 (AI Act, Cyber Resilience Act, Machinery Regulation, ESPR/DPP, Battery Regulation), créant une obligation légale pour 200 000+ PME/ETI manufacturières.</p>
+
+  <h2>Chiffres clés au 4 mai 2026 — Ce qui est prouvé</h2>
+  <div class="tiles">
+    <div class="tile s">
+      <div class="tile-l">Première transaction</div>
+      <div class="tile-v">16 avr. 2026</div>
+      <div class="tile-s">Mollie LIVE — circuit bancaire validé</div>
+    </div>
+    <div class="tile s">
+      <div class="tile-l">Phase β cobaye complète</div>
+      <div class="tile-v">250 €</div>
+      <div class="tile-s">Pleine valeur encaissée — GO γ</div>
+    </div>
+    <div class="tile a">
+      <div class="tile-l">Marge brute DIAGNOSTIC</div>
+      <div class="tile-v">99,8 %</div>
+      <div class="tile-s">250 € prix — 0,39 € coût mesuré</div>
+    </div>
+    <div class="tile w">
+      <div class="tile-l">Phase γ — 1<sup>er</sup> client externe</div>
+      <div class="tile-v">En qualif.</div>
+      <div class="tile-s">Pipeline LinkedIn + réseau pro</div>
+    </div>
+  </div>
+
+  <h2>Dispositif patrimonial et opérationnel triadique</h2>
+  <p>Le projet du porteur est ancré à <strong>Deshaies (Guadeloupe)</strong> et structuré autour de <strong>trois entités juridiquement et financièrement indépendantes</strong>, complétées par un revenu personnel garanti.</p>
+
+  <table>
+    <thead><tr><th>Entité</th><th>Nature</th><th>Forme</th><th class="num">Demande bancaire</th><th class="num">CA An 1</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AEGIS Intelligence</strong></td><td>Conseil EISaaS B2B EU + ultrapériphérique</td><td>BNC → SAS T3 2026</td><td class="num"><strong>Aucune</strong></td><td class="num">~42 k€ (base)</td></tr>
+      <tr><td><strong>Karukera Prestige</strong></td><td>Commerce premium hors-taxes croisières</td><td>SASU (en création)</td><td class="num">18 k€ (BP distinct)</td><td class="num">~130 k€</td></tr>
+      <tr><td><strong>SCI Charles-Touchard</strong></td><td>Locatif saisonnier Villa T4 Deshaies</td><td>SCI (en création)</td><td class="num">244,9 k€ (BP distinct)</td><td class="num">~49 k€ (central)</td></tr>
+      <tr class="total"><td><strong>Maintien ARE</strong></td><td colspan="2">Revenu personnel garanti — France Travail (390 j. droits restants)</td><td class="num">—</td><td class="num"><strong>~26,6 k€ net / 13 mois</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="tnote">Le présent document concerne <strong>AEGIS Intelligence uniquement</strong>. Les BP Karukera Prestige V3 et SCI Charles-Touchard / Villa T4 V3 (4 mai 2026) sont distincts et autoportants.</div>
+
+  <h2>Pourquoi Deshaies&nbsp;? Trois logiques convergentes</h2>
+  <ul>
+    <li><strong>Patrimoniale</strong>&nbsp;: parcelle AR 818 successorale (Morne Paul Thomas), permis de construire PC 971111 24 10051 accordé et purgé.</li>
+    <li><strong>Marché local</strong>&nbsp;: 320 escales croisières prévues en 2026-2027 (MSC World Europa), dispositif détaxe Deshaies (décret n° 2024-89, valide jusqu'au 31/12/2026).</li>
+    <li><strong>Extension AEGIS</strong>&nbsp;: positionnement référent pour les régions ultrapériphériques EU (DOM-TOM, Canaries, Açores, Réunion) — segment peu adressé par Big4 et SSII métropolitaines, soumis aux mêmes règlements européens.</li>
+  </ul>
+
+  <div class="sig">
+    <div><strong>jeanpierrecharles.com</strong> — Infrastructure EU souveraine (Paris cdg1 · Frankfurt)</div>
+    <div>Document confidentiel — Reproduction interdite</div>
+  </div>
+  <div class="page-num">Page 1 / 3</div>
+</section>
+
+<!-- ====== PAGE 2 — AEGIS INTELLIGENCE ====== -->
+<section class="page">
+  <div class="page-head">
+    <div class="brand">AEGIS Intelligence<small>Modèle économique et trajectoire financière</small></div>
+    <div class="head-meta">
+      <strong>Page 2 — Le cœur</strong><br>
+      Modèle, marges, trajectoire 3 ans
+    </div>
+  </div>
+
+  <h1 class="title">AEGIS Intelligence — Modèle et trajectoire</h1>
+
+  <h2>Funnel à quatre paliers progressifs</h2>
+  <div class="funnel">
+    <div class="ftier t1"><div class="ftier-n">PULSE</div><div class="ftier-p">Gratuit</div><div class="ftier-d">Pré-diagnostic IA conversationnelle. Lead magnet de qualification.</div></div>
+    <div class="ftier t2"><div class="ftier-n">DIAGNOSTIC</div><div class="ftier-p">250 € HT</div><div class="ftier-d">Rapport expert 7 sections — méthodologie Pearl, BOM mécatronique, GANTT, CAPEX/OPEX.</div></div>
+    <div class="ftier t3"><div class="ftier-n">VEILLE</div><div class="ftier-p">150 € / mois</div><div class="ftier-d">Abonnement veille réglementaire ciblée 5 piliers, alertes 14 jours.</div></div>
+    <div class="ftier t4"><div class="ftier-n">EXPERTISE TERRAIN</div><div class="ftier-p">350 €/h ou 2 500 €/mois</div><div class="ftier-d">Intervention JP en personne. Audit, atelier, revue de conception.</div></div>
+  </div>
+
+  <h2>Marges prouvées empiriquement</h2>
+  <table>
+    <thead><tr><th>Palier</th><th class="num">Prix HT</th><th class="num">Coût variable</th><th class="num">Marge brute</th><th class="num">Taux</th></tr></thead>
+    <tbody>
+      <tr><td>DIAGNOSTIC</td><td class="num">250 €</td><td class="num">0,39 €</td><td class="num">249,61 €</td><td class="num"><strong>99,8 %</strong></td></tr>
+      <tr><td>VEILLE</td><td class="num">150 €/mois</td><td class="num">5–15 €/mois</td><td class="num">135–145 €</td><td class="num">90–97 %</td></tr>
+      <tr><td>EXPERTISE TERRAIN</td><td class="num">350 €/h</td><td class="num">temps fondateur</td><td class="num">350 €/h net</td><td class="num">100 %</td></tr>
+    </tbody>
+  </table>
+  <div class="tnote">Coût API DIAGNOSTIC mesuré le 29/03/2026&nbsp;: 0,42 USD pour rapport 617 lignes 7 sections, prompt caching ephemeral activé. Marge structurellement &gt; 99 % à toute échelle.</div>
+
+  <div class="cols2">
+    <div>
+      <h2>Infrastructure — Souveraineté EU</h2>
+      <table>
+        <tbody>
+          <tr><td>Vercel Pro</td><td>Paris (cdg1)</td><td class="num">30 €</td></tr>
+          <tr><td>Supabase</td><td>Frankfurt</td><td class="num">25 €</td></tr>
+          <tr><td>Gandi (mail/domaine)</td><td>France</td><td class="num">15 €</td></tr>
+          <tr><td>Anthropic Opus + Max</td><td>API + caching</td><td class="num">~311 €</td></tr>
+          <tr><td>Gemini Flash (PULSE)</td><td>API</td><td class="num">~20 €</td></tr>
+          <tr><td>Mollie</td><td>Amsterdam</td><td class="num">% transac.</td></tr>
+          <tr class="total"><td colspan="2"><strong>Total mensuel</strong></td><td class="num"><strong>~366 €</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="tnote">Aucun transfert hors UE. Conformité RGPD native, livrables eIDAS art. 25.</div>
+    </div>
+    <div>
+      <h2>Trajectoire financière — Scénario base</h2>
+      <table>
+        <thead><tr><th></th><th class="num">An 1</th><th class="num">An 2</th><th class="num">An 3</th></tr></thead>
+        <tbody>
+          <tr><td>CA HT</td><td class="num">41 650</td><td class="num">123 000</td><td class="num">220 000</td></tr>
+          <tr><td>Marge brute</td><td class="num">37 258</td><td class="num">117 000</td><td class="num">210 400</td></tr>
+          <tr><td>OPEX total</td><td class="num">−6 804</td><td class="num">−19 400</td><td class="num">−77 000</td></tr>
+          <tr><td>Cotisations</td><td class="num">−9 163</td><td class="num">−29 280</td><td class="num">−40 020</td></tr>
+          <tr class="total"><td><strong>Résultat net</strong></td><td class="num"><strong>21 291</strong></td><td class="num"><strong>68 320</strong></td><td class="num"><strong>93 380</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="tnote">An 1 BNC (cotisations 22 %). An 2-3 SAS, gérant assimilé salarié optimisé. Recrutement A2 imputé An 3 (−48 k€).</div>
+    </div>
+  </div>
+
+  <div class="cols2">
+    <div>
+      <h2>Break-even par scénario</h2>
+      <table>
+        <thead><tr><th>Scénario</th><th>Mois</th><th class="num">CA seuil/mois</th></tr></thead>
+        <tbody>
+          <tr><td>Conservateur</td><td>M+7</td><td class="num">~900 €</td></tr>
+          <tr><td><strong>Base</strong></td><td><strong>M+3 / M+4</strong></td><td class="num"><strong>~1 350 €</strong></td></tr>
+          <tr><td>Optimiste</td><td>M+2</td><td class="num">~2 000 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2>CA cumulé 3 ans (k€)</h2>
+      <table>
+        <thead><tr><th>Scénario</th><th class="num">An 1</th><th class="num">An 2</th><th class="num">An 3</th><th class="num">Cumul</th></tr></thead>
+        <tbody>
+          <tr><td>Conservateur</td><td class="num">15</td><td class="num">70</td><td class="num">140</td><td class="num">225</td></tr>
+          <tr><td><strong>Base</strong></td><td class="num"><strong>42</strong></td><td class="num"><strong>123</strong></td><td class="num"><strong>220</strong></td><td class="num"><strong>385</strong></td></tr>
+          <tr><td>Optimiste</td><td class="num">60</td><td class="num">180</td><td class="num">350</td><td class="num">590</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="box s">
+    <div class="box-t">BFR structurellement négatif — Avantage modèle</div>
+    Encaissement immédiat par carte bancaire (Mollie LIVE), coût marginal quasi nul, absence de stock et de locaux. Trésorerie positive sur les trois ans, scénarios base et optimiste. <strong>Aucune demande de financement bancaire formulée pour AEGIS Intelligence.</strong>
+  </div>
+
+  <h2>Statut commercial au 4 mai 2026 — Distinction prouvé / attendu</h2>
+  <p><strong>Prouvé</strong>&nbsp;: pipeline technique complet (procédure FAI inspirée AS9102) ; transaction de démonstration Mollie LIVE 16/04/2026 ; <strong>Phase β cobaye 1 (InnovateMat SAS) close — 250 € pleine valeur encaissés</strong> ; GO conditionnel Phase γ obtenu. <strong>Attendu</strong>&nbsp;: Phase γ — premier client B2B externe DIAGNOSTIC 250 € en cours de qualification (mai-juin 2026). Bascule juridique BNC → SAS au T3 2026 conditionnée à CA mensuel récurrent &gt; 6 000 €.</p>
+
+  <div class="page-num">Page 2 / 3</div>
+</section>
+
+<!-- ====== PAGE 3 — SECURITE BANCAIRE ====== -->
+<section class="page">
+  <div class="page-head">
+    <div class="brand">AEGIS Intelligence<small>Sécurité bancaire et perspectives</small></div>
+    <div class="head-meta">
+      <strong>Page 3 — Synthèse banquière</strong><br>
+      Atouts, demandes, calendrier
+    </div>
+  </div>
+
+  <h1 class="title">Sécurité bancaire — Lecture intégrée</h1>
+
+  <h2>Diversification structurelle des revenus du porteur</h2>
+  <table>
+    <thead><tr><th>Flux</th><th>Type</th><th>Saisonnalité</th><th>Dépendance</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Maintien ARE</strong></td><td>Allocation France Travail</td><td>Mensuel régulier 13 mois</td><td>Inscription FT, actualisation</td></tr>
+      <tr><td><strong>AEGIS DIAGNOSTIC</strong></td><td>Transactionnel B2B SaaS</td><td>Acyclique structurel</td><td>Calendrier réglementaire EU 27-28</td></tr>
+      <tr><td><strong>AEGIS VEILLE / EXPERTISE</strong></td><td>Récurrent + premium</td><td>Mensuel régulier dès An 2</td><td>Cohorte clients fidélisés</td></tr>
+      <tr><td><strong>Karukera Prestige</strong></td><td>Commerce saisonnier</td><td>80 % CA novembre–avril</td><td>Calendrier escales croisières</td></tr>
+      <tr><td><strong>Villa T4 SCI</strong></td><td>Locatif saisonnier</td><td>Forte décembre–avril, août</td><td>Plateforme location, classement 3*</td></tr>
+    </tbody>
+  </table>
+  <div class="tnote">Cinq flux de natures et de cycles distincts. Une défaillance ponctuelle d'un flux n'affecte pas les autres.</div>
+
+  <div class="box s">
+    <div class="box-t">Découplage revenu personnel / résultat AEGIS</div>
+    Le maintien partiel de l'ARE permet de percevoir <strong>~2 220 €/mois net pendant 13 mois</strong> (~26 640 € net cumulés). Ce revenu finance <strong>directement le train de vie du porteur indépendamment de la trajectoire commerciale</strong> de chacune des activités. Les résultats d'exploitation restent intégralement disponibles pour autofinancer la croissance. PV d'AG attestent l'absence de rémunération dirigeant en An 1 pour les structures sociétaires.
+  </div>
+
+  <h2>Atouts pour l'établissement bancaire</h2>
+  <ol>
+    <li><strong>Entrepreneur structuré et transparent</strong>&nbsp;: 32 années d'expérience industrielle, méthodologie scientifique documentée, distinction rigoureuse prouvé / attendu.</li>
+    <li><strong>Modèle AEGIS prouvé techniquement et amorcé commercialement</strong>&nbsp;: infrastructure FAI complète, marges mesurées empiriquement (99,8 %), Phase β complète, GO Phase γ.</li>
+    <li><strong>Trajectoire financière saine</strong>&nbsp;: BFR négatif, break-even M+3/M+4 base, autonomie sans recours à la dette courante.</li>
+    <li><strong>Dispositif triadique cohérent et diversifié</strong>&nbsp;: AEGIS + Karukera + SCI ancrés à Deshaies, avec maintien ARE sécurisant le revenu personnel sur 13 mois.</li>
+    <li><strong>Marché chiffré et non reportable</strong>&nbsp;: 200 000+ PME/ETI européennes, échéances réglementaires datées (Machinery 20/01/2027, CRA 11/12/2027). Extension naturelle aux régions ultrapériphériques.</li>
+    <li><strong>Différenciation défendable 5–10 ans</strong>&nbsp;: moat expertise tacite + concept SAAIBOM propriétaire (1<sup>er</sup> avril 2026) + infrastructure EU souveraine.</li>
+    <li><strong>Porteur solvable</strong>&nbsp;: propriétaire de sa résidence principale, sans dette personnelle, foncier successoral en pleine propriété (parcelle AR 818 Deshaies, état hypothécaire vierge).</li>
+  </ol>
+
+  <h2>Demandes bancaires — Périmètre et calendrier</h2>
+  <table>
+    <thead><tr><th>Entité</th><th>Demande</th><th>Garantie / dispositif</th><th>Échéance</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AEGIS Intelligence</strong></td><td><strong>Aucune dans le présent dossier</strong></td><td>Compte pro SAS au T3 2026 (envisagé)</td><td>T3 2026</td></tr>
+      <tr><td>Karukera Prestige SASU</td><td>Prêt 18 k€ sur 60 mois @ 5 %</td><td>FRG Bpifrance 80 % — exposition résiduelle ~3 600 €</td><td>Été 2026</td></tr>
+      <tr><td>SCI Charles-Touchard</td><td>Prêt 244,9 k€ sur 20 ans</td><td>Apport 20 % conforme HCSF, hypothèque + DSCR central 2,03×</td><td>Été 2026</td></tr>
+    </tbody>
+  </table>
+  <div class="tnote">Voir BP Karukera Prestige V3 (20260504T1510) et BP SCI Charles-Touchard / Villa T4 V3 (20260504T1430) pour le détail des deux demandes ci-dessus.</div>
+
+  <h2>Calendrier 12 mois</h2>
+  <table>
+    <thead><tr><th>Période</th><th>AEGIS</th><th>Triadique</th></tr></thead>
+    <tbody>
+      <tr><td>Mai – juin 2026</td><td>Phase γ — 1<sup>er</sup> client B2B externe</td><td>Création SASU Karukera + SCI Charles-Touchard, instruction prêts</td></tr>
+      <tr><td>T3 2026</td><td>Bascule BNC → SAS, ouverture compte pro</td><td>Signature prêts, début travaux Villa T4</td></tr>
+      <tr><td>Nov. 2026</td><td>Montée en charge VEILLE</td><td>Saison 1 Karukera Prestige (croisières)</td></tr>
+      <tr><td>T1–T2 2027</td><td>Pic Machinery Regulation (échéance 20/01/2027)</td><td>Livraison Villa T4, début locations saisonnières</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box">
+    <div class="box-t">Demande pour ce rendez-vous</div>
+    Le présent document est un <strong>support de discussion</strong>. AEGIS Intelligence ne sollicite aucun financement bancaire à ce stade. L'objet de l'entretien est de poser les bases d'une relation de confiance, présenter le dispositif triadique d'ensemble, et préparer le terrain pour les <strong>deux demandes concrètes immédiates</strong> (Karukera Prestige 18 k€ et SCI Charles-Touchard 244,9 k€) traitées dans leurs dossiers respectifs.
+  </div>
+
+  <div class="sig">
+    <div>
+      <strong>Jean-Pierre Charles</strong> — Fondateur AEGIS Intelligence<br>
+      jeanpierrecharles.com — Document signé eIDAS art. 25, SHA-256 sur demande
+    </div>
+    <div><span class="conf">V4 — 4 mai 2026</span></div>
+  </div>
+  <div class="page-num">Page 3 / 3</div>
+</section>
+
+</body>
+</html>

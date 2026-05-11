@@ -364,6 +364,61 @@ ${deliveryBlock}
     return emailWrapper(content);
 }
 
+// --- VEILLE monthly report email (S5 Mission N11) ---
+// Email mensuel a chaque abonne actif. PJ PDF gere par mailer.ts (sendVeilleMonthlyReport).
+export function veilleMonthlyReportHtml(data: MailerPaymentData, lang: 'fr' | 'en'): string {
+    const isFr = lang === 'fr';
+    const edition = data.edition || 'N/A';
+    const monthLabel = data.month_label || edition;
+
+    const navy = '#1e3a5f';
+    const gold = '#c9a84c';
+
+    const content = `
+<div class="header" style="background:linear-gradient(135deg,${navy},${navy});padding:32px 24px;text-align:center;color:#fff">
+    <div style="display:inline-block;width:44px;height:44px;background:${gold};border-radius:6px;line-height:44px;color:${navy};font-weight:800;font-size:18px">AE</div>
+    <h1 style="margin:14px 0 4px;color:#fff;font-size:22px;font-weight:800">${isFr ? 'Veille Reglementaire EU' : 'EU Regulatory Watch'}</h1>
+    <p style="margin:0;color:${gold};font-size:13px;font-weight:600">${escapeHtml(monthLabel)}</p>
+</div>
+<div class="body">
+    <p style="font-size:14px">${isFr ? 'Bonjour,' : 'Hello,'}</p>
+    <p style="font-size:14px">${isFr
+        ? 'Votre <strong>rapport mensuel de veille reglementaire AEGIS</strong> est joint a cet email. Edition <strong>'
+          + escapeHtml(edition) + '</strong>, format PDF, ~10 pages couvrant les 5 piliers AEGIS.'
+        : 'Your <strong>AEGIS monthly regulatory watch report</strong> is attached to this email. Edition <strong>'
+          + escapeHtml(edition) + '</strong>, PDF format, ~10 pages covering the 5 AEGIS pillars.'}</p>
+
+    <div style="background:#f8fafc;border-left:4px solid ${gold};border-radius:6px;padding:14px 18px;margin:20px 0;font-size:13px;line-height:1.7;color:${BRAND.text}">
+        <strong style="color:${navy}">${isFr ? 'Au sommaire' : 'In this issue'} :</strong><br>
+        1. ${isFr ? 'Executive summary' : 'Executive summary'}<br>
+        2. ${isFr ? 'Tableau de bord -- feux tricolores 5 piliers' : 'Dashboard -- 5-pillar traffic lights'}<br>
+        3. ${isFr ? 'Analyse par pilier (AI Act, CRA, Machines, ESPR/DPP, Battery)' : 'Per-pillar analysis (AI Act, CRA, Machinery, ESPR/DPP, Battery)'}<br>
+        4. ${isFr ? 'Calendrier des echeances 6 mois' : '6-month deadline calendar'}<br>
+        5. ${isFr ? 'Sources EUR-Lex / ENISA / AI Office / JRC' : 'Sources EUR-Lex / ENISA / AI Office / JRC'}
+    </div>
+
+    <div style="background:${BRAND.bgAlt};border:1px solid ${BRAND.border};border-radius:10px;padding:14px;font-size:12px;line-height:1.7">
+        <strong>${isFr ? 'Reference edition' : 'Edition reference'} :</strong> ${escapeHtml(edition)}<br>
+        <strong>Date :</strong> ${new Date().toLocaleDateString(isFr ? 'fr-FR' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}<br>
+        <strong>${isFr ? 'Format' : 'Format'} :</strong> PDF (${isFr ? 'piece jointe' : 'attached'})
+    </div>
+
+    <p style="font-size:13px;color:${BRAND.textMuted};margin-top:24px">${isFr
+        ? 'Pour toute question, suggestion de signal a couvrir, ou demande d\'analyse approfondie sur un sujet specifique : '
+        : 'For any question, signal suggestion to cover, or in-depth analysis request on a specific topic : '}<a href="mailto:${SELLER.email}" style="color:${navy};font-weight:600">${SELLER.email}</a></p>
+
+    <p style="font-size:11px;color:${BRAND.textLight};margin-top:18px">${isFr
+        ? 'Vous recevez ce rapport au titre de votre abonnement actif VEILLE AEGIS Intelligence (150 EUR/mois). Pour resilier, repondez a cet email.'
+        : 'You receive this report as part of your active AEGIS Intelligence WATCH subscription (EUR 150/month). To cancel, reply to this email.'}</p>
+</div>
+<div class="footer">
+    AEGIS Intelligence | ${SELLER.web} | SIRET ${SELLER.siret}<br>
+    ${SELLER.forme} | ${SELLER.tva}
+</div>`;
+
+    return emailWrapper(content);
+}
+
 // --- Ops pre-notify email ---
 export function opsPreNotifyHtml(data: MailerPaymentData): string {
     const content = `

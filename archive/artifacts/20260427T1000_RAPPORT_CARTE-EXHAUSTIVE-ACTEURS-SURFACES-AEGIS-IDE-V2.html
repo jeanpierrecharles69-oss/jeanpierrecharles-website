@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Intelligence — Carte Acteurs/Surfaces IDE v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e14;--bg2:#111820;--bg3:#1a2230;--text:#e0e6ed;--text2:#8a96a8;--text3:#5a6678;--accent:#00d4aa;--accent2:#00b894;--accent-glow:rgba(0,212,170,.15);--red:#ff6b6b;--red-glow:rgba(255,107,107,.12);--amber:#ffc048;--amber-glow:rgba(255,192,72,.12);--blue:#4dabf7;--blue-glow:rgba(77,171,247,.12);--purple:#b197fc;--purple-glow:rgba(177,151,252,.12);--border:#1e2a3a;--radius:10px}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.5;overflow-x:hidden}
+.noise{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.03;z-index:9999}
+.header{padding:48px 40px 32px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-60%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);pointer-events:none}
+.header .tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:inline-block;background:var(--accent-glow);padding:4px 12px;border-radius:20px;border:1px solid rgba(0,212,170,.2)}
+.header h1{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:900;color:#fff;margin:12px 0 8px;letter-spacing:-.5px}
+.header .sub{color:var(--text2);font-size:14px;max-width:700px}
+.header .meta{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+.header .meta span{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);padding:4px 10px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)}
+.defense{margin:32px 40px;padding:24px 28px;background:linear-gradient(135deg,rgba(0,212,170,.06),rgba(0,184,148,.03));border:1px solid rgba(0,212,170,.15);border-radius:var(--radius);display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.defense-col{text-align:center}
+.defense-col .num{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--accent)}
+.defense-col .label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
+.defense-col .val{font-size:13px;color:var(--text);margin-top:6px;font-weight:500}
+@media(max-width:600px){.defense{grid-template-columns:1fr}}
+.hierarchy{margin:0 40px 32px;padding:28px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)}
+.hierarchy h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:20px}
+.level-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);transition:background .2s}
+.level-row:last-child{border-bottom:none}
+.level-row:hover{background:rgba(255,255,255,.02)}
+.level-badge{width:56px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0}
+.level-badge.l3{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+.level-badge.l2{background:linear-gradient(135deg,#ffc048,#f0932b);color:#1a1a1a}
+.level-badge.l1a{background:linear-gradient(135deg,#4dabf7,#3498db);color:#fff}
+.level-badge.l1b{background:linear-gradient(135deg,#b197fc,#8854d0);color:#fff}
+.level-badge.l0{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.level-badge.blocked{background:linear-gradient(135deg,#ff6b6b22,#ee5a2422);color:var(--red);border:1px solid rgba(255,107,107,.3)}
+.level-desc{font-size:13px;color:var(--text2);flex:1}
+.level-desc strong{color:var(--text)}
+.level-bar{height:4px;border-radius:2px;background:var(--border);flex:0 0 120px}
+.level-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.cards-section{padding:0 40px 40px}
+.cards-section h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:20px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+@media(max-width:740px){.cards-grid{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:transform .2s,border-color .3s,box-shadow .3s;cursor:default}
+.card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card.l3::before{background:linear-gradient(90deg,#ff6b6b,#ee5a24)}
+.card.l2::before{background:linear-gradient(90deg,#ffc048,#f0932b)}
+.card.l1a::before{background:linear-gradient(90deg,#4dabf7,#3498db)}
+.card.l1b::before{background:linear-gradient(90deg,#b197fc,#8854d0)}
+.card.l0::before{background:linear-gradient(90deg,var(--bg3),var(--border))}
+.card.blocked::before{background:repeating-linear-gradient(90deg,#ff6b6b 0,#ff6b6b 8px,transparent 8px,transparent 16px)}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:var(--bg);padding:2px 8px;border-radius:4px}
+.card-level{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700}
+.card-level.l3{background:rgba(255,107,107,.15);color:#ff6b6b}
+.card-level.l2{background:rgba(255,192,72,.15);color:#ffc048}
+.card-level.l1a{background:rgba(77,171,247,.15);color:#4dabf7}
+.card-level.l1b{background:rgba(177,151,252,.15);color:#b197fc}
+.card-level.l0{background:rgba(138,150,168,.1);color:var(--text2)}
+.card-level.blocked{background:rgba(255,107,107,.1);color:#ff6b6b}
+.card-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.card-surface{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:12px}
+.card-missions{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6}
+.card-risk{font-size:12px;padding:10px 12px;border-radius:8px;line-height:1.5}
+.card-risk.green{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.12);color:var(--accent)}
+.card-risk.amber{background:var(--amber-glow);border:1px solid rgba(255,192,72,.15);color:var(--amber)}
+.card-risk.red{background:var(--red-glow);border:1px solid rgba(255,107,107,.15);color:var(--red)}
+.card-risk.blue{background:var(--blue-glow);border:1px solid rgba(77,171,247,.15);color:var(--blue)}
+.risks{margin:0 40px 40px;padding:28px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)}
+.risks h2{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:20px}
+.risk-row{display:grid;grid-template-columns:32px 1fr 60px 90px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.risk-row:last-child{border-bottom:none}
+.risk-num{font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:11px}
+.risk-text{color:var(--text)}
+.risk-prio{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;padding:3px 8px;border-radius:4px}
+.risk-prio.p0{background:rgba(255,107,107,.15);color:#ff6b6b}
+.risk-prio.p1{background:rgba(255,192,72,.15);color:#ffc048}
+.risk-prio.p2{background:rgba(138,150,168,.1);color:var(--text2)}
+.risk-status{font-size:11px;text-align:right;color:var(--text3)}
+.footer{padding:24px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer span{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card,.level-row,.risk-row{animation:fadeUp .5s ease both}
+.card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.1s}.card:nth-child(3){animation-delay:.15s}.card:nth-child(4){animation-delay:.2s}.card:nth-child(5){animation-delay:.25s}.card:nth-child(6){animation-delay:.3s}.card:nth-child(7){animation-delay:.35s}.card:nth-child(8){animation-delay:.4s}.card:nth-child(9){animation-delay:.45s}.card:nth-child(10){animation-delay:.5s}.card:nth-child(11){animation-delay:.55s}.card:nth-child(12){animation-delay:.6s}.card:nth-child(13){animation-delay:.65s}.card:nth-child(14){animation-delay:.7s}.card:nth-child(15){animation-delay:.75s}.card:nth-child(16){animation-delay:.8s}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="header">
+  <div class="tag">L_T1000_01 — AEGIS Intelligence</div>
+  <h1>Carte Exhaustive Acteurs &amp; Surfaces IDE</h1>
+  <div class="sub">16 acteurs documentés — Niveaux ACOOS — Risques cyber — Défense en profondeur 3 couches vérifiée empiriquement</div>
+  <div class="meta"><span>v2 — 27/04/2026</span><span>D418 / L337 / R156</span><span>LIFECYCLE v2.11.1</span><span>D10r2 MAINTENU</span></div>
+</div>
+<div class="defense">
+  <div class="defense-col"><div class="num">1</div><div class="label">Couche Absence</div><div class="val">CC CLI npm standalone ABSENT (D183 confirmé 26/04)</div></div>
+  <div class="defense-col"><div class="num">2</div><div class="label">Couche Configuration</div><div class="val">.npmrc ignore-scripts + toggles OFF + registre nettoyé</div></div>
+  <div class="defense-col"><div class="num">3</div><div class="label">Couche Gouvernance</div><div class="val">R_T1215_01 + R_ABS_NIGHT_01 + CLAUDE.md + DIVA L3</div></div>
+</div>
+<div class="hierarchy">
+  <h2>Hiérarchie ACOOS — Niveaux de décision</h2>
+  <div class="level-row"><div class="level-badge l3">L3</div><div class="level-desc"><strong>JP HITL</strong> — Décision finale, seul humain, irremplaçable. git push, credentials, DIVA L3.</div><div class="level-bar"><div class="level-bar-fill" style="width:100%;background:linear-gradient(90deg,#ff6b6b,#ee5a24)"></div></div></div>
+  <div class="level-row"><div class="level-badge l2">L2</div><div class="level-desc"><strong>ACDC Chat Opus</strong> — Contre-expertise P_CR_01, audit, stratégie, bridges.</div><div class="level-bar"><div class="level-bar-fill" style="width:75%;background:linear-gradient(90deg,#ffc048,#f0932b)"></div></div></div>
+  <div class="level-row"><div class="level-badge l1a">L1a</div><div class="level-desc"><strong>ACDC Code</strong> — Exécution bornée gouvernée, missions nocturnes N1-N10.1.</div><div class="level-bar"><div class="level-bar-fill" style="width:55%;background:linear-gradient(90deg,#4dabf7,#3498db)"></div></div></div>
+  <div class="level-row"><div class="level-badge l1b">L1b</div><div class="level-desc"><strong>Claude.ai Sonnet</strong> — Collecte mobile S24+, analyses ponctuelles.</div><div class="level-bar"><div class="level-bar-fill" style="width:40%;background:linear-gradient(90deg,#b197fc,#8854d0)"></div></div></div>
+  <div class="level-row"><div class="level-badge l0">L0</div><div class="level-desc"><strong>Services automatiques</strong> — Gemini, Opus API, Mollie, Supabase, Gandi, GitHub, Perplexity, Gamma, AG.</div><div class="level-bar"><div class="level-bar-fill" style="width:25%;background:var(--text3)"></div></div></div>
+  <div class="level-row"><div class="level-badge blocked">⊘</div><div class="level-desc"><strong>INTERDIT D10r2</strong> — Cowork VM (bundle dormant), Computer Use, DXT, MCP externes.</div><div class="level-bar"><div class="level-bar-fill" style="width:0%"></div></div></div>
+</div>
+<div class="cards-section">
+  <h2>16 Acteurs — Détail par surface</h2>
+  <div class="cards-grid">
+    <div class="card l3"><div class="card-head"><span class="card-num">#1</span><span class="card-level l3">L3 HITL</span></div><div class="card-name">JP — Décideur final</div><div class="card-surface">Surface Pro 11 ARM64 + Samsung S24+</div><div class="card-missions">Arbitrage, V&amp;V, livraison client, credentials, git push (S6), DIVA L3 avant tout déploiement.</div><div class="card-risk amber">⚠ Switching cost cognitif (12 étapes → candidat 3 via aegis-deliver-all.ps1). Exposition credentials en transit.</div></div>
+    <div class="card l2"><div class="card-head"><span class="card-num">#2</span><span class="card-level l2">L2 AUDIT</span></div><div class="card-name">ACDC Chat Opus</div><div class="card-surface">Desktop Chat tab — MCP Filesystem (4 dirs)</div><div class="card-missions">Bridges, audit P_CR_01, forensic Desktop, LIFECYCLE, analyse stratégique, briefs ACDC Code.</div><div class="card-risk green">✓ Read-only filesystem borné. Pas d'accès credentials.</div></div>
+    <div class="card l1a"><div class="card-head"><span class="card-num">#3</span><span class="card-level l1a">L1a CODE</span></div><div class="card-name">ACDC Code</div><div class="card-surface">Desktop Code tab — CC embarqué Electron</div><div class="card-missions">Missions N1-N10.1, implémentation, V&amp;V locale, npm build. Gouverné R_T1215_01 + CLAUDE.md.</div><div class="card-risk amber">⚠ Code tab non pinable. Preview ON = Computer Use limité. .npmrc protège install, pas runtime.</div></div>
+    <div class="card l1b"><div class="card-head"><span class="card-num">#4</span><span class="card-level l1b">L1b MOBILE</span></div><div class="card-name">Claude.ai Sonnet</div><div class="card-surface">S24+ mobile / Web navigateur</div><div class="card-missions">Bridges mobiles, veille LinkedIn, analyses ponctuelles.</div><div class="card-risk amber">⚠ Pas de MCP. Risque hallucination sans P_CR_01.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#5</span><span class="card-level l0">L0 COLLECTE</span></div><div class="card-name">Perplexity.ai</div><div class="card-surface">Web (S24+ / Surface)</div><div class="card-missions">Workflow D81 : collecte faits + sources, triage JP 3-5 signaux. JAMAIS générateur d'IDs.</div><div class="card-risk green">✓ Pas d'accès AEGIS. Ratio signal/bruit ~15 % brut, ~60-70 % filtré JP.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#6</span><span class="card-level l0">L0 SERVICE</span></div><div class="card-name">Google Gemini Flash</div><div class="card-surface">Vercel cdg1 cloud EU Paris</div><div class="card-missions">Brain + PULSE frontend. gemini-proxy.ts = JAMAIS modifié.</div><div class="card-risk green">✓ API publique. Monitoring = provider primaire (P_CR_01).</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#7</span><span class="card-level l0">L0 CONNECTEUR</span></div><div class="card-name">Google Drive / Gmail / Calendar</div><div class="card-surface">Cloud Google EU — MCP Desktop</div><div class="card-missions">Drive search (REGISTRE_TRACABILITE), Gmail, Calendar. OAuth session.</div><div class="card-risk green">✓ Pas de credentials stockés localement.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#8</span><span class="card-level l0">L0 ÉDITION</span></div><div class="card-name">Antigravity (AG)</div><div class="card-surface">Bundle Desktop disque Surface</div><div class="card-missions">Édition statique uniquement. Sandboxing cassé ARM64 (Scénario D).</div><div class="card-risk amber">⚠ Usage interdit D10r2 au-delà édition statique. Bundle non opt-out.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#9</span><span class="card-level l0">L0 GÉNÉRATION</span></div><div class="card-name">Gamma.ai</div><div class="card-surface">MCP connecté ACDC Desktop</div><div class="card-missions">Présentations, documents, webpages (generate, get_themes, read_gamma).</div><div class="card-risk amber">⚠ Données envoyées à Gamma. Évaluer RGPD si contenu sensible PME/ETI.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#10</span><span class="card-level l0">L0 SERVICE</span></div><div class="card-name">Opus 4.6 API</div><div class="card-surface">Vercel cdg1 cloud EU Paris</div><div class="card-missions">DIAGNOSTIC 250 € (~500s, ~0,66 $/appel). Prompt caching actif.</div><div class="card-risk red">⚡ Retirement 15/06/2026 (49 jours). Migration VVS A/B/C requise.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#11</span><span class="card-level l0">L0 PAIEMENT</span></div><div class="card-name">Mollie</div><div class="card-surface">Cloud Amsterdam EU</div><div class="card-missions">Paiements LIVE/TEST, webhooks → Vercel. Split VERCEL_ENV.</div><div class="card-risk green">✓ Souveraineté EU Amsterdam. Webhook HTTPS.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#12</span><span class="card-level l0">L0 PERSISTANCE</span></div><div class="card-name">Supabase</div><div class="card-surface">Cloud EU Frankfurt</div><div class="card-missions">Requests diagnostics, statuts pipeline, données client.</div><div class="card-risk blue">ℹ Données nominatives → RGPD Art. 6(1)(b). Souveraineté EU Frankfurt.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#13</span><span class="card-level l0">L0 EMAIL</span></div><div class="card-name">SMTP Gandi</div><div class="card-surface">Cloud EU Paris</div><div class="card-missions">Emails client + ops + livraison PDF. TLS bout en bout.</div><div class="card-risk blue">ℹ Credentials Vercel env vars. Candidat migration → Credential Manager DPAPI.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#14</span><span class="card-level l0">L0 REPO</span></div><div class="card-name">GitHub</div><div class="card-surface">Cloud US</div><div class="card-missions">Repo jeanpierrecharles, auto-deploy Vercel. Seul JP git push (S6).</div><div class="card-risk green">✓ Supply chain mitigé .npmrc ignore-scripts=true.</div></div>
+    <div class="card blocked"><div class="card-head"><span class="card-num">#15</span><span class="card-level blocked">⊘ INTERDIT</span></div><div class="card-name">Cowork VM</div><div class="card-surface">Bundle Desktop disque Surface</div><div class="card-missions">Aucune mission autorisée. Bundle présent (non opt-out).</div><div class="card-risk red">⚡ Banner « Réinstaller » → ignorer. Suppression candidate D_T0810_02.</div></div>
+    <div class="card l0"><div class="card-head"><span class="card-num">#16</span><span class="card-level l0">L0 CONTRÔLÉ</span></div><div class="card-name">Native Messaging</div><div class="card-surface">Registre HKCU + AppData Surface</div><div class="card-missions">Chrome MCP bridge (légitime). Edge/Chromium supprimés T0935.</div><div class="card-risk amber">⚠ Recréés chaque MAJ Desktop → nettoyage auto v4. R_T1020_01 RÉSOLU.</div></div>
+  </div>
+</div>
+<div class="risks">
+  <h2>Risques résiduels ouverts</h2>
+  <div class="risk-row" style="font-weight:700;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:1px"><span>#</span><span>Risque</span><span>Priorité</span><span style="text-align:right">Statut</span></div>
+  <div class="risk-row"><span class="risk-num">1</span><span class="risk-text">Native Messaging recréé chaque MAJ Desktop</span><span class="risk-prio p1">P1</span><span class="risk-status">Brief v4 livré</span></div>
+  <div class="risk-row"><span class="risk-num">2</span><span class="risk-text">Code tab Desktop non pinable (MAJ avec build)</span><span class="risk-prio p2">P2</span><span class="risk-status">Gouvernance</span></div>
+  <div class="risk-row"><span class="risk-num">3</span><span class="risk-text">Preview ON = Computer Use limité Code tab</span><span class="risk-prio p2">P2</span><span class="risk-status">Arbitrage JP</span></div>
+  <div class="risk-row"><span class="risk-num">4</span><span class="risk-text">Cowork VM bundle dormant sur disque</span><span class="risk-prio p2">P2</span><span class="risk-status">Test suppression</span></div>
+  <div class="risk-row"><span class="risk-num">5</span><span class="risk-text">Opus 4.6 retirement 15/06/2026 — 49 jours</span><span class="risk-prio p1">P1</span><span class="risk-status">VVS A/B/C</span></div>
+  <div class="risk-row"><span class="risk-num">6</span><span class="risk-text">Gamma.ai données client dans prompts → RGPD</span><span class="risk-prio p2">P2</span><span class="risk-status">À évaluer</span></div>
+  <div class="risk-row"><span class="risk-num">7</span><span class="risk-text">Pipeline DIAGNOSTIC 250 € friction L3 JP</span><span class="risk-prio p0">P0</span><span class="risk-status">Script candidat</span></div>
+</div>
+<div class="footer">
+  <span>AEGIS Intelligence — Engineering Intelligence as a Service — EU-27 + régions ultrapériphériques</span>
+  <span>20260427T1000 CET — D10r2 MAINTENU — Défense 3 couches vérifiée</span>
+</div>
+</body>
+</html>

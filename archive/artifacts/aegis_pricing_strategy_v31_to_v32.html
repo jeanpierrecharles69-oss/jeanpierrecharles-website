@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Pricing Pivot v3.1 → v3.3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg-p:#fff;--bg-s:#f5f4f0;--txt-p:#1a1a1a;--txt-s:#5f5e5a;--txt-t:#888780;--bd:rgba(0,0,0,.12);--info-bg:#E6F1FB;--info-txt:#0C447C;--info-bd:#85B7EB;--ok:#0F6E56;--ok-bg:#E1F5EE;--err:#A32D2D}
+@media(prefers-color-scheme:dark){:root{--bg-p:#1e1e1e;--bg-s:#2a2a28;--txt-p:#e8e6df;--txt-s:#b4b2a9;--txt-t:#888780;--bd:rgba(255,255,255,.12);--info-bg:#0C447C;--info-txt:#B5D4F4;--info-bd:#378ADD;--ok:#5DCAA5;--ok-bg:#085041;--err:#F09595}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-p);color:var(--txt-p);padding:2rem;max-width:800px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:1.5rem}
+.mg{display:grid;gap:12px;margin-bottom:1.5rem}.mg4{grid-template-columns:repeat(4,1fr)}.mg2{grid-template-columns:repeat(2,1fr)}
+.mc{background:var(--bg-s);border-radius:8px;padding:1rem;text-align:center}
+.mc .l{font-size:12px;color:var(--txt-s)}.mc .v{font-size:22px;font-weight:500}.mc .u{font-size:11px;color:var(--txt-t)}
+.cd{background:var(--bg-p);border:.5px solid var(--bd);border-radius:12px;padding:1.25rem;margin-bottom:12px}
+.cd.ft{border:2px solid var(--info-bd)}
+.hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.bg{font-size:11px;padding:3px 10px;border-radius:8px;font-weight:500}
+.nm{font-size:16px;font-weight:500}.cx{font-size:12px;color:var(--txt-t);margin-left:auto}
+.pr{font-size:24px;font-weight:500;margin-bottom:6px}.pr span{font-size:14px;font-weight:400;color:var(--txt-s)}
+.tb{width:100%;font-size:12px;border-collapse:collapse}.tb td{padding:2px 0}.tb td:first-child{color:var(--txt-s);width:25%}
+.mvp{position:absolute;top:-10px;right:16px;background:var(--info-bg);color:var(--info-txt);font-size:11px;padding:2px 10px;border-radius:8px;font-weight:500}
+.ch{position:relative;width:100%;margin-bottom:1rem}
+.lg{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:1.5rem;font-size:12px;color:var(--txt-s)}
+.lg span{display:flex;align-items:center;gap:4px}
+.dt{width:10px;height:10px;border-radius:2px}
+.ib{background:var(--info-bg);border-radius:8px;padding:1rem;font-size:13px;color:var(--info-txt);margin-top:1.5rem}
+.ib strong{font-weight:500}
+.green{color:var(--ok)}.red{color:var(--err)}
+</style>
+</head>
+<body>
+<h1>AEGIS Intelligence — Pivot pricing v3.1 → v3.3</h1>
+
+<div class="mg mg4">
+<div class="mc"><div class="l">Cout API prouve</div><div class="v">$0.42</div><div class="u">par diagnostic Opus</div></div>
+<div class="mc"><div class="l">Equiv. cabinet</div><div class="v">3-8K</div><div class="u">EUR conseil</div></div>
+<div class="mc"><div class="l">Code v3.3</div><div class="v green">PASS</div><div class="u">4 tiers implemente</div></div>
+<div class="mc"><div class="l">Marche EU27</div><div class="v">250K</div><div class="u">PME/ETI industrielles</div></div>
+</div>
+
+<div class="mg mg2">
+<div class="cd"><div style="font-size:14px;font-weight:500;margin-bottom:10px">v3.1 production (b8d4cb6)</div>
+<table class="tb">
+<tr><td>Pricing</td><td style="text-align:right" class="red">DISCOVER gratuit + tiers vagues</td></tr>
+<tr><td>Modele cout</td><td style="text-align:right" class="red">Temps JP x taux horaire</td></tr>
+<tr><td>API 1P</td><td style="text-align:right" class="red">Inexistant</td></tr>
+<tr><td>Sections page</td><td style="text-align:right">10 sections</td></tr>
+<tr><td>Funnel</td><td style="text-align:right" class="red">Menu (choix libre)</td></tr>
+</table></div>
+<div class="cd ft"><div style="font-size:14px;font-weight:500;margin-bottom:10px">v3.3 localhost (Design Review PASS)</div>
+<table class="tb">
+<tr><td>Pricing</td><td style="text-align:right" class="green">4 tiers codes FR+EN</td></tr>
+<tr><td>Modele cout</td><td style="text-align:right" class="green">API hybride ($0.42)</td></tr>
+<tr><td>API 1P</td><td style="text-align:right" class="green">Opus v1.2.0 operationnel</td></tr>
+<tr><td>Sections page</td><td style="text-align:right" class="green">7 sections (-30%)</td></tr>
+<tr><td>Funnel</td><td style="text-align:right" class="green">Maieutique Q1→Q4</td></tr>
+</table></div>
+</div>
+
+<div class="cd"><div class="hd"><span class="bg" style="background:#E1F5EE;color:#085041">GRATUIT</span><span class="nm">AEGIS PULSE</span><span class="cx">Q1-Q2 Damasio</span></div>
+<div class="pr green">0 EUR</div>
+<table class="tb"><tr><td>Contenu</td><td>Pre-diagnostic Sonnet S1+S2 via formulaire 3 champs</td></tr><tr><td>Cout / Marge</td><td>$0.05/appel / Acquisition client</td></tr><tr><td>Code v3.3</td><td class="green">PricingSection.tsx PASS</td></tr></table></div>
+
+<div class="cd ft" style="position:relative"><span class="mvp">MVP 15/04</span>
+<div class="hd"><span class="bg" style="background:#E6F1FB;color:#0C447C">ONE-SHOT</span><span class="nm">AEGIS DIAGNOSTIC</span><span class="cx">Q3 contrefactuel Pearl</span></div>
+<div class="pr">250 EUR <span>/ rapport</span></div>
+<table class="tb"><tr><td>Contenu</td><td>7 sections Pearl, 617 lignes, graphe causal, plan A1-A17</td></tr><tr><td>Cout / Marge</td><td>$0.42 Opus / 99.8% marge</td></tr><tr><td>Code v3.3</td><td class="green">PricingSection.tsx + aegis-diagnostic-api.ps1 v1.2.0</td></tr></table></div>
+
+<div class="cd"><div class="hd"><span class="bg" style="background:#EEEDFE;color:#3C3489">RECURRENT</span><span class="nm">AEGIS VEILLE</span><span class="cx">Compliance ≠ Conformite (D277)</span></div>
+<div class="pr">150 EUR <span>/ mois</span></div>
+<table class="tb"><tr><td>Contenu</td><td>Alertes reglementaires personnalisees, Stripe subscription</td></tr><tr><td>Cout / Marge</td><td>$5-15/mois Haiku+Sonnet / >90% marge</td></tr><tr><td>Code v3.3</td><td class="green">PricingSection.tsx + Stripe Q4 confirme JP</td></tr></table></div>
+
+<div class="cd"><div class="hd"><span class="bg" style="background:#FAECE7;color:#712B13">PREMIUM</span><span class="nm">AEGIS EXPERTISE TERRAIN</span><span class="cx">Q4 imperatif existentiel</span></div>
+<div class="pr">350 EUR/h <span>ou 2 500 EUR/mois</span></div>
+<table class="tb"><tr><td>Contenu</td><td>JP en personne, 32 ans, gap analysis + ON + formation</td></tr><tr><td>Cout / Marge</td><td>Temps JP / 100% (expertise incarnee)</td></tr><tr><td>Code v3.3</td><td class="green">PricingSection.tsx PASS</td></tr></table></div>
+
+<div class="ch" style="height:320px"><canvas id="c1"></canvas></div>
+<div class="lg"><span><span class="dt" style="background:#1D9E75"></span>Volume clients/mois</span><span><span class="dt" style="background:#534AB7"></span>Revenu mensuel EUR</span></div>
+
+<div class="ch" style="height:280px"><canvas id="c2"></canvas></div>
+<div class="lg"><span><span class="dt" style="background:#D85A30"></span>Cout API EUR</span><span><span class="dt" style="background:#1D9E75"></span>Marge nette EUR</span></div>
+
+<div class="ch" style="height:260px"><canvas id="c3"></canvas></div>
+<div class="lg"><span><span class="dt" style="background:#534AB7"></span>Revenu cumule EUR</span><span><span class="dt" style="background:#1D9E75"></span>Cout infra cumule EUR</span></div>
+
+<div class="ib"><strong>Pivot v3.1 → v3.3 :</strong> Le funnel PULSE→DIAGNOSTIC→VEILLE→TERRAIN est desormais CODE (PricingSection.tsx), PROUVE (API $0.42, 617 lignes), et FORMALISE (Causal Knowledge Fabric D·L·R). Chaque tier = etape maieutique Q1→Q4. Chaque diagnostic enrichit le graphe causal (D265 Flywheel). Carter & Baker 1992 → Pearl 2000 → AEGIS 2026.</div>
+
+<script>
+const dk=matchMedia('(prefers-color-scheme:dark)').matches,tc=dk?'#d3d1c7':'#5f5e5a',gc=dk?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['PULSE\n0 EUR','DIAGNOSTIC\n250 EUR','VEILLE\n150 EUR/mois','TERRAIN\n350 EUR/h'],datasets:[{data:[100,15,20,3],backgroundColor:'#1D9E75',borderRadius:4,yAxisID:'y'},{data:[0,3750,3000,5250],backgroundColor:'#534AB7',borderRadius:4,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Funnel v3.3 — volume vs revenu (cible 6 mois)',color:tc,font:{size:14,weight:'500'}}},scales:{x:{ticks:{color:tc,font:{size:11},maxRotation:0},grid:{display:false}},y:{position:'left',ticks:{color:'#1D9E75',callback:v=>v+' cl.'},grid:{color:gc},title:{display:true,text:'Clients',color:'#1D9E75',font:{size:11}}},y1:{position:'right',ticks:{color:'#534AB7',callback:v=>v.toLocaleString()+' EUR'},grid:{display:false},title:{display:true,text:'Revenu',color:'#534AB7',font:{size:11}}}}}});
+new Chart(document.getElementById('c2'),{type:'bar',data:{labels:['PULSE\n100 appels','DIAGNOSTIC\n15 rapports','VEILLE\n20 clients','TERRAIN\n3 clients'],datasets:[{data:[5,6,14,0],backgroundColor:'#D85A30',borderRadius:4},{data:[-5,3744,2986,5250],backgroundColor:'#1D9E75',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},title:{display:true,text:'Marge nette par tier (EUR/mois)',color:tc,font:{size:14,weight:'500'}}},scales:{x:{stacked:true,ticks:{color:tc,callback:v=>v.toLocaleString()+' EUR'},grid:{color:gc}},y:{stacked:true,ticks:{color:tc,font:{size:11}},grid:{display:false}}}}});
+new Chart(document.getElementById('c3'),{type:'line',data:{labels:['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],datasets:[{data:[2000,5000,9500,16000,24000,34000,46000,60000,76000,94000,114000,136000],borderColor:'#534AB7',backgroundColor:'rgba(83,74,183,.08)',fill:true,tension:.3,pointRadius:3},{data:[366,732,1098,1464,1830,2196,2562,2928,3294,3660,4026,4392],borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,.08)',fill:true,tension:.1,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Flywheel Compliance — revenu vs cout infra (12 mois)',color:tc,font:{size:14,weight:'500'}}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{ticks:{color:tc,callback:v=>(v/1000).toFixed(0)+'K EUR'},grid:{color:gc}}}}});
+</script>
+</body>
+</html>

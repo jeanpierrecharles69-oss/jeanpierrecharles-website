@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>AEGIS Admin -- Pipeline VEILLE mensuel</title>
+<style>
+:root {
+    --navy: #1e3a5f;
+    --gold: #c9a84c;
+    --emerald: #10b981;
+    --rose: #ef4444;
+    --amber: #f59e0b;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+}
+header {
+    background: linear-gradient(135deg, var(--navy), #142a45);
+    color: #fff;
+    padding: 22px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+header .logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+header h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+header .sub {
+    margin-left: auto;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+}
+main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+}
+@media (max-width: 1000px) {
+    main { grid-template-columns: 1fr; }
+}
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card h2 .step {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+input[type="text"], input[type="password"], select, textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    color: var(--text);
+}
+textarea {
+    min-height: 110px;
+    resize: vertical;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.55;
+}
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: -1px;
+    border-color: var(--gold);
+}
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.6fr;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.field { margin-bottom: 14px; }
+.pillar {
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    background: #fafaf7;
+    border-radius: 0 6px 6px 0;
+}
+.pillar .pillar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.pillar h3 {
+    margin: 0;
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 700;
+}
+.pillar .hint {
+    font-size: 11px;
+    color: var(--text-light);
+}
+button {
+    padding: 10px 18px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.btn-primary {
+    background: var(--navy);
+    color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: #142a45; }
+.btn-secondary {
+    background: var(--gold);
+    color: var(--navy);
+}
+.btn-secondary:hover:not(:disabled) { filter: brightness(1.05); }
+.btn-success {
+    background: var(--emerald);
+    color: #fff;
+}
+.btn-success:hover:not(:disabled) { background: #059669; }
+.btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+.preview {
+    grid-column: 1 / -1;
+    min-height: 720px;
+}
+.preview iframe {
+    width: 100%;
+    height: 720px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+}
+.status {
+    margin-top: 12px;
+    padding: 11px 14px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+.status.info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+}
+.status.success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+.status.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+.status.warn {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+.kv {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+.kv code {
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+}
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+    vertical-align: -1px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">AE</div>
+    <h1>Pipeline VEILLE mensuel</h1>
+    <div class="sub">AEGIS Intelligence -- S5 Mission N11</div>
+</header>
+
+<main>
+
+<!-- ========== CARD 1 : Configuration ========== -->
+<section class="card">
+    <h2><span class="step">1</span>Edition + clé admin</h2>
+
+    <div class="field">
+        <label for="adminKey">x-admin-key (AEGIS_ADMIN_KEY)</label>
+        <input type="password" id="adminKey" placeholder="cle admin Vercel" autocomplete="current-password">
+    </div>
+
+    <div class="row">
+        <div>
+            <label for="edition">Edition (référence unique)</label>
+            <input type="text" id="edition" placeholder="ex: Mai 2026 -- N°1">
+        </div>
+        <div>
+            <label for="monthLabel">Mois (couverture)</label>
+            <input type="text" id="monthLabel" placeholder="ex: Mai 2026">
+        </div>
+        <div>
+            <label for="lang">Langue</label>
+            <select id="lang">
+                <option value="fr">FR</option>
+                <option value="en">EN</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="kv">
+        Workflow : <code>Générer</code> → preview PDF → <code>Valider</code> → <code>Distribuer</code> aux abonnés actifs.
+        Le pipeline UPSERT par <code>(edition, lang)</code>. Pour repartir de zero : changer l'édition.
+    </div>
+</section>
+
+<!-- ========== CARD 2 : Signaux 5 piliers ========== -->
+<section class="card">
+    <h2><span class="step">2</span>Signaux du mois (5 piliers)</h2>
+
+    <div class="kv" style="margin-bottom: 14px;">
+        Format libre. Idealement : 3-5 signaux par pilier, format <code>- [Source, date] Titre + URL + 1 ligne résumé</code>.
+        Si aucun signal : laisser vide (Opus écrira "Aucun signal majeur ce mois").
+    </div>
+
+    <div class="pillar">
+        <div class="pillar-head">
+            <h3>1. AI Act</h3>
+            <span class="hint">Reglement (UE) 2024/1689</span>
+        </div>
+        <textarea id="signal_ai_act" placeholder="- [EUR-Lex, 15/04/2026] AI Office guidance Art. 9 ... &#10;- ..."></textarea>
+    </div>
+
+    <div class="pillar">
+        <div class="pillar-head">
+            <h3>2. CRA -- Cyber Resilience Act</h3>
+            <span class="hint">Reglement (UE) 2024/2847</span>
+        </div>
+        <textarea id="signal_cra" placeholder="- [ENISA, ...] SBOM ... &#10;- ..."></textarea>
+    </div>
+
+    <div class="pillar">
+        <div class="pillar-head">
+            <h3>3. Reglement Machines 2023/1230</h3>
+            <span class="hint">Application 20/01/2027</span>
+        </div>
+        <textarea id="signal_machinery" placeholder="- ..."></textarea>
+    </div>
+
+    <div class="pillar">
+        <div class="pillar-head">
+            <h3>4. ESPR / DPP</h3>
+            <span class="hint">Reglement (UE) 2024/1781</span>
+        </div>
+        <textarea id="signal_espr_dpp" placeholder="- ..."></textarea>
+    </div>
+
+    <div class="pillar">
+        <div class="pillar-head">
+            <h3>5. Battery Regulation</h3>
+            <span class="hint">Reglement (UE) 2023/1542</span>
+        </div>
+        <textarea id="signal_battery" placeholder="- ..."></textarea>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-primary" id="btnGenerate">Générer</button>
+        <button class="btn-secondary" id="btnValidate" disabled>Valider</button>
+        <button class="btn-success" id="btnDistribute" disabled>Distribuer aux abonnés</button>
+    </div>
+
+    <div id="status" class="status info" style="display:none"></div>
+</section>
+
+<!-- ========== CARD 3 : Preview PDF ========== -->
+<section class="card preview">
+    <h2><span class="step">3</span>Preview PDF</h2>
+    <div id="previewEmpty" class="kv" style="padding: 60px 20px; text-align: center; background: #fafaf7; border-radius: 8px;">
+        Aucun rapport généré pour l'instant. Saisir les signaux ci-dessus, cliquer <strong>Générer</strong>.
+    </div>
+    <iframe id="previewIframe" style="display:none" title="Preview rapport VEILLE"></iframe>
+</section>
+
+</main>
+
+<script>
+'use strict';
+
+// ===== State =====
+let currentReportId = null;
+let currentBlobUrl = null;
+
+const $ = (id) => document.getElementById(id);
+
+const adminKeyInput = $('adminKey');
+const editionInput = $('edition');
+const monthLabelInput = $('monthLabel');
+const langSelect = $('lang');
+const signalIds = ['ai_act', 'cra', 'machinery', 'espr_dpp', 'battery'];
+const btnGenerate = $('btnGenerate');
+const btnValidate = $('btnValidate');
+const btnDistribute = $('btnDistribute');
+const statusEl = $('status');
+const previewIframe = $('previewIframe');
+const previewEmpty = $('previewEmpty');
+
+// ===== LocalStorage convenience (admin key) =====
+try {
+    const saved = localStorage.getItem('aegis_admin_key');
+    if (saved) adminKeyInput.value = saved;
+    adminKeyInput.addEventListener('change', () => {
+        try { localStorage.setItem('aegis_admin_key', adminKeyInput.value); } catch (e) {}
+    });
+} catch (e) { /* localStorage unavailable */ }
+
+// ===== Pre-fill edition + month_label depuis date courante =====
+(function prefill() {
+    const now = new Date();
+    const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    const monthLabel = `${months[now.getMonth()]} ${now.getFullYear()}`;
+    if (!editionInput.value) editionInput.value = `${monthLabel} -- N°1`;
+    if (!monthLabelInput.value) monthLabelInput.value = monthLabel;
+})();
+
+// ===== Helpers =====
+function setStatus(kind, msg) {
+    statusEl.style.display = 'block';
+    statusEl.className = 'status ' + kind;
+    statusEl.innerHTML = msg;
+}
+function clearStatus() {
+    statusEl.style.display = 'none';
+    statusEl.innerHTML = '';
+}
+function setBusy(busy) {
+    btnGenerate.disabled = busy;
+    btnValidate.disabled = busy || !currentReportId;
+    btnDistribute.disabled = busy || !currentReportId;
+}
+function base64ToBlob(b64, contentType) {
+    const byteChars = atob(b64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+    return new Blob([new Uint8Array(byteNumbers)], { type: contentType });
+}
+function showPdfPreview(b64) {
+    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+    const blob = base64ToBlob(b64, 'application/pdf');
+    currentBlobUrl = URL.createObjectURL(blob);
+    previewIframe.src = currentBlobUrl;
+    previewIframe.style.display = 'block';
+    previewEmpty.style.display = 'none';
+}
+function getAdminKey() {
+    const k = (adminKeyInput.value || '').trim();
+    if (!k) {
+        setStatus('error', '⚠ x-admin-key obligatoire (champ 1).');
+        return null;
+    }
+    return k;
+}
+
+// ===== Step 1 : Generer =====
+btnGenerate.addEventListener('click', async () => {
+    const adminKey = getAdminKey();
+    if (!adminKey) return;
+
+    const edition = (editionInput.value || '').trim();
+    const monthLabel = (monthLabelInput.value || '').trim();
+    const lang = langSelect.value === 'en' ? 'en' : 'fr';
+
+    if (!edition || edition.length < 3) {
+        setStatus('error', '⚠ Edition obligatoire (3 caractères minimum).');
+        return;
+    }
+
+    const signals = {};
+    for (const key of signalIds) {
+        signals[key] = ($('signal_' + key).value || '').trim();
+    }
+
+    setBusy(true);
+    setStatus('info', '<span class="spinner"></span>Génération en cours (Opus + jsPDF)... peut prendre 30-90s.');
+
+    try {
+        const res = await fetch('/api/generate-veille-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': adminKey,
+            },
+            body: JSON.stringify({
+                edition,
+                month_label: monthLabel,
+                lang,
+                signals,
+                include_pdf: true,
+            }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            setStatus('error', `⚠ Génération échouée (${res.status}) : ${escapeHtml(data.error || data.reason || 'unknown')}.`);
+            setBusy(false);
+            return;
+        }
+
+        currentReportId = data.report_id;
+        if (data.pdf_base64) {
+            showPdfPreview(data.pdf_base64);
+        }
+        const sizeKb = Math.round((data.pdf_size_bytes || 0) / 1024);
+        const elapsed = Math.round((data.elapsed_ms || 0) / 1000);
+        const usage = data.opus_usage || {};
+        const usageStr = usage ? ` -- in:${usage.input_tokens||'?'} out:${usage.output_tokens||'?'}${usage.cache_read_input_tokens?' cache_read:'+usage.cache_read_input_tokens:''}` : '';
+        setStatus('success', `✓ Rapport <code>${escapeHtml(data.report_id)}</code> généré (${sizeKb} KB, ${elapsed}s${usageStr}). État <code>draft</code>. Vérifier le preview puis cliquer <strong>Valider</strong>.`);
+        btnValidate.disabled = false;
+        btnDistribute.disabled = true;
+    } catch (e) {
+        setStatus('error', '⚠ Erreur réseau : ' + escapeHtml(e.message || String(e)));
+    } finally {
+        setBusy(false);
+    }
+});
+
+// ===== Step 2 : Valider =====
+btnValidate.addEventListener('click', async () => {
+    const adminKey = getAdminKey();
+    if (!adminKey || !currentReportId) return;
+
+    setBusy(true);
+    setStatus('info', '<span class="spinner"></span>Validation...');
+    try {
+        const res = await fetch('/api/admin/veille-report-validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': adminKey,
+            },
+            body: JSON.stringify({ report_id: currentReportId }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            setStatus('error', `⚠ Validation échouée (${res.status}) : ${escapeHtml(data.error || 'unknown')}.`);
+            setBusy(false);
+            return;
+        }
+        setStatus('success', `✓ Rapport <code>${escapeHtml(currentReportId)}</code> validé. Prêt pour distribution.`);
+        btnDistribute.disabled = false;
+    } catch (e) {
+        setStatus('error', '⚠ Erreur réseau : ' + escapeHtml(e.message || String(e)));
+    } finally {
+        btnGenerate.disabled = false;
+        btnValidate.disabled = false;
+    }
+});
+
+// ===== Step 3 : Distribuer =====
+btnDistribute.addEventListener('click', async () => {
+    const adminKey = getAdminKey();
+    if (!adminKey || !currentReportId) return;
+    if (!confirm('Confirmer la distribution du rapport à tous les abonnés actifs (' + langSelect.value.toUpperCase() + ') ?\n\nCette action enverra des emails et marquera le rapport comme distribué.')) {
+        return;
+    }
+
+    setBusy(true);
+    setStatus('info', '<span class="spinner"></span>Distribution en cours...');
+    try {
+        const res = await fetch('/api/distribute-veille-report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': adminKey,
+            },
+            body: JSON.stringify({ report_id: currentReportId }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            setStatus('error', `⚠ Distribution échouée (${res.status}) : ${escapeHtml(data.error || 'unknown')}.`);
+            setBusy(false);
+            return;
+        }
+        const elapsed = Math.round((data.elapsed_ms || 0) / 1000);
+        setStatus('success',
+            `✓ Distribution effectuée en ${elapsed}s.<br>
+             • Envoyés : <strong>${data.distributed}</strong><br>
+             • Échecs : <strong>${data.failed}</strong><br>
+             • Déjà envoyés (skipped) : <strong>${data.skipped}</strong><br>
+             • Total abonnés ${data.lang.toUpperCase()} actifs : ${data.subscribers_total}`
+        );
+    } catch (e) {
+        setStatus('error', '⚠ Erreur réseau : ' + escapeHtml(e.message || String(e)));
+    } finally {
+        btnGenerate.disabled = false;
+    }
+});
+
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+</script>
+
+</body>
+</html>

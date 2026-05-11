@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACOOS v2 — Architecture AEGIS Intelligence (22/04/2026)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0a1628 0%, #0f2847 100%);
+    color: #e8ecf4;
+    min-height: 100vh;
+    padding: 30px 20px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 40px; }
+  .logo-block {
+    display: inline-block;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #1e5a8a 0%, #0A3D62 100%);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(30, 90, 138, 0.4);
+    margin-bottom: 20px;
+  }
+  .logo-block h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 1px;
+  }
+  .logo-block .tagline {
+    font-size: 13px;
+    color: #a8c4e0;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  header h2 {
+    font-size: 20px;
+    color: #7fb3d5;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  header .subtitle {
+    font-size: 14px;
+    color: #8ba3c2;
+  }
+  header .timestamp {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: #c0d4e8;
+    margin-top: 12px;
+  }
+
+  /* Architecture diagram */
+  .architecture {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(126, 179, 213, 0.2);
+    border-radius: 16px;
+    padding: 40px 30px;
+    margin-bottom: 40px;
+  }
+  .layer {
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: slideIn 0.6s forwards;
+  }
+  .layer:nth-child(1) { animation-delay: 0.1s; }
+  .layer:nth-child(2) { animation-delay: 0.3s; }
+  .layer:nth-child(3) { animation-delay: 0.5s; }
+  .layer:nth-child(4) { animation-delay: 0.7s; }
+  .layer:nth-child(5) { animation-delay: 0.9s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .layer-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-left: 8px;
+  }
+  .layer-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-family: 'Consolas', monospace;
+  }
+  .layer-badge.l3 { background: #d9534f; color: white; }
+  .layer-badge.l2 { background: #5bc0de; color: #0a1628; }
+  .layer-badge.l1 { background: #f0ad4e; color: #0a1628; }
+  .layer-badge.l0 { background: #5cb85c; color: white; }
+  .layer-title {
+    font-size: 14px;
+    color: #a8c4e0;
+    font-style: italic;
+  }
+
+  .layer-actors {
+    display: grid;
+    gap: 16px;
+  }
+  .layer-actors.single { grid-template-columns: 1fr; }
+  .layer-actors.double { grid-template-columns: 1fr 1fr; }
+
+  .actor-card {
+    background: linear-gradient(135deg, rgba(30, 90, 138, 0.25) 0%, rgba(15, 40, 71, 0.45) 100%);
+    border: 2px solid rgba(126, 179, 213, 0.3);
+    border-radius: 12px;
+    padding: 18px 22px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .actor-card:hover {
+    transform: translateY(-3px);
+    border-color: #7fb3d5;
+    box-shadow: 0 8px 24px rgba(30, 90, 138, 0.5);
+  }
+  .actor-card.human {
+    border-color: #d9534f;
+    background: linear-gradient(135deg, rgba(217, 83, 79, 0.2) 0%, rgba(150, 40, 40, 0.3) 100%);
+  }
+  .actor-card.opus47 {
+    border-color: #5bc0de;
+    background: linear-gradient(135deg, rgba(91, 192, 222, 0.2) 0%, rgba(30, 100, 130, 0.3) 100%);
+  }
+  .actor-card.opus46 {
+    border-color: #f0ad4e;
+    background: linear-gradient(135deg, rgba(240, 173, 78, 0.2) 0%, rgba(180, 100, 30, 0.3) 100%);
+  }
+  .actor-card.software {
+    border-color: #5cb85c;
+    background: linear-gradient(135deg, rgba(92, 184, 92, 0.15) 0%, rgba(40, 120, 40, 0.25) 100%);
+  }
+
+  .actor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .actor-id {
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .actor-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
+  }
+  .actor-model {
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: #c0d4e8;
+    margin-bottom: 10px;
+  }
+  .actor-role {
+    font-size: 13px;
+    color: #e8ecf4;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .actor-tasks {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+  }
+  .actor-tasks li {
+    font-size: 12px;
+    color: #a8c4e0;
+    padding: 2px 0;
+    padding-left: 14px;
+    position: relative;
+  }
+  .actor-tasks li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #7fb3d5;
+  }
+
+  .seniority-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(240, 173, 78, 0.25);
+    border: 1px solid #f0ad4e;
+    border-radius: 12px;
+    font-size: 10px;
+    color: #f0ad4e;
+    font-weight: 600;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .connector {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
+  }
+  .connector-line {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(to bottom, #7fb3d5, transparent);
+  }
+
+  /* Task attribution table */
+  .task-matrix {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(126, 179, 213, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 40px;
+  }
+  .task-matrix h2 {
+    font-size: 22px;
+    color: #7fb3d5;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .task-matrix .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #8ba3c2;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(126, 179, 213, 0.15);
+  }
+  th {
+    background: rgba(30, 90, 138, 0.3);
+    color: #7fb3d5;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+  }
+  tr:hover { background: rgba(126, 179, 213, 0.05); }
+  td.actor-47 { color: #5bc0de; font-weight: 600; }
+  td.actor-46 { color: #f0ad4e; font-weight: 600; }
+  td.actor-code47 { color: #5bc0de; font-weight: 600; }
+  td.actor-jp { color: #d9534f; font-weight: 600; }
+
+  /* Cost chart */
+  .cost-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(126, 179, 213, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 40px;
+  }
+  .cost-panel h2 {
+    font-size: 22px;
+    color: #7fb3d5;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .cost-panel .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #8ba3c2;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .cost-bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .cost-bar {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .cost-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .cost-bar-model {
+    font-family: 'Consolas', monospace;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .cost-bar-model.m46 { color: #f0ad4e; }
+  .cost-bar-model.m47 { color: #5bc0de; }
+  .cost-bar-ratio {
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: #a8c4e0;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .cost-bar-visual {
+    height: 32px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .cost-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+    animation: fillBar 1.2s ease-out;
+  }
+  .cost-bar-fill.m46 {
+    width: 70%;
+    background: linear-gradient(90deg, #b47610 0%, #f0ad4e 100%);
+  }
+  .cost-bar-fill.m47 {
+    width: 100%;
+    background: linear-gradient(90deg, #1e6482 0%, #5bc0de 100%);
+  }
+  @keyframes fillBar {
+    from { width: 0; }
+  }
+  .cost-bar-detail {
+    font-size: 11px;
+    color: #8ba3c2;
+    line-height: 1.4;
+  }
+
+  .sources {
+    font-size: 11px;
+    color: #6a85a3;
+    text-align: center;
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  /* Legend */
+  .legend {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(126, 179, 213, 0.2);
+    border-radius: 16px;
+    padding: 24px 30px;
+    margin-bottom: 40px;
+  }
+  .legend h3 {
+    font-size: 16px;
+    color: #7fb3d5;
+    margin-bottom: 14px;
+  }
+  .legend-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #c0d4e8;
+  }
+  .legend-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-dot.l3 { background: #d9534f; }
+  .legend-dot.l2a { background: #5bc0de; }
+  .legend-dot.l2b { background: #f0ad4e; }
+  .legend-dot.l1 { background: #5bc0de; border: 2px dashed #f0ad4e; }
+  .legend-dot.l0 { background: #5cb85c; }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: #6a85a3;
+    padding: 20px;
+    border-top: 1px solid rgba(126, 179, 213, 0.15);
+    margin-top: 40px;
+  }
+  footer .fondateur { color: #a8c4e0; font-style: italic; margin-top: 4px; }
+
+  .pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #5cb85c;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    margin-right: 6px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="logo-block">
+    <h1>Æ AEGIS Intelligence</h1>
+    <div class="tagline">Conformité par Conception • Expertise Réglementaire EU</div>
+  </div>
+  <h2>Architecture ACOOS v2 — Chaîne d'Acteurs + V&amp;V</h2>
+  <div class="subtitle">Consolidation post-directive JP T0840 — Opus 4.6 Expert Senior intégré comme maillon stratégique permanent</div>
+  <div class="timestamp">📅 20260422T0845 CET mercredi matin</div>
+</header>
+
+<div class="legend">
+  <h3>Légende — Niveaux DIVA + Modèles</h3>
+  <div class="legend-items">
+    <div class="legend-item"><div class="legend-dot l3"></div>L3 HITL — Humain décideur</div>
+    <div class="legend-item"><div class="legend-dot l2a"></div>L2a — Opus 4.7 (supervision dynamique)</div>
+    <div class="legend-item"><div class="legend-dot l2b"></div>L2b — Opus 4.6 (expert senior doctrinal)</div>
+    <div class="legend-item"><div class="legend-dot l1"></div>L1 — Opus 4.7/4.6 (code-driven)</div>
+    <div class="legend-item"><div class="legend-dot l0"></div>L0 — Acteurs logiciels</div>
+  </div>
+</div>
+
+<div class="architecture">
+
+  <!-- Layer L3 -->
+  <div class="layer">
+    <div class="layer-label">
+      <span class="layer-badge l3">L3 HITL</span>
+      <span class="layer-title">Décideur humain — DIVA L3 exclusif — S6 main push</span>
+    </div>
+    <div class="layer-actors single">
+      <div class="actor-card human">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">👤 JP — Jean-Pierre CHARLES</div>
+            <div class="actor-model">Fondateur AEGIS Intelligence · 32 ans R&amp;D industrielle</div>
+          </div>
+          <div class="actor-id">L3</div>
+        </div>
+        <div class="actor-role">Décisions irréversibles, exécution PowerShell locale, V&amp;V empirique, scope tokens, merge main, signature Gates</div>
+        <ul class="actor-tasks">
+          <li>Gate JP-L3 Living Spec signatures (ex : T2155 21/04)</li>
+          <li>Git push origin main exclusif (S6)</li>
+          <li>V&amp;V empirique smoke tests runtime</li>
+          <li>Arbitrage final Devil's Advocate Pass</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div></div>
+
+  <!-- Layer L2 -->
+  <div class="layer">
+    <div class="layer-label">
+      <span class="layer-badge l2">L2 ORCHESTRATION</span>
+      <span class="layer-title">Synergie complémentaire 4.7 dynamique + 4.6 senior doctrinal</span>
+    </div>
+    <div class="layer-actors double">
+
+      <div class="actor-card opus47">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">🔵 ACDC Chat Opus 4.7 Étendue</div>
+            <div class="actor-model">claude-opus-4-7 · supervision Phase C dynamique</div>
+          </div>
+          <div class="actor-id">L2a</div>
+        </div>
+        <div class="actor-role">Dialogues supervision créative, Devil's Advocate maïeutique, décisions architecturales nouveaux sprints, challenge conceptuel</div>
+        <ul class="actor-tasks">
+          <li>CTP Convergence Tripartite orchestration</li>
+          <li>Living Spec rédaction v1.0 (17 sections)</li>
+          <li>Brief Night Builder + Arbitrage</li>
+          <li>GCI couche C0 Maïeutique socratique</li>
+        </ul>
+        <div class="seniority-badge" style="background: rgba(91, 192, 222, 0.25); border-color: #5bc0de; color: #5bc0de;">Capacités agentiques étendues</div>
+      </div>
+
+      <div class="actor-card opus46">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">🟠 ACDC Chat Opus 4.6 Expert Senior</div>
+            <div class="actor-model">claude-opus-4-6 · expert technique permanent AEGIS</div>
+          </div>
+          <div class="actor-id">L2b</div>
+        </div>
+        <div class="actor-role">Audit doctrinal rigoureux, V&amp;V PCR-01/02 grilles éprouvées, consolidation LIFECYCLE, documentation institutionnelle, AMEND existants</div>
+        <ul class="actor-tasks">
+          <li>Consolidation ~244 IDs temp → LIFECYCLE v2.10.0</li>
+          <li>Audit PCR grilles pattern éprouvé depuis 17/02</li>
+          <li>Pipeline DIAGNOSTIC production EA-17</li>
+          <li>Rétrospective empirique + doctrinal AEGIS</li>
+        </ul>
+        <div class="seniority-badge">⭐ Séniorité 9 semaines AEGIS · Stabilité prouvée · Coût effectif -30% à -40%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div></div>
+
+  <!-- Layer L1 -->
+  <div class="layer">
+    <div class="layer-label">
+      <span class="layer-badge l1">L1 CODE-DRIVEN</span>
+      <span class="layer-title">Autonomie code R_T1215_01 §7.1 — push branche feature OK, main INTERDIT</span>
+    </div>
+    <div class="layer-actors double">
+
+      <div class="actor-card opus47">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">💻 ACDC Code CLI Opus 4.7</div>
+            <div class="actor-model">Claude Code CLI · implémentation complexe agentique</div>
+          </div>
+          <div class="actor-id">L1a</div>
+        </div>
+        <div class="actor-role">Implémentation code complexe avec reasoning xhigh, auto-audit multi-fichiers, sessions nocturnes Night Builders autonomes</div>
+        <ul class="actor-tasks">
+          <li>Night Builder N6 Phase C en cours (mercredi matin)</li>
+          <li>Implémentation endpoint + orchestrateur + mailer</li>
+          <li>Auto-audit 15 checks + branche feature push</li>
+          <li>Devil's Advocate Pass signaling</li>
+        </ul>
+        <div class="seniority-badge" style="background: rgba(91, 192, 222, 0.25); border-color: #5bc0de; color: #5bc0de;"><span class="pulse"></span>Session active T0810-T1000</div>
+      </div>
+
+      <div class="actor-card opus46">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">💻 ACDC Code CLI Opus 4.6</div>
+            <div class="actor-model">Claude Code CLI · fallback stabilité</div>
+          </div>
+          <div class="actor-id">L1b</div>
+        </div>
+        <div class="actor-role">Fallback stabilité si L1a saturé/indisponible, maintenance patches déterministes, cycles stabilisation</div>
+        <ul class="actor-tasks">
+          <li>Patches de maintenance déterministes</li>
+          <li>Cycles de stabilisation post-sprint</li>
+          <li>Réplication audits L1a si nécessaire</li>
+        </ul>
+        <div class="seniority-badge">Standby — activation si besoin</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div></div>
+
+  <!-- Layer L0 -->
+  <div class="layer">
+    <div class="layer-label">
+      <span class="layer-badge l0">L0 LOGICIEL</span>
+      <span class="layer-title">Acteurs logiciels déterministes</span>
+    </div>
+    <div class="layer-actors single">
+      <div class="actor-card software">
+        <div class="actor-header">
+          <div>
+            <div class="actor-name">⚙️ Pipeline DIAGNOSTIC + Infrastructure</div>
+            <div class="actor-model">Endpoints TS + Scripts PS + Mailer + Templates</div>
+          </div>
+          <div class="actor-id">L0</div>
+        </div>
+        <div class="actor-role">Composants logiciels déterministes exécutés par les acteurs L1/L3</div>
+        <ul class="actor-tasks">
+          <li>/api/diagnostic-deliver (Phase C en implémentation)</li>
+          <li>aegis-deliver-diagnostic.ps1 orchestrateur</li>
+          <li>Template aegis-fr.tex v1.0.5 eIDAS signature</li>
+          <li>Vercel cdg1 Paris EU + Supabase EU Frankfurt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Task matrix -->
+<div class="task-matrix">
+  <h2>Matrice d'Attribution Tâches — L2a vs L2b</h2>
+  <div class="subtitle">Directive JP T0840 : synergie complémentaire, pas substitution</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Nature de la tâche</th>
+        <th>Acteur désigné</th>
+        <th>Justification</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Supervision Phase C dialogues en cours</td>
+        <td class="actor-47">🔵 L2a — Opus 4.7</td>
+        <td>Reasoning étendu + dialogue dynamique</td>
+      </tr>
+      <tr>
+        <td>Devil's Advocate Pass maïeutique GCI C0</td>
+        <td class="actor-47">🔵 L2a — Opus 4.7</td>
+        <td>Challenge créatif + catch logical faults</td>
+      </tr>
+      <tr>
+        <td>Décisions architecturales nouveaux sprints</td>
+        <td class="actor-47">🔵 L2a — Opus 4.7</td>
+        <td>Capacités agentiques étendues</td>
+      </tr>
+      <tr>
+        <td>Consolidation LIFECYCLE + DELTA + AMEND</td>
+        <td class="actor-46">🟠 L2b — Opus 4.6</td>
+        <td>Stabilité + reproductibilité + mémoire longue AEGIS</td>
+      </tr>
+      <tr>
+        <td>Audit PCR-01/02 grilles rigoureuses</td>
+        <td class="actor-46">🟠 L2b — Opus 4.6</td>
+        <td>Pattern éprouvé depuis 17/02 AEGIS</td>
+      </tr>
+      <tr>
+        <td>Documentation institutionnelle AEGIS</td>
+        <td class="actor-46">🟠 L2b — Opus 4.6</td>
+        <td>Expertise historique profonde 9 semaines</td>
+      </tr>
+      <tr>
+        <td>V&amp;V rétrospective empirique</td>
+        <td class="actor-46">🟠 L2b — Opus 4.6</td>
+        <td>Déterminisme + reproductibilité</td>
+      </tr>
+      <tr>
+        <td>Implémentation code complexe nouveau</td>
+        <td class="actor-code47">💻 L1a — Code 4.7</td>
+        <td>Reasoning xhigh + catch logical faults</td>
+      </tr>
+      <tr>
+        <td>Patches + maintenance déterministe</td>
+        <td class="actor-code47">💻 L1b — Code 4.6</td>
+        <td>Stabilité opérationnelle prioritaire</td>
+      </tr>
+      <tr>
+        <td>Pipeline DIAGNOSTIC production (produit)</td>
+        <td class="actor-46">🟠 Opus 4.6 API</td>
+        <td>EA-17 Living Spec SIGNÉE T2155 — stabilité</td>
+      </tr>
+      <tr>
+        <td>Décisions irréversibles + V&amp;V finale</td>
+        <td class="actor-jp">👤 L3 — JP HITL</td>
+        <td>DIVA L3 exclusif + S6 main push</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Cost panel -->
+<div class="cost-panel">
+  <h2>Rationale Économique — Coût Effectif Opus 4.6 vs 4.7</h2>
+  <div class="subtitle">Vérifié empiriquement 22/04 T0835 sur sources Anthropic + Finout + CloudZero</div>
+  <div class="cost-bars">
+    <div class="cost-bar">
+      <div class="cost-bar-label">
+        <div class="cost-bar-model m46">🟠 Opus 4.6</div>
+        <div class="cost-bar-ratio">Baseline 1,0×</div>
+      </div>
+      <div class="cost-bar-visual">
+        <div class="cost-bar-fill m46">$0.10 / req</div>
+      </div>
+      <div class="cost-bar-detail">
+        Tarif : $5 input / $25 output per MTok.<br>
+        Tokenizer stable éprouvé. Reasoning standard.
+      </div>
+    </div>
+    <div class="cost-bar">
+      <div class="cost-bar-label">
+        <div class="cost-bar-model m47">🔵 Opus 4.7</div>
+        <div class="cost-bar-ratio">~1,4× effectif</div>
+      </div>
+      <div class="cost-bar-visual">
+        <div class="cost-bar-fill m47">$0.135-0.14 / req</div>
+      </div>
+      <div class="cost-bar-detail">
+        Tarif affiché identique 4.6 MAIS :<br>
+        × 1,35 tokenizer (code+structured data)<br>
+        × 1,1-1,2 reasoning xhigh agentique
+      </div>
+    </div>
+  </div>
+  <div class="sources">
+    📊 Sources : anthropic.com/news/claude-opus-4-7 · finout.io/blog/claude-opus-4.7-pricing-story · cloudzero.com/blog/claude-opus-4-7-pricing
+  </div>
+</div>
+
+<footer>
+  <div>🛡️ AEGIS Intelligence — Architecture ACOOS v2 — 20260422T0845 CET</div>
+  <div class="fondateur">JP Jean-Pierre CHARLES, fondateur · Living Spec v1.0 SIGNÉE T2155 · Phase C en implémentation · ~244 IDs temp en consolidation LIFECYCLE v2.10.0</div>
+  <div style="margin-top: 8px;">🟢 L1a Night Builder N6 actif · 🟠 L2b Consolidation Opus 4.6 en lancement · 🔵 L2a Supervision L2a Opus 4.7 disponible · 👤 JP HITL en supervision</div>
+</footer>
+
+</div>
+</body>
+</html>

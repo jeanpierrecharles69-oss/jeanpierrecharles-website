@@ -57,10 +57,13 @@ export default function NavBar() {
                                 aria-label={`Navigate to ${item}`}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    if (location.pathname === "/") {
+                                    // D_T1600_01 (S2 Mission N11) : preserver lang sur navigation interne.
+                                    // Auparavant navigate("/") forcait FR meme depuis /en -> nav EN perdait sa langue.
+                                    const onHome = location.pathname === "/" || location.pathname === "/en";
+                                    if (onHome) {
                                         document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
                                     } else {
-                                        navigate("/", { state: { scrollTo: target } });
+                                        navigate(lang === "en" ? "/en" : "/", { state: { scrollTo: target } });
                                     }
                                 }}
                             >

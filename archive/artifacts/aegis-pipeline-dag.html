@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Pipeline — Chaîne de Cotes Causale × DAG Pearl</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #2a3550;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.08);
+    --green-border: rgba(34,197,94,0.25);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.08);
+    --red-border: rgba(239,68,68,0.25);
+    --orange: #f59e0b;
+    --orange-bg: rgba(245,158,11,0.08);
+    --orange-border: rgba(245,158,11,0.25);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.08);
+    --cyan: #06b6d4;
+    --purple: #8b5cf6;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: linear-gradient(135deg, #0f1729 0%, #162038 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .header-left h1 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header-left .subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin-top: 6px;
+  }
+  .header-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .meta-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .meta-badge .label { color: var(--text-dim); }
+  .meta-badge .val { color: var(--text); font-weight: 500; }
+
+  /* ─── SCOREBOARD ─── */
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 24px 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .score-card {
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    text-align: center;
+  }
+  .score-card .number {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-card .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .score-card.pass .number { color: var(--green); }
+  .score-card.fail .number { color: var(--red); }
+  .score-card.warn .number { color: var(--orange); }
+  .score-card.total .number { color: var(--blue); }
+
+  /* ─── LEGEND ─── */
+  .legend-bar {
+    display: flex;
+    gap: 24px;
+    padding: 16px 40px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-bar .title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .legend-dot.g { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .legend-dot.r { background: var(--red); box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+  .legend-dot.o { background: var(--orange); box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+  .legend-dot.b { background: var(--blue); box-shadow: 0 0 8px rgba(59,130,246,0.4); }
+
+  /* ─── DAG CONTAINER ─── */
+  .dag-container {
+    padding: 32px 40px;
+    position: relative;
+  }
+  .dag-container > h2 {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--cyan);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ─── PIPELINE LANE ─── */
+  .lane {
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .lane-header {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    background: var(--surface);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lane-header .icon { font-size: 14px; }
+  .lane-body {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 10px 10px 10px;
+    overflow-x: auto;
+    padding: 16px;
+    position: relative;
+  }
+
+  /* ─── NODE (dimension dans la chaîne) ─── */
+  .node {
+    flex: 0 0 auto;
+    min-width: 160px;
+    max-width: 200px;
+    border-radius: 10px;
+    padding: 14px;
+    position: relative;
+    border: 1.5px solid;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .node:hover {
+    transform: translateY(-2px);
+    z-index: 10;
+  }
+  .node.pass {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+  .node.pass:hover { box-shadow: 0 4px 20px rgba(34,197,94,0.15); }
+  .node.fail {
+    background: var(--red-bg);
+    border-color: var(--red-border);
+  }
+  .node.fail:hover { box-shadow: 0 4px 20px rgba(239,68,68,0.15); }
+  .node.warn {
+    background: var(--orange-bg);
+    border-color: var(--orange-border);
+  }
+  .node.warn:hover { box-shadow: 0 4px 20px rgba(245,158,11,0.15); }
+
+  .node .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  .node.pass .status-dot { background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+  .node.fail .status-dot { background: var(--red); box-shadow: 0 0 6px rgba(239,68,68,0.5); animation: pulse-red 2s infinite; }
+  .node.warn .status-dot { background: var(--orange); box-shadow: 0 0 6px rgba(245,158,11,0.5); animation: pulse-orange 2s infinite; }
+
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+    50% { box-shadow: 0 0 16px rgba(239,68,68,0.8); }
+  }
+  @keyframes pulse-orange {
+    0%, 100% { box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 0 16px rgba(245,158,11,0.8); }
+  }
+
+  .node .name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    padding-right: 16px;
+    line-height: 1.3;
+  }
+  .node .type-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim);
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .node .detail {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .node .tolerance {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255,255,255,0.08);
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.5;
+  }
+  .node.pass .tolerance { color: var(--green); }
+  .node.fail .tolerance { color: var(--red); }
+  .node.warn .tolerance { color: var(--orange); }
+
+  /* ─── ARROW between nodes ─── */
+  .arrow {
+    flex: 0 0 auto;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .arrow::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: var(--border);
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    right: 4px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid var(--border);
+  }
+  .arrow.ok::before { background: var(--green); opacity: 0.5; }
+  .arrow.ok::after { border-left-color: var(--green); opacity: 0.5; }
+  .arrow.ko::before { background: var(--red); opacity: 0.5; }
+  .arrow.ko::after { border-left-color: var(--red); opacity: 0.5; }
+  .arrow.degraded::before { background: var(--orange); opacity: 0.5; }
+  .arrow.degraded::after { border-left-color: var(--orange); opacity: 0.5; }
+
+  /* ─── TOLERANCE ANNOTATION (GD&T style) ─── */
+  .gdt-annotation {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 40px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .gdt-annotation .gdt-symbol {
+    font-family: var(--mono);
+    font-size: 18px;
+    min-width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--cyan);
+    border-radius: 6px;
+    color: var(--cyan);
+    flex-shrink: 0;
+  }
+  .gdt-annotation .gdt-content {
+    flex: 1;
+    min-width: 200px;
+  }
+  .gdt-annotation .gdt-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .gdt-annotation .gdt-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .gdt-annotation .gdt-desc code {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: rgba(255,255,255,0.05);
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: var(--cyan);
+  }
+  .gdt-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 6px;
+  }
+  .gdt-tag.fix { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .gdt-tag.bug { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .gdt-tag.degraded { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 20px 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .header, .scoreboard, .dag-container, .legend-bar, .footer, .gdt-annotation {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .lane-body { flex-direction: column; gap: 8px; }
+    .arrow { width: auto; height: 24px; flex-direction: column; }
+    .arrow::before { width: 2px; height: 16px; }
+    .arrow::after {
+      right: auto; bottom: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--border);
+      border-bottom: none;
+    }
+    .node { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ═══════ -->
+<header class="header">
+  <div class="header-left">
+    <h1>AEGIS DIAGNOSTIC 250 € — Chaîne de Cotes Causale</h1>
+    <div class="subtitle">DAG Pearl × Chaîne GD&T — Pipeline intégré bout-en-bout — Cobaye 2 EN (Sarah Thompson)</div>
+  </div>
+  <div class="header-right">
+    <div class="meta-badge"><span class="label">Date </span><span class="val">2026-04-24 T2000</span></div>
+    <div class="meta-badge"><span class="label">Prod </span><span class="val">v3.4.6 · 44e5bd2</span></div>
+    <div class="meta-badge"><span class="label">Preview </span><span class="val">bca9afc · TEST</span></div>
+    <div class="meta-badge"><span class="label">REQ </span><span class="val">#837129eb</span></div>
+  </div>
+</header>
+
+<!-- ═══════ SCOREBOARD ═══════ -->
+<div class="scoreboard">
+  <div class="score-card total"><div class="number">15</div><div class="label">Nœuds totaux</div></div>
+  <div class="score-card pass"><div class="number">9</div><div class="label">Pass ✓</div></div>
+  <div class="score-card warn"><div class="number">2</div><div class="label">Dégradé ⚠</div></div>
+  <div class="score-card fail"><div class="number">4</div><div class="label">Bloqué ✗</div></div>
+</div>
+
+<!-- ═══════ LEGEND ═══════ -->
+<div class="legend-bar">
+  <span class="title">Légende</span>
+  <div class="legend-item"><span class="legend-dot g"></span> Pass — tolérance nominale</div>
+  <div class="legend-item"><span class="legend-dot o"></span> Dégradé — hors tolérance non-bloquant</div>
+  <div class="legend-item"><span class="legend-dot r"></span> Bloqué — rupture chaîne</div>
+  <div class="legend-item"><span class="legend-dot b"></span> Service externe</div>
+</div>
+
+<!-- ═══════ LANE 1 : CLIENT → CHECKOUT ═══════ -->
+<div class="dag-container">
+  <h2>① Acquisition Client → Paiement</h2>
+</div>
+<div style="padding: 0 40px 12px;">
+  <div class="lane">
+    <div class="lane-header"><span class="icon">🌐</span> Frontend React + Vercel Functions</div>
+    <div class="lane-body">
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">NavBar.tsx</div>
+        <div class="type-badge">COMPONENT</div>
+        <div class="detail">Sélecteur FR/EN, routing #pricing</div>
+        <div class="tolerance">✓ HTTP 200 · 3349 bytes</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">PricingSection.tsx</div>
+        <div class="type-badge">COMPONENT</div>
+        <div class="detail">3 cartes : PULSE / DIAGNOSTIC / VEILLE + TERRAIN</div>
+        <div class="tolerance">✓ CTA "Order" → DiagnosticCheckoutForm</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node warn">
+        <div class="status-dot"></div>
+        <div class="name">DiagnosticCheckout Form.tsx</div>
+        <div class="type-badge">COMPONENT</div>
+        <div class="detail">Formulaire 4 sections : ID, Diagnostic, Context, Legal</div>
+        <div class="tolerance">⚠ product_description 500c → 607/500 non bloqué côté client</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">api/diagnostic-request.ts</div>
+        <div class="type-badge">VERCEL FN</div>
+        <div class="detail">INSERT Supabase diagnostic_requests → request_id</div>
+        <div class="tolerance">✓ HTTP 200 · 695ms</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">api/mollie-checkout.ts</div>
+        <div class="type-badge">VERCEL FN v1.3.1</div>
+        <div class="detail">Crée paiement Mollie, metadata allégée 1kB</div>
+        <div class="tolerance">✓ HTTP 200 après fix bca9afc + redeploy env var</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">Mollie Checkout Page</div>
+        <div class="type-badge">EXTERNE · SANDBOX</div>
+        <div class="detail">TEST mode via MOLLIE_API_KEY_TEST (preview scope)</div>
+        <div class="tolerance">✓ tr_u7MFKCqC7n9VkwxfRqHQJ</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- GD&T Annotations Lane 1 -->
+<div class="gdt-annotation">
+  <div class="gdt-symbol">⊕</div>
+  <div class="gdt-content">
+    <div class="gdt-title">Cote critique C1 — Metadata Mollie ≤ 1 024 bytes</div>
+    <div class="gdt-desc">
+      Tolérance dépassée : <code>product_description:450</code> + <code>regulations:200</code> + <code>context:300</code> ≈ 1,3 kB → HTTP 422.
+      Fix <code>bca9afc</code> : product 100c, regulations 80c, context null. Données complètes dans Supabase via <code>request_id</code>.
+    </div>
+    <span class="gdt-tag fix">CORRIGÉ · D_T1715_01</span>
+  </div>
+</div>
+<div class="gdt-annotation">
+  <div class="gdt-symbol">⊖</div>
+  <div class="gdt-content">
+    <div class="gdt-title">Cote critique C2 — Env var build-time bundling</div>
+    <div class="gdt-desc">
+      <code>MOLLIE_API_KEY_TEST</code> scope "All Pre-Production" mais preview déployé AVANT ajout → <code>process.env</code> undefined au runtime.
+      Fix : redeploy preview après vérification scope. Règle <code>L_T1935_01</code> : créer env var AVANT merge/deploy.
+    </div>
+    <span class="gdt-tag fix">CORRIGÉ · Redeploy 3r5HhNRBP</span>
+  </div>
+</div>
+
+<!-- ═══════ LANE 2 : WEBHOOK → NOTIFICATION ═══════ -->
+<div class="dag-container">
+  <h2>② Webhook Paiement → Notifications</h2>
+</div>
+<div style="padding: 0 40px 12px;">
+  <div class="lane">
+    <div class="lane-header"><span class="icon">🔔</span> Webhook Mollie + SMTP Gandi</div>
+    <div class="lane-body">
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">api/mollie-webhook.ts</div>
+        <div class="type-badge">VERCEL FN</div>
+        <div class="detail">Reçoit callback Mollie, UPDATE Supabase status=paid, INSERT pending_generations</div>
+        <div class="tolerance">✓ Supabase MAJ · pending_generations créé</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">Email Client Confirmation</div>
+        <div class="type-badge">SMTP GANDI</div>
+        <div class="detail">Template "Paiement confirmé" + lien facture PDF</div>
+        <div class="tolerance">✓ Inbox Gmail 17:51 · jeanpierrecharles69+nordicenergy</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">Email Admin [AEGIS] Nouvelle Commande</div>
+        <div class="type-badge">SMTP GANDI</div>
+        <div class="detail">REQ-837129eb, lien dashboard admin, données client complètes</div>
+        <div class="tolerance">✓ Inbox Thunderbird 17:51 · artefacts complets</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LANE 3 : MERCI PAGE + FACTURE ═══════ -->
+<div class="dag-container">
+  <h2>③ Post-Paiement — Page Merci + Facture</h2>
+</div>
+<div style="padding: 0 40px 12px;">
+  <div class="lane">
+    <div class="lane-header"><span class="icon">📄</span> MerciPage + Invoice PDF</div>
+    <div class="lane-body">
+
+      <div class="node warn">
+        <div class="status-dot"></div>
+        <div class="name">MerciPage.tsx</div>
+        <div class="type-badge">COMPONENT</div>
+        <div class="detail">Redirect Mollie → jeanpierrecharles.com/merci?lang=fr</div>
+        <div class="tolerance">⚠ LANG=FR au lieu de EN — redirectUrl hardcodé prod + lang perdu</div>
+      </div>
+
+      <div class="arrow degraded"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">api/generate-invoice.ts</div>
+        <div class="type-badge">VERCEL FN</div>
+        <div class="detail">Génère facture PDF AEGIS-20260424-1751</div>
+        <div class="tolerance">✓ PDF téléchargeable · mentions légales OK</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- GD&T Annotation Lane 3 -->
+<div class="gdt-annotation">
+  <div class="gdt-symbol">⊘</div>
+  <div class="gdt-content">
+    <div class="gdt-title">Cote critique C3 — Propagation paramètre lang</div>
+    <div class="gdt-desc">
+      Le <code>redirectUrl</code> dans <code>mollie-checkout.ts</code> construit <code>jeanpierrecharles.com/merci?product=diagnostic&lang=XX</code>.
+      En preview, la soumission a propagé <code>lang=fr</code> au lieu de <code>en</code>. Cause probable : le formulaire prend <code>lang</code> depuis
+      le contexte React (LangContext) qui n'a peut-être pas basculé avant soumission, ou le redirectUrl force la prod (pas le preview).
+      Impact : rapport généré en FR au lieu de EN. Dashboard admin affiche LANGUE: FR.
+    </div>
+    <span class="gdt-tag degraded">NON CORRIGÉ · Investigation requise</span>
+  </div>
+</div>
+
+<!-- ═══════ LANE 4 : ADMIN DASHBOARD → PS1 ═══════ -->
+<div class="dag-container">
+  <h2>④ Admin Dashboard → Génération Locale</h2>
+</div>
+<div style="padding: 0 40px 12px;">
+  <div class="lane">
+    <div class="lane-header"><span class="icon">⚙️</span> Dashboard Admin + PowerShell Pipeline</div>
+    <div class="lane-body">
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">pending-diagnostics.html</div>
+        <div class="type-badge">ADMIN DASHBOARD</div>
+        <div class="detail">Affiche pending_generations, bouton "Générer et livrer"</div>
+        <div class="tolerance">✓ Nordic Energy Systems visible · 17:55:54</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">api/admin/pending-complete.ts</div>
+        <div class="type-badge">VERCEL FN</div>
+        <div class="detail">Marque pending_generation comme "generating", fournit commande PS1</div>
+        <div class="tolerance">✓ HTTP 200 · statut changé · commande affichée</div>
+      </div>
+
+      <div class="arrow ko"></div>
+
+      <div class="node fail">
+        <div class="status-dot"></div>
+        <div class="name">aegis-deliver-diagnostic.ps1</div>
+        <div class="type-badge">PS1 v1.5.2 · LOCAL</div>
+        <div class="detail">Orchestrateur : lookup Supabase → appel API Opus → .md → .pdf → email livraison</div>
+        <div class="tolerance">✗ NON EXÉCUTÉ — JP n'a pas copié/lancé la commande PS1</div>
+      </div>
+
+      <div class="arrow ko"></div>
+
+      <div class="node fail">
+        <div class="status-dot"></div>
+        <div class="name">aegis-diagnostic-api.ps1</div>
+        <div class="type-badge">PS1 · OPUS API</div>
+        <div class="detail">Appel Anthropic Opus API + prompt v1.5.2 → génération .md 40+ pages</div>
+        <div class="tolerance">✗ JAMAIS ATTEINT — dépend du script parent</div>
+      </div>
+
+      <div class="arrow ko"></div>
+
+      <div class="node fail">
+        <div class="status-dot"></div>
+        <div name="pandoc-xelatex">
+        <div class="name">Pandoc + XeLaTeX</div>
+        <div class="type-badge">LOCAL · PDF</div>
+        <div class="detail">.md → .tex → .pdf signé avec métadonnées AEGIS</div>
+        <div class="tolerance">✗ JAMAIS ATTEINT</div>
+      </div></div>
+
+      <div class="arrow ko"></div>
+
+      <div class="node fail">
+        <div class="status-dot"></div>
+        <div class="name">Email Livraison PDF Client</div>
+        <div class="type-badge">SMTP GANDI</div>
+        <div class="detail">Envoi rapport PDF premium au client</div>
+        <div class="tolerance">✗ JAMAIS ATTEINT</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- GD&T Annotation Lane 4 -->
+<div class="gdt-annotation">
+  <div class="gdt-symbol">⬚</div>
+  <div class="gdt-content">
+    <div class="gdt-title">Cote critique C4 — Rupture chaîne : Dashboard → PS1 (gap HITL)</div>
+    <div class="gdt-desc">
+      Le bouton "Générer et livrer" marque l'intention dans Supabase et <strong>affiche</strong> la commande PowerShell.
+      JP doit <strong>manuellement</strong> copier cette commande et l'exécuter dans un terminal PS7 sur la Surface.
+      Ce gap humain est le point de rupture de la chaîne : le dashboard passe à "0 en attente" avant que le script n'ait tourné.
+      <br><br>
+      <strong>Action T1930 :</strong> <code>.\aegis-deliver-diagnostic.ps1 -RequestId "837129eb-..." -Environment production -PromptVersion v1.5.2</code>
+    </div>
+    <span class="gdt-tag bug">RUPTURE CHAÎNE · ACTION JP REQUISE</span>
+  </div>
+</div>
+<div class="gdt-annotation">
+  <div class="gdt-symbol">⏱</div>
+  <div class="gdt-content">
+    <div class="gdt-title">Cote temporelle C5 — SLA « même jour ouvré avant 19h CET »</div>
+    <div class="gdt-desc">
+      Paiement reçu 17:51 CET. SLA annoncé = livraison avant 19:00 CET même jour.
+      Script PS1 non lancé à 18:06. JP en break natation 18:06→19:30.
+      <strong>SLA sera dépassé</strong> pour ce cobaye TEST — acceptable en smoke test, critique en LIVE.
+    </div>
+    <span class="gdt-tag degraded">SLA DÉPASSÉ · TEST ONLY</span>
+  </div>
+</div>
+
+<!-- ═══════ LANE 5 : DNS + SÉCURITÉ ═══════ -->
+<div class="dag-container">
+  <h2>⑤ Infrastructure — DNS + Sécurité + Env</h2>
+</div>
+<div style="padding: 0 40px 12px;">
+  <div class="lane">
+    <div class="lane-header"><span class="icon">🔒</span> DNS Triple Auth + Vercel + Supabase</div>
+    <div class="lane-body">
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">SPF (Gandi)</div>
+        <div class="type-badge">DNS TXT</div>
+        <div class="detail">v=spf1 include:_mailcust.gandi.net ~all</div>
+        <div class="tolerance">✓ Vérifié via 8.8.8.8</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">DMARC</div>
+        <div class="type-badge">DNS TXT</div>
+        <div class="detail">p=none; rua+ruf; fo=1; pct=100</div>
+        <div class="tolerance">✓ Politique monitoring active</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">Vercel Paris cdg1</div>
+        <div class="type-badge">HOSTING</div>
+        <div class="detail">Pro · 10 env vars · Preview + Production</div>
+        <div class="tolerance">✓ Ready · dual-key Mollie TEST/LIVE</div>
+      </div>
+
+      <div class="arrow ok"></div>
+
+      <div class="node pass">
+        <div class="status-dot"></div>
+        <div class="name">Supabase EU Frankfurt</div>
+        <div class="type-badge">DATABASE</div>
+        <div class="detail">diagnostic_requests + pending_generations</div>
+        <div class="tolerance">✓ Projet actif · données cobaye 2 écrites</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+  <span>AEGIS Intelligence — Pipeline Chaîne de Cotes Causale v1.0 — Analogie GD&T × Pearl DAG</span>
+  <span>Généré 20260424T2000 CET — Session Opus Desktop — D_T1615_xx</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>AEGIS Gantt-Kanban v4 N2 — Preview Annotations</title>
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fa; color: #0A3D62; }
+  header { background: #0A3D62; color: white; padding: 16px 24px; }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 4px 0 0; font-size: 12px; opacity: 0.85; }
+  #status { padding: 12px 24px; background: #fff3cd; border-bottom: 1px solid #ffe69c; font-size: 13px; }
+  #status.ok { background: #d1e7dd; border-color: #a3cfbb; }
+  #status.err { background: #f8d7da; border-color: #f5c2c7; color: #842029; }
+  #root { padding: 16px; }
+  pre { background: #fff; padding: 12px; border: 1px solid #dee2e6; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+  code { background: #fff; padding: 2px 6px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AEGIS Gantt-Kanban v4 — Night Builder N2 Preview (Gouvernance Interne)</h1>
+  <p>Source : drafts/night-build/20260412/v4-jsx/gantt-kanban-v4-scaffold-n2.jsx · Audit Opus T0830 : MERGE-CONDITIONNEL DIFFÉRÉ POST-J0</p>
+</header>
+<div id="status">Chargement du scaffold N2...</div>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script>
+const statusEl = document.getElementById('status');
+const SCAFFOLD_PATH = '../v4-jsx/gantt-kanban-v4-scaffold-n2.jsx';
+
+fetch(SCAFFOLD_PATH)
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(jsxSource => {
+    const transformed = Babel.transform(jsxSource, {
+      presets: [['react', { runtime: 'classic' }], 'typescript'],
+      filename: 'scaffold.tsx'
+    }).code;
+
+    const stripped = transformed.replace(/import[^;]+;/g, '').replace(/export\s+default\s+/g, '');
+
+    const Component = new Function('React', 'useState', 'useReducer', 'useMemo', 'useCallback', 'useEffect',
+      stripped + '\nreturn typeof GanttKanbanV4 !== "undefined" ? GanttKanbanV4 : null;'
+    )(React, React.useState, React.useReducer, React.useMemo, React.useCallback, React.useEffect);
+
+    if (!Component) throw new Error('Composant GanttKanbanV4 introuvable');
+
+    statusEl.className = 'ok';
+    statusEl.textContent = '✓ Scaffold N2 chargé. Pour annoter : Chrome DevTools → clic droit → Inspecter.';
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Component));
+  })
+  .catch(err => {
+    statusEl.className = 'err';
+    statusEl.innerHTML = '<strong>Erreur :</strong> ' + err.message +
+      '<br><br><strong>Solution (CORS file://) :</strong> lancer un serveur HTTP local :' +
+      '<pre>cd C:\\Projects\\jeanpierrecharles\\drafts\\night-build\\20260412\npython -m http.server 8765</pre>' +
+      'Puis ouvrir : <code>http://localhost:8765/preview/preview-gantt-kanban-v4-n2.html</code>';
+  });
+</script>
+</body>
+</html>

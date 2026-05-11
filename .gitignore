@@ -36,3 +36,5 @@ _archives/
 
 # ACDC Code working directory
 .claude/
+
+archive/drafts-old/exports/*.json

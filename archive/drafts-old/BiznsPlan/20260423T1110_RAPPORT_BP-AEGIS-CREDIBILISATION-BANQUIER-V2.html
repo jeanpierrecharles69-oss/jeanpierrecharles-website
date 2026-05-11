@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Intelligence — Business Plan 2026 — Dossier de présentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#fafaf8;--card:#ffffff;--ink:#1a1a1a;--ink-soft:#3a3a3a;--muted:#6b6b6b;
+    --line:#e8e4dc;--primary:#0f2a44;--primary-soft:#1e4068;--accent:#8b6f47;
+    --success:#2d6a4f;--warn:#b8843a;--danger:#8b3a3a;
+    --shadow:0 1px 3px rgba(15,42,68,.06),0 4px 16px rgba(15,42,68,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',-apple-system,sans-serif;font-size:15px;line-height:1.65;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Source Serif 4',Georgia,serif;font-weight:600;letter-spacing:-.01em;}
+  .container{max-width:960px;margin:0 auto;padding:0 32px;}
+  .page{padding:72px 0;border-bottom:1px solid var(--line);}
+  .page:last-child{border-bottom:none;}
+
+  /* COVER */
+  .cover{min-height:95vh;display:flex;flex-direction:column;justify-content:space-between;padding:80px 32px 64px;background:linear-gradient(180deg,#fff 0%,#fafaf8 100%);border-bottom:3px solid var(--primary);}
+  .cover-mark{font-family:'Source Serif 4',serif;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .cover-title{font-size:clamp(38px,6vw,64px);line-height:1.05;color:var(--primary);margin:48px 0 12px;font-weight:700;}
+  .cover-sub{font-size:clamp(20px,2.5vw,26px);color:var(--ink-soft);font-family:'Source Serif 4',serif;font-style:italic;}
+  .cover-spec{font-size:17px;color:var(--muted);margin-top:24px;max-width:620px;line-height:1.55;}
+  .cover-foot{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:24px;padding-top:48px;border-top:1px solid var(--line);}
+  .cover-foot-block{font-size:14px;line-height:1.7;}
+  .cover-foot-label{text-transform:uppercase;font-size:11px;letter-spacing:.15em;color:var(--accent);font-weight:600;margin-bottom:4px;}
+  .cover-foot-value{color:var(--ink);font-weight:500;}
+  .confidential{display:inline-block;font-size:10px;letter-spacing:.25em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--accent);color:var(--accent);font-weight:600;border-radius:2px;}
+
+  /* TYPO */
+  .section-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);letter-spacing:.05em;margin-bottom:8px;font-weight:500;}
+  h1.section-title{font-size:36px;color:var(--primary);margin-bottom:40px;padding-bottom:16px;border-bottom:1px solid var(--line);line-height:1.15;}
+  h2{font-size:24px;color:var(--primary);margin:40px 0 16px;line-height:1.2;}
+  h3{font-size:18px;color:var(--primary-soft);margin:28px 0 12px;font-weight:600;}
+  p{margin-bottom:14px;color:var(--ink-soft);}
+  p strong{color:var(--ink);font-weight:600;}
+  ul,ol{margin:12px 0 16px 20px;color:var(--ink-soft);}
+  li{margin-bottom:6px;}
+
+  /* TABLES */
+  .table-wrap{overflow-x:auto;margin:20px 0;}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);box-shadow:var(--shadow);}
+  th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);}
+  th{background:var(--primary);color:#fff;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+  td.num,th.num{font-family:'JetBrains Mono',monospace;text-align:right;font-variant-numeric:tabular-nums;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#faf7f1;}
+  .table-note{font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;}
+
+  /* METRICS */
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0;}
+  .metric{background:var(--card);border-left:3px solid var(--primary);padding:18px 20px;box-shadow:var(--shadow);}
+  .metric.success{border-left-color:var(--success);}
+  .metric.accent{border-left-color:var(--accent);}
+  .metric.warn{border-left-color:var(--warn);}
+  .metric-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .metric-value{font-family:'Source Serif 4',serif;font-size:28px;color:var(--primary);font-weight:600;line-height:1.1;}
+  .metric-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+  /* CALLOUTS */
+  .callout{background:#f5f1e8;border-left:3px solid var(--accent);padding:20px 24px;margin:24px 0;font-size:14px;line-height:1.6;}
+  .callout-title{font-family:'Source Serif 4',serif;font-weight:600;color:var(--primary);margin-bottom:6px;font-size:15px;}
+  .callout.success{background:#eef4ef;border-left-color:var(--success);}
+  .callout.success .callout-title{color:var(--success);}
+  .callout.warn{background:#fdf6ed;border-left-color:var(--warn);}
+  .callout.warn .callout-title{color:var(--warn);}
+
+  .narrative{font-family:'Source Serif 4',serif;font-size:18px;line-height:1.6;color:var(--ink);padding:24px 32px;border-left:3px solid var(--primary);background:#f7f5f0;font-style:italic;margin:28px 0;}
+
+  /* TOC */
+  .toc{margin-top:32px;}
+  .toc ol{list-style:none;margin:0;counter-reset:toc;}
+  .toc li{counter-increment:toc;padding:12px 0;border-bottom:1px dashed var(--line);display:flex;align-items:baseline;font-size:15px;}
+  .toc li::before{content:counter(toc,decimal-leading-zero)".";font-family:'JetBrains Mono',monospace;color:var(--accent);margin-right:16px;font-size:13px;font-weight:500;min-width:32px;}
+  .toc a{color:var(--ink);text-decoration:none;flex:1;font-weight:500;}
+  .toc a:hover{color:var(--primary);}
+  .toc-dots{flex:1;border-bottom:1px dotted var(--line);margin:0 12px;transform:translateY(-4px);}
+  .toc-page{color:var(--muted);font-size:13px;font-family:'JetBrains Mono',monospace;}
+
+  /* TIMELINE */
+  .timeline{margin:24px 0;}
+  .timeline-item{display:grid;grid-template-columns:140px 1fr;gap:24px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start;}
+  .timeline-date{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary);font-weight:600;white-space:nowrap;}
+  .timeline-content strong{color:var(--primary);}
+  .timeline-content small{color:var(--muted);display:block;margin-top:2px;font-size:12px;}
+
+  /* CHARTS */
+  .chart-container{background:var(--card);padding:24px;box-shadow:var(--shadow);margin:24px 0;border-radius:4px;}
+  .chart-title{font-family:'Source Serif 4',serif;font-size:17px;color:var(--primary);margin-bottom:4px;font-weight:600;}
+  .chart-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+
+  /* PILIERS */
+  .piliers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:24px 0;}
+  .pilier{background:var(--card);padding:16px;border-top:2px solid var(--primary);box-shadow:var(--shadow);font-size:13px;}
+  .pilier-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;}
+  .pilier-title{font-family:'Source Serif 4',serif;font-size:15px;color:var(--primary);font-weight:600;margin-bottom:6px;}
+  .pilier-desc{color:var(--muted);line-height:1.5;}
+
+  /* FUNNEL */
+  .funnel{margin:32px 0;}
+  .funnel-tier{display:grid;grid-template-columns:140px 1fr 120px;gap:20px;padding:18px 24px;background:var(--card);border-left:4px solid var(--primary);margin-bottom:8px;box-shadow:var(--shadow);align-items:center;}
+  .funnel-tier.t1{border-left-color:#94a3b8;}
+  .funnel-tier.t2{border-left-color:var(--accent);}
+  .funnel-tier.t3{border-left-color:var(--primary);}
+  .funnel-tier.t4{border-left-color:var(--success);}
+  .funnel-name{font-family:'Source Serif 4',serif;font-size:18px;font-weight:600;color:var(--primary);}
+  .funnel-name small{display:block;font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.1em;font-family:'Inter',sans-serif;font-weight:500;}
+  .funnel-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .funnel-price{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--primary);font-weight:600;text-align:right;}
+
+  /* FOOTER */
+  .doc-footer{padding:40px 32px;text-align:center;font-size:12px;color:var(--muted);background:#f5f1e8;border-top:3px solid var(--primary);line-height:1.8;}
+  .doc-footer strong{color:var(--ink);}
+
+  @media(max-width:720px){
+    .two-col,.funnel-tier{grid-template-columns:1fr;}
+    .funnel-price{text-align:left;}
+    .timeline-item{grid-template-columns:1fr;gap:4px;}
+    .container{padding:0 20px;}
+    .page{padding:48px 0;}
+    h1.section-title{font-size:28px;}
+  }
+  @media print{
+    body{background:#fff;font-size:11pt;}
+    .page{padding:24pt 0;page-break-inside:avoid;border-bottom:none;}
+    .cover{min-height:auto;page-break-after:always;padding:40pt 24pt;}
+    h1.section-title,h2,h3{page-break-after:avoid;}
+    table,.metric-grid,.callout,.funnel-tier,.chart-container{page-break-inside:avoid;}
+    .chart-container{box-shadow:none;border:1px solid #ccc;}
+    .metric,.funnel-tier,table{box-shadow:none;border:1px solid #ddd;}
+    .doc-footer{page-break-before:always;}
+    a{color:var(--ink);text-decoration:none;}
+    .container{max-width:none;padding:0 24pt;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== COVER ====== -->
+<section class="cover">
+  <div>
+    <div class="cover-mark">AEGIS Intelligence</div>
+    <h1 class="cover-title">Business Plan 2026</h1>
+    <div class="cover-sub">Dossier de présentation — Crédibilisation relation bancaire</div>
+    <p class="cover-spec">Plateforme d'expertise et d'intelligence réglementaire continue (EISaaS) pour les PME et ETI industrielles de l'Union européenne, associant 32 années d'expérience R&amp;D terrain et les modèles d'intelligence artificielle de frontière.</p>
+  </div>
+  <div class="cover-foot">
+    <div class="cover-foot-block">
+      <div class="cover-foot-label">Fondateur</div>
+      <div class="cover-foot-value">Jean-Pierre Charles</div>
+      <div class="cover-foot-value" style="color:var(--muted);font-size:13px;">Ingénieur mécatronique senior</div>
+    </div>
+    <div class="cover-foot-block">
+      <div class="cover-foot-label">Date d'édition</div>
+      <div class="cover-foot-value">23 avril 2026</div>
+      <div class="cover-foot-value" style="color:var(--muted);font-size:13px;">Version 2 — Révisée</div>
+    </div>
+    <div class="cover-foot-block">
+      <div class="cover-foot-label">Site officiel</div>
+      <div class="cover-foot-value">jeanpierrecharles.com</div>
+      <div class="cover-foot-value" style="color:var(--muted);font-size:13px;">Infrastructure EU — Paris · Frankfurt</div>
+    </div>
+    <div><span class="confidential">Document confidentiel</span></div>
+  </div>
+</section>
+
+<!-- ====== SOMMAIRE ====== -->
+<section class="page">
+  <div class="container">
+    <div class="section-num">SOMMAIRE</div>
+    <h1 class="section-title">Plan du document</h1>
+    <div class="toc"><ol>
+      <li><a href="#s1">Résumé exécutif</a><div class="toc-dots"></div><span class="toc-page">1 p.</span></li>
+      <li><a href="#s2">Le fondateur</a><div class="toc-dots"></div><span class="toc-page">1 p.</span></li>
+      <li><a href="#s3">L'entreprise et son infrastructure</a><div class="toc-dots"></div><span class="toc-page">2 p.</span></li>
+      <li><a href="#s4">Marché et timing réglementaire</a><div class="toc-dots"></div><span class="toc-page">2 p.</span></li>
+      <li><a href="#s5">Positionnement et différenciation</a><div class="toc-dots"></div><span class="toc-page">2 p.</span></li>
+      <li><a href="#s6">Modèle économique</a><div class="toc-dots"></div><span class="toc-page">2 p.</span></li>
+      <li><a href="#s7">État d'avancement et jalons prochains</a><div class="toc-dots"></div><span class="toc-page">2 p.</span></li>
+      <li><a href="#s8">Prévisionnel financier 3 ans</a><div class="toc-dots"></div><span class="toc-page">3 p.</span></li>
+      <li><a href="#s9">Risques et mesures d'atténuation</a><div class="toc-dots"></div><span class="toc-page">1 p.</span></li>
+      <li><a href="#s10">Perspectives et relation bancaire</a><div class="toc-dots"></div><span class="toc-page">1 p.</span></li>
+      <li><a href="#s11">Annexes</a><div class="toc-dots"></div><span class="toc-page">1 p.</span></li>
+    </ol></div>
+    <div class="callout" style="margin-top:32px;">
+      <div class="callout-title">Nature du document</div>
+      Le présent document constitue un <strong>dossier de présentation</strong> destiné à l'établissement d'une relation de confiance avec l'institution bancaire. Il ne comporte pas de demande de financement chiffrée. Son objectif est d'exposer la viabilité du modèle, la traction déjà obtenue sur le plan technique, et la trajectoire financière prévisionnelle sur trois ans — avec la transparence d'un fondateur qui sépare rigoureusement ce qui est prouvé de ce qui est attendu.
+    </div>
+  </div>
+</section>
+
+<!-- ====== S1 RÉSUMÉ EXÉCUTIF ====== -->
+<section class="page" id="s1">
+  <div class="container">
+    <div class="section-num">SECTION 01</div>
+    <h1 class="section-title">Résumé exécutif</h1>
+    <div class="narrative">« La conformité industrielle n'est pas un problème de documentation. C'est un problème de connaissance. »</div>
+
+    <h2>Vision</h2>
+    <p>AEGIS Intelligence démocratise l'accès à l'expertise réglementaire industrielle européenne pour les PME et ETI manufacturières. En combinant 32 années d'expérience terrain en recherche et développement avec les modèles d'intelligence artificielle de frontière, AEGIS transforme la compliance multi-réglementaire d'un fardeau administratif en levier de compétitivité.</p>
+
+    <h2>Proposition de valeur</h2>
+    <p>Seul acteur européen combinant <strong>expertise industrielle incarnée</strong> (six groupes internationaux : Autoliv, Saft/TotalEnergies, Forsee Power, Faurecia, Bombardier, Branson) et <strong>intelligence réglementaire continue par IA</strong>, AEGIS couvre simultanément les cinq règlements structurants entrant en application entre 2027 et 2028 : AI Act, Cyber Resilience Act, Machinery Regulation, ESPR/Digital Product Passport, Battery Regulation.</p>
+
+    <h2>Chiffres clés — Ce qui est prouvé au 23 avril 2026</h2>
+    <div class="metric-grid">
+      <div class="metric success">
+        <div class="metric-label">Première transaction encaissée</div>
+        <div class="metric-value">16 avril 2026</div>
+        <div class="metric-sub">Paiement de démonstration validé via Mollie LIVE</div>
+      </div>
+      <div class="metric success">
+        <div class="metric-label">Marge brute DIAGNOSTIC</div>
+        <div class="metric-value">99,8 %</div>
+        <div class="metric-sub">250 € prix — 0,39 € coût API mesuré empiriquement</div>
+      </div>
+      <div class="metric accent">
+        <div class="metric-label">Infrastructure opérationnelle</div>
+        <div class="metric-value">366 €/mois</div>
+        <div class="metric-sub">Hébergement, API, base de données EU</div>
+      </div>
+      <div class="metric warn">
+        <div class="metric-label">Premier client B2B 250 € attendu</div>
+        <div class="metric-value">≥ 1er mai 2026</div>
+        <div class="metric-sub">Phase bêta ouverte — transaction commerciale réelle imminente</div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-title">Transparence fondateur — Distinction prouvé vs attendu</div>
+      <p style="margin-bottom:8px;">L'infrastructure technique de production est opérationnelle et a fait l'objet d'une inspection complète en avril 2026. La <strong>première transaction commerciale client réel</strong> (250 €, hors démonstration interne) n'est cependant pas encore encaissée à la date d'édition du présent document. Elle est attendue pour le début mai 2026, dans le cadre de l'ouverture de la phase bêta commerciale B2B.</p>
+      Cette distinction volontaire illustre la rigueur méthodologique d'AEGIS : <strong>ne jamais présenter comme acquis ce qui est seulement attendu.</strong> C'est précisément cette culture de la preuve empirique qui différencie AEGIS des cabinets de conseil qui vendent des intentions.
+    </div>
+
+    <h2>Trajectoire financière résumée</h2>
+    <p>Le modèle génère un <strong>besoin en fonds de roulement structurellement négatif</strong> (encaissement immédiat par carte bancaire, coût marginal quasi nul, absence de stock et de locaux). La trésorerie reste positive sur l'ensemble du prévisionnel dans les scénarios base et optimiste. Aucune demande de financement bancaire n'est formulée à ce stade.</p>
+
+    <ul>
+      <li><strong>Break-even</strong> projeté entre le troisième et le quatrième mois d'exploitation commerciale (scénario base).</li>
+      <li><strong>Résultat net An 1</strong> estimé à ~21 k€ (scénario base, après cotisations).</li>
+      <li><strong>CA An 3</strong> estimé entre 140 k€ (conservateur) et 350 k€ (optimiste).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ====== S2 FONDATEUR ====== -->
+<section class="page" id="s2">
+  <div class="container">
+    <div class="section-num">SECTION 02</div>
+    <h1 class="section-title">Le fondateur</h1>
+    <p>Jean-Pierre Charles, ingénieur en sciences des matériaux, mécanique et technologies numériques de conception et production industrielle, cumule <strong>32 années d'expérience</strong> en leadership R&amp;D, industrialisation et pilotage d'opérations pour six groupes internationaux de premier rang.</p>
+
+    <h2>Parcours industriel</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Groupe</th><th>Secteur</th><th>Expertise acquise</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Autoliv</strong></td><td>Sécurité automobile</td><td>Systèmes pyrotechniques et électroniques, certification</td></tr>
+        <tr><td><strong>Saft / TotalEnergies</strong></td><td>Batteries industrielles</td><td>R&amp;D électrochimie, intégration systèmes, Battery Regulation amont</td></tr>
+        <tr><td><strong>Forsee Power</strong></td><td>Batteries mobilité électrique</td><td>Industrialisation produit, passage prototype–série</td></tr>
+        <tr><td><strong>Faurecia</strong></td><td>Équipement automobile</td><td>Intérieur véhicule, réduction des émissions, conformité</td></tr>
+        <tr><td><strong>Bombardier</strong></td><td>Transport ferroviaire</td><td>Systèmes de traction et d'énergie, architectures embarquées</td></tr>
+        <tr><td><strong>Branson</strong></td><td>Équipements industriels</td><td>Technologies d'assemblage par ultrasons, procédés</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Méthodologie scientifique</h2>
+    <p>AEGIS applique une <strong>méthodologie d'analyse intégrée scientifique et systémique</strong> fondée sur trois piliers théoriques&nbsp;:</p>
+    <ul>
+      <li><strong>Modélisation causale de Judea Pearl</strong>&nbsp;: structuration des relations de causalité, analyse contrefactuelle, arbitrage rationnel des décisions d'investissement conformité.</li>
+      <li><strong>Rationalité limitée d'Herbert Simon</strong>&nbsp;: prise en compte des contraintes cognitives du décideur industriel, simplification raisonnée des arbitrages.</li>
+      <li><strong>Neurosciences d'Antonio Damasio</strong>&nbsp;: intégration du marqueur somatique dans l'analyse du risque réglementaire perçu versus modélisé.</li>
+    </ul>
+
+    <div class="callout">
+      <div class="callout-title">Moat concurrentiel — Expertise tacite irréplicable</div>
+      Trente-deux années d'expérience R&amp;D terrain ne se répliquent pas par prompt engineering. Chaque diagnostic produit enrichit la base de connaissance causale propriétaire d'AEGIS. L'expertise tacite constitue le prochain avantage concurrentiel face à la généralisation de l'IA — AEGIS est positionné exactement à cette intersection.
+    </div>
+  </div>
+</section>
+
+<!-- ====== S3 ENTREPRISE ====== -->
+<section class="page" id="s3">
+  <div class="container">
+    <div class="section-num">SECTION 03</div>
+    <h1 class="section-title">L'entreprise et son infrastructure</h1>
+
+    <h2>Statut juridique</h2>
+    <p>AEGIS Intelligence est exploitée sous forme de <strong>micro-entreprise de prestation de services</strong> (BNC) enregistrée en France. La bascule vers une forme sociétaire (SAS ou SASU) est planifiée pour le <strong>troisième trimestre 2026</strong>, conditionnée à l'atteinte d'un chiffre d'affaires mensuel récurrent supérieur à 6 000 €.</p>
+
+    <h2>Propriété intellectuelle — Patrimoine immatériel</h2>
+    <ul>
+      <li><strong>SAAIBOM</strong> (System Architecture AI &amp; Bill of Materials)&nbsp;: nomenclature intégrée à quatre couches Hardware × Silicon × OS/Software × TechAI. Concept inventé par le fondateur le 1er avril 2026, antériorité documentée.</li>
+      <li><strong>Causal Knowledge Fabric</strong>&nbsp;: base de connaissance causale persistante enrichie à chaque diagnostic, flywheel d'apprentissage cumulatif.</li>
+      <li><strong>Ambient Regulatory Intelligence</strong>&nbsp;: compliance contextuelle, continue et invisible — sentinelle plutôt que rapport d'audit.</li>
+      <li><strong>Doctrine TKE-AEGIS</strong>&nbsp;: méthodologie opérationnelle de gouvernance patrimoniale gravée le 22 avril 2026.</li>
+      <li><strong>Prompts système versionnés</strong> et <strong>templates diagnostic propriétaires</strong>.</li>
+    </ul>
+
+    <h2>Infrastructure technique — Souveraineté européenne</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Composant</th><th>Fournisseur</th><th>Localisation</th><th class="num">Coût / mois</th></tr></thead>
+      <tbody>
+        <tr><td>Hébergement applicatif</td><td>Vercel Pro</td><td>Paris (cdg1)</td><td class="num">30 €</td></tr>
+        <tr><td>Base de données</td><td>Supabase</td><td>Frankfurt (EU Central)</td><td class="num">25 €</td></tr>
+        <tr><td>Messagerie / domaine</td><td>Gandi.net</td><td>France</td><td class="num">15 €</td></tr>
+        <tr><td>Paiements</td><td>Mollie</td><td>Amsterdam (NL)</td><td class="num">% transactionnel</td></tr>
+        <tr><td>Modèle IA DIAGNOSTIC</td><td>Anthropic Claude Opus</td><td>API avec caching</td><td class="num">~211 €</td></tr>
+        <tr><td>Modèle IA PULSE / VEILLE</td><td>Gemini Flash</td><td>API</td><td class="num">~20 €</td></tr>
+        <tr><td>Abonnement plateforme</td><td>Anthropic Max</td><td>—</td><td class="num">100 €</td></tr>
+        <tr><td colspan="3"><strong>Total infrastructure récurrente</strong></td><td class="num"><strong>~366 €</strong></td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-note">Ratio coût infrastructure / revenu projeté à six mois (scénario base) : environ 8 %. Le modèle est structurellement scalable sans inflation proportionnelle des coûts techniques.</p>
+
+    <div class="callout success">
+      <div class="callout-title">Conformité RGPD native — Résidence EU complète</div>
+      La chaîne de traitement complète (formulaire, paiement, génération diagnostic, livraison, archivage) est localisée dans l'Union européenne. Aucun transfert hors UE n'est opéré sur les données client. Les livrables sont signés électroniquement conformément à l'article 25 du règlement eIDAS (UE) 910/2014.
+    </div>
+  </div>
+</section>
+
+<!-- ====== S4 MARCHÉ ====== -->
+<section class="page" id="s4">
+  <div class="container">
+    <div class="section-num">SECTION 04</div>
+    <h1 class="section-title">Marché et timing réglementaire</h1>
+
+    <h2>Analyse Pearl — Chaîne causale de la demande</h2>
+    <p>La demande pour les services d'AEGIS ne relève pas d'une anticipation optimiste mais d'une <strong>causalité structurelle datée</strong>. Cinq règlements européens entrent en application entre janvier 2027 et août 2028, créant une obligation légale pour 200 000 à 250 000 PME et ETI industrielles.</p>
+
+    <h2>Marché adressable</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Niveau</th><th>Définition</th><th class="num">Volume</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>TAM</td><td>Entreprises manufacturières EU27 (NACE C)</td><td class="num">~2,2 M</td><td>Eurostat 2022</td></tr>
+        <tr><td>SAM</td><td>PME/ETI industrielles concernées par ≥ 1 des 5 règlements</td><td class="num">200–250 k</td><td>Analyse AEGIS</td></tr>
+        <tr><td>SOM An 1</td><td>Cible opérationnelle France et pays francophones EU</td><td class="num">500–1 000</td><td>Marché initial</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Calendrier réglementaire — Accélérateur structurel 2027–2028</h2>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-date">20 janv. 2027</div><div class="timeline-content"><strong>Machinery Regulation 2023/1230</strong> — Application complète, remplace la Directive 2006/42/CE.<small>Annexe III §1.1.9 sur les systèmes embarquant de l'IA — différenciateur absolu AEGIS.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">2 août 2027</div><div class="timeline-content"><strong>AI Act 2024/1689</strong> — Obligations pour systèmes IA à risque élevé (article 6.1).<small>Conditionnées à l'adoption du Digital Omnibus en discussion.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">11 déc. 2027</div><div class="timeline-content"><strong>Cyber Resilience Act 2024/2847</strong> — Conformité complète obligatoire pour les produits comportant des éléments numériques.<small>Pénalités jusqu'à 15 M€ ou 2,5 % du CA mondial.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">Déc. 2027</div><div class="timeline-content"><strong>AI Act — IA haut risque autonome</strong> (Annexe III).<small>Systèmes d'évaluation, gestion infrastructures critiques.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">Août 2028</div><div class="timeline-content"><strong>AI Act — IA embarquée produits</strong> (Annexe I).<small>Convergence complète avec la Machinery Regulation.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">2025–2028</div><div class="timeline-content"><strong>ESPR 2024/1781 — Digital Product Passport</strong>.<small>Déploiement progressif par catégories produit.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">2025–2028</div><div class="timeline-content"><strong>Battery Regulation 2023/1542</strong> — Passeport batterie, empreinte carbone, devoir de diligence.<small>Obligations progressives jusqu'en 2028.</small></div></div>
+    </div>
+
+    <h2>Les cinq piliers symbiotiques couverts par AEGIS</h2>
+    <div class="piliers">
+      <div class="pilier"><div class="pilier-num">P1</div><div class="pilier-title">AI Act</div><div class="pilier-desc">Règlement (UE) 2024/1689 — classification risques, gouvernance des données, transparence, supervision humaine.</div></div>
+      <div class="pilier"><div class="pilier-num">P2</div><div class="pilier-title">Cyber Resilience Act</div><div class="pilier-desc">Règlement (UE) 2024/2847 — cybersécurité produits numériques, SBOM, vulnérabilités, signalement 24h.</div></div>
+      <div class="pilier"><div class="pilier-num">P3</div><div class="pilier-title">Machinery Regulation</div><div class="pilier-desc">Règlement (UE) 2023/1230 — machines et quasi-machines, IA embarquée, marquage CE, analyse de risques.</div></div>
+      <div class="pilier"><div class="pilier-num">P4</div><div class="pilier-title">ESPR / DPP</div><div class="pilier-desc">Règlement (UE) 2024/1781 — écoconception, passeport numérique produit, réparabilité, circularité.</div></div>
+      <div class="pilier"><div class="pilier-num">P5</div><div class="pilier-title">Battery Regulation</div><div class="pilier-desc">Règlement (UE) 2023/1542 — passeport batterie, empreinte carbone, devoir de diligence, recyclage.</div></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Nœud causal stratégique — Demande structurelle non reportable</div>
+      Tout déploiement industriel européen de systèmes d'intelligence artificielle est soumis <strong>simultanément</strong> aux cinq piliers. L'industriel qui n'adopte pas une approche intégrée s'expose à des contradictions réglementaires et des risques de non-conformité multiples. AEGIS est la réponse intégrée. Le CRA, notamment, est verrouillé pour décembre 2027 sans possibilité réaliste de report.
+    </div>
+  </div>
+</section>
+
+<!-- ====== S5 POSITIONNEMENT ====== -->
+<section class="page" id="s5">
+  <div class="container">
+    <div class="section-num">SECTION 05</div>
+    <h1 class="section-title">Positionnement et différenciation</h1>
+
+    <h2>Paysage concurrentiel</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Catégorie</th><th>Acteurs représentatifs</th><th class="num">Tarifs typiques</th><th>Limite face à AEGIS</th></tr></thead>
+      <tbody>
+        <tr><td>Cabinets conseil stratégique</td><td>Deloitte, PwC, McKinsey, BCG, Accenture</td><td class="num">100 k€+ / mission</td><td>Expertise terrain machine absente, cycle de vente 6–12 mois</td></tr>
+        <tr><td>Services numériques globaux</td><td>Capgemini, Atos, Infosys, TCS, Wipro</td><td class="num">50–200 k€</td><td>Pas de spécialisation compliance industrielle EU, modèle en crise</td></tr>
+        <tr><td>Fournisseurs IA de frontière</td><td>OpenAI, Anthropic, Google DeepMind</td><td class="num">API généraliste</td><td>Aucune connaissance compliance EU physique, pas d'expertise terrain</td></tr>
+        <tr style="background:#f5f1e8;"><td><strong>AEGIS Intelligence</strong></td><td>Jean-Pierre Charles + IA Opus</td><td class="num"><strong>250–2 500 €</strong></td><td><strong>Expertise incarnée + IA + cinq piliers intégrés</strong></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Barrières à l'entrée — Moat à quatre strates</h2>
+
+    <h3>1. Connaissance tacite — 32 années non répliquables</h3>
+    <p>La connaissance tacite d'ingénierie mécatronique acquise sur six groupes industriels ne s'acquiert pas par formation accélérée ni par prompt engineering. C'est l'expertise du «&nbsp;20 secondes ou 20 jours&nbsp;»&nbsp;: comprendre instantanément pourquoi une décision d'architecture produit a des conséquences réglementaires multiples.</p>
+
+    <h3>2. Intégration cinq piliers — Vision systémique</h3>
+    <p>Aucun concurrent identifié ne couvre simultanément les cinq règlements avec une approche d'ingénierie intégrée. Les Big4 traitent la conformité en silo règlement par règlement, les pure players IA ignorent la dimension physique, les SSII ne connaissent pas les contraintes industrielles amont.</p>
+
+    <h3>3. Concept SAAIBOM — Innovation propriétaire</h3>
+    <p>Le concept SAAIBOM (System Architecture AI &amp; Bill of Materials) inventé le 1er avril 2026 étend la traçabilité SBOM et TAIBOM vers une nomenclature intégrée produit à quatre couches&nbsp;: Hardware × Silicon × OS/Software × TechAI. Cette représentation devient de facto obligatoire à l'intersection CRA × Machinery Regulation × AI Act.</p>
+
+    <h3>4. Base de connaissance causale propriétaire — Effet flywheel</h3>
+    <p>Chaque diagnostic produit enrichit la Causal Knowledge Fabric d'AEGIS. Après 100 diagnostics, l'outil produit des prédictions contrefactuelles que ni un consultant isolé ni une IA généraliste ne peuvent formuler. Cet effet flywheel est structurellement irréplicable par un nouvel entrant.</p>
+
+    <div class="callout">
+      <div class="callout-title">Différenciation Big4 — Tableau comparé</div>
+      <div class="table-wrap" style="margin-top:12px;"><table>
+        <thead><tr><th>Critère</th><th>Big4 / Cabinets conseil</th><th>AEGIS Intelligence</th></tr></thead>
+        <tbody>
+          <tr><td>Prix d'accès (première mission)</td><td>100 k€ minimum</td><td><strong>250 €</strong></td></tr>
+          <tr><td>Cycle de vente</td><td>6 à 12 mois</td><td>Paiement immédiat en ligne</td></tr>
+          <tr><td>Expertise terrain machine</td><td>Absente</td><td>32 ans acquise</td></tr>
+          <tr><td>Couverture multi-règlements</td><td>Silo par règlement</td><td>Intégrée 5 piliers</td></tr>
+          <tr><td>Adaptation PME</td><td>Sur-dimensionnée</td><td>Conçue pour PME/ETI</td></tr>
+          <tr><td>Enrichissement itératif</td><td>One-shot</td><td>Flywheel, base de connaissance</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== S6 MODÈLE ÉCONOMIQUE ====== -->
+<section class="page" id="s6">
+  <div class="container">
+    <div class="section-num">SECTION 06</div>
+    <h1 class="section-title">Modèle économique</h1>
+
+    <h2>Funnel à quatre paliers progressifs</h2>
+    <div class="funnel">
+      <div class="funnel-tier t1">
+        <div><div class="funnel-name">PULSE<small>Acquisition</small></div></div>
+        <div class="funnel-desc">Pré-diagnostic gratuit par IA conversationnelle. Qualification des besoins, identification des piliers réglementaires concernés, génération d'un besoin concret. Ramène le prospect à la page DIAGNOSTIC avec contexte pré-rempli.</div>
+        <div class="funnel-price">Gratuit</div>
+      </div>
+      <div class="funnel-tier t2">
+        <div><div class="funnel-name">DIAGNOSTIC<small>Premier revenu</small></div></div>
+        <div class="funnel-desc">Rapport expert 7 sections selon méthodologie Pearl (observation, intervention, contrefactuel). Analyse BOM mécatronique, cartographie causale, recommandations chiffrées, GANTT déploiement, plan CAPEX/OPEX, financements publics identifiés. Production automatisée par IA de frontière, relecture humaine systématique.</div>
+        <div class="funnel-price">250 € HT</div>
+      </div>
+      <div class="funnel-tier t3">
+        <div><div class="funnel-name">VEILLE<small>Revenu récurrent</small></div></div>
+        <div class="funnel-desc">Abonnement mensuel de veille réglementaire ciblée sur les cinq piliers. Alertes sous 14 jours sur les évolutions pertinentes au profil client. Synthèses actionnables, désabonnement libre.</div>
+        <div class="funnel-price">150 € / mois</div>
+      </div>
+      <div class="funnel-tier t4">
+        <div><div class="funnel-name">EXPERTISE TERRAIN<small>Premium</small></div></div>
+        <div class="funnel-desc">Intervention JP Charles en personne. Audit sur site, atelier de travail, revue de conception, représentation en réunion réglementaire ou technique. Volontairement limité en volume pour préserver la valeur premium.</div>
+        <div class="funnel-price">350 € / h<br><span style="font-size:12px;color:var(--muted);">ou 2 500 € / mois</span></div>
+      </div>
+    </div>
+
+    <h2>Marges par palier — Prouvées empiriquement</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Palier</th><th class="num">Prix HT</th><th class="num">Coût variable</th><th class="num">Marge brute</th><th class="num">Taux</th></tr></thead>
+      <tbody>
+        <tr><td>PULSE</td><td class="num">0 €</td><td class="num">~0,05 €</td><td class="num">—</td><td class="num">Lead magnet</td></tr>
+        <tr><td>DIAGNOSTIC</td><td class="num">250 €</td><td class="num">0,39 €</td><td class="num">249,61 €</td><td class="num"><strong>99,8 %</strong></td></tr>
+        <tr><td>VEILLE</td><td class="num">150 €/mois</td><td class="num">5–15 €/mois</td><td class="num">135–145 €</td><td class="num">90–97 %</td></tr>
+        <tr><td>EXPERTISE TERRAIN</td><td class="num">350 €/h</td><td class="num">Temps fondateur</td><td class="num">350 €/h net</td><td class="num">100 %</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-note">Coût API DIAGNOSTIC mesuré empiriquement le 29 mars 2026 : 0,42 $ USD pour un rapport complet de 617 lignes en 7 sections, avec prompt caching ephemeral activé. La marge se maintient structurellement au-delà de 99 % quelle que soit la montée en charge.</p>
+
+    <h2>Structure de coûts récurrents</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Poste</th><th class="num">M1–M6</th><th class="num">M7–M12</th><th class="num">Année 2</th></tr></thead>
+      <tbody>
+        <tr><td>Infrastructure technique</td><td class="num">366 €</td><td class="num">366 €</td><td class="num">500 €</td></tr>
+        <tr><td>Marketing / LinkedIn Ads</td><td class="num">100 €</td><td class="num">300 €</td><td class="num">1 000 €</td></tr>
+        <tr><td>Assurance RC Pro</td><td class="num">100 €</td><td class="num">100 €</td><td class="num">200 €</td></tr>
+        <tr><td>Comptabilité / juridique</td><td class="num">167 €</td><td class="num">167 €</td><td class="num">250 €</td></tr>
+        <tr><td><strong>Total mensuel OPEX</strong></td><td class="num"><strong>733 €</strong></td><td class="num"><strong>933 €</strong></td><td class="num"><strong>1 950 €</strong></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ====== S7 ÉTAT D'AVANCEMENT ====== -->
+<section class="page" id="s7">
+  <div class="container">
+    <div class="section-num">SECTION 07</div>
+    <h1 class="section-title">État d'avancement et jalons prochains</h1>
+
+    <p>Cette section présente l'état réel de la construction commerciale d'AEGIS au 23 avril 2026, en distinguant <strong>rigoureusement ce qui est validé de ce qui est attendu</strong>. Cette posture de transparence est constitutive de la doctrine AEGIS.</p>
+
+    <h2>Ce qui est prouvé — Infrastructure technique dé-risquée</h2>
+    <p>Depuis le 22 avril 2026, l'intégralité du pipeline de production technique a fait l'objet d'une <strong>inspection complète</strong> (inspirée des standards aéronautiques de First Article Inspection AS9102). Chaque composant de la chaîne a été exercé individuellement et en séquence.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Étape</th><th>Composant</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Formulaire de commande client</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>2</td><td>Paiement Mollie (CB + SEPA)</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>3</td><td>Webhook Mollie déclenchement post-paiement</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>4</td><td>Génération diagnostic IA Opus — 7 sections</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>5</td><td>Génération facture PDF conforme</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>6</td><td>Envoi email automatisé client + ops (SMTP Gandi)</td><td style="color:var(--success);">✓ Validé</td></tr>
+        <tr><td>7</td><td>Intégrité cryptographique bout-en-bout (SHA-256)</td><td style="color:var(--success);">✓ Validé</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Ce qui est prouvé — Première transaction de démonstration</h2>
+    <div class="metric-grid">
+      <div class="metric success">
+        <div class="metric-label">Date</div>
+        <div class="metric-value">16 avril 2026</div>
+        <div class="metric-sub">Transaction Mollie LIVE encaissée</div>
+      </div>
+      <div class="metric success">
+        <div class="metric-label">Montant net</div>
+        <div class="metric-value">4,75 €</div>
+        <div class="metric-sub">Post-frais Mollie, post-refund volontaire</div>
+      </div>
+      <div class="metric success">
+        <div class="metric-label">Signification</div>
+        <div class="metric-value" style="font-size:16px;">Chaîne encaissement–facturation fonctionnelle</div>
+        <div class="metric-sub">Circuit bancaire réel exercé</div>
+      </div>
+    </div>
+    <p>La transaction a été remboursée (refund) après validation fonctionnelle. Le net de 4,75 € correspond aux frais Mollie non remboursables — <strong>premier coût bancaire réel de l'entreprise</strong>, preuve que le circuit encaissement–facturation fonctionne de bout en bout. Il s'agit d'une transaction de démonstration interne, non d'un paiement client B2B commercial.</p>
+
+    <h2>Ce qui est attendu — Jalons prochains</h2>
+
+    <div class="callout warn">
+      <div class="callout-title">Jalon J+8 — Premier client B2B commercial attendu ≥ 1er mai 2026</div>
+      La phase bêta commerciale est ouverte depuis le 23 avril 2026. Les premiers prospects qualifiés (réseau professionnel du fondateur, contacts LinkedIn ciblés, inbound site) sont invités à passer commande DIAGNOSTIC à 250 €. <strong>La première transaction commerciale client réel n'est pas encore encaissée</strong> à la date d'édition. Elle est attendue pour le début mai 2026 — à J+8 du présent document.
+    </div>
+
+    <div class="timeline" style="margin-top:28px;">
+      <div class="timeline-item"><div class="timeline-date">23 avr. 2026</div><div class="timeline-content"><strong>Ouverture phase bêta B2B</strong> — Lancement de l'acquisition clients commerciaux réels. Infrastructure technique complètement dé-risquée.<small>Statut actuel à la date d'édition du document.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">≥ 1er mai 2026</div><div class="timeline-content"><strong>Premier client B2B DIAGNOSTIC 250 €</strong> — Premier revenu commercial réel attendu.<small>Jalon de validation commerciale définitive du modèle.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">Juin–juillet 2026</div><div class="timeline-content"><strong>5 à 10 clients bêta consolidés</strong> — Montée en charge marketing post-validation.<small>Objectif phase bêta avant passage à l'acquisition systématique.</small></div></div>
+      <div class="timeline-item"><div class="timeline-date">T3 2026</div><div class="timeline-content"><strong>Bascule juridique SAS</strong> — Conditionnée à CA mensuel récurrent &gt; 6 000 €.<small>Ouverture compte professionnel dédié, optimisation fiscale.</small></div></div>
+    </div>
+
+    <h2>Présence numérique et autorité construite</h2>
+    <ul>
+      <li><strong>LinkedIn</strong>&nbsp;: sept posts publiés depuis mars 2026 (manifeste, consultation CRA, SBOM, supply chain, SAAIBOM) avec engagement qualifié de décideurs industriels.</li>
+      <li><strong>Site jeanpierrecharles.com</strong>&nbsp;: publication continue depuis mars 2026, composants PULSE et Brain opérationnels.</li>
+      <li><strong>Participation consultation CRA</strong>&nbsp;: contribution formelle soumise à la Commission européenne en mars 2026.</li>
+      <li><strong>Domaine jeanpierrecharles.com</strong>&nbsp;: déposé et actif depuis décembre 2025.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ====== S8 PRÉVISIONNEL ====== -->
+<section class="page" id="s8">
+  <div class="container">
+    <div class="section-num">SECTION 08</div>
+    <h1 class="section-title">Prévisionnel financier trois ans</h1>
+
+    <h2>Méthodologie et hypothèses</h2>
+    <p>Le prévisionnel est construit selon <strong>trois scénarios</strong> (conservateur, base, optimiste) avec transparence complète des hypothèses. La période couverte s'étend de mai 2026 à avril 2029. L'année 1 commence à compter du <strong>premier revenu commercial réel</strong> (≥ 1er mai 2026).</p>
+
+    <h2>Hypothèses par palier</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Palier / Métrique</th><th class="num">Conservateur</th><th class="num">Base</th><th class="num">Optimiste</th></tr></thead>
+      <tbody>
+        <tr><td colspan="4" style="background:#f5f1e8;font-weight:600;">Année 1 (mai 2026 – avril 2027)</td></tr>
+        <tr><td>Diagnostics vendus (total 12 mois)</td><td class="num">25</td><td class="num">57</td><td class="num">90</td></tr>
+        <tr><td>Clients VEILLE à M12</td><td class="num">10</td><td class="num">16</td><td class="num">25</td></tr>
+        <tr><td>Engagements EXPERTISE TERRAIN</td><td class="num">0</td><td class="num">4</td><td class="num">8</td></tr>
+        <tr><td colspan="4" style="background:#f5f1e8;font-weight:600;">Année 2 (mai 2027 – avril 2028)</td></tr>
+        <tr><td>Diagnostics / mois (moyenne)</td><td class="num">5</td><td class="num">10</td><td class="num">15</td></tr>
+        <tr><td>Clients VEILLE stable</td><td class="num">20</td><td class="num">35</td><td class="num">60</td></tr>
+        <tr><td>EXPERTISE TERRAIN — mois-forfaits</td><td class="num">3</td><td class="num">12</td><td class="num">24</td></tr>
+        <tr><td colspan="4" style="background:#f5f1e8;font-weight:600;">Année 3 (mai 2028 – avril 2029)</td></tr>
+        <tr><td>Diagnostics / mois (moyenne)</td><td class="num">8</td><td class="num">15</td><td class="num">25</td></tr>
+        <tr><td>Clients VEILLE stable</td><td class="num">35</td><td class="num">60</td><td class="num">100</td></tr>
+        <tr><td>Contrats XaaS forfaits annuels</td><td class="num">2</td><td class="num">5</td><td class="num">10</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Trajectoire de chiffre d'affaires</h2>
+    <div class="chart-container">
+      <div class="chart-title">Chiffre d'affaires prévisionnel sur 3 ans</div>
+      <div class="chart-sub">Trois scénarios — Unité : milliers d'euros — Départ mai 2026</div>
+      <canvas id="chartCA" height="280"></canvas>
+    </div>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Exercice</th><th class="num">Conservateur</th><th class="num">Base</th><th class="num">Optimiste</th></tr></thead>
+      <tbody>
+        <tr><td>Année 1</td><td class="num">~15 k€</td><td class="num"><strong>~42 k€</strong></td><td class="num">~60 k€</td></tr>
+        <tr><td>Année 2</td><td class="num">~70 k€</td><td class="num"><strong>~123 k€</strong></td><td class="num">~180 k€</td></tr>
+        <tr><td>Année 3</td><td class="num">~140 k€</td><td class="num"><strong>~220 k€</strong></td><td class="num">~350 k€</td></tr>
+        <tr><td><strong>Cumul 3 ans</strong></td><td class="num"><strong>~225 k€</strong></td><td class="num"><strong>~385 k€</strong></td><td class="num"><strong>~590 k€</strong></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Compte de résultat simplifié — Scénario base</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Poste</th><th class="num">Année 1</th><th class="num">Année 2</th><th class="num">Année 3</th></tr></thead>
+      <tbody>
+        <tr><td>Chiffre d'affaires HT</td><td class="num">41 650 €</td><td class="num">123 000 €</td><td class="num">220 000 €</td></tr>
+        <tr><td>Coûts API et infrastructure</td><td class="num">−4 392 €</td><td class="num">−6 000 €</td><td class="num">−9 600 €</td></tr>
+        <tr><td><strong>Marge brute</strong></td><td class="num"><strong>37 258 €</strong></td><td class="num"><strong>117 000 €</strong></td><td class="num"><strong>210 400 €</strong></td></tr>
+        <tr><td>Marketing et communication</td><td class="num">−2 400 €</td><td class="num">−12 000 €</td><td class="num">−18 000 €</td></tr>
+        <tr><td>Assurance, compta, juridique</td><td class="num">−3 204 €</td><td class="num">−5 400 €</td><td class="num">−8 000 €</td></tr>
+        <tr><td>Autres charges</td><td class="num">−1 200 €</td><td class="num">−2 000 €</td><td class="num">−3 000 €</td></tr>
+        <tr><td>Recrutement A2 partiel (An 3 uniquement)</td><td class="num">—</td><td class="num">—</td><td class="num">−48 000 €</td></tr>
+        <tr style="font-weight:600;"><td>Résultat avant cotisations</td><td class="num">30 454 €</td><td class="num">97 600 €</td><td class="num">133 400 €</td></tr>
+        <tr><td>Cotisations sociales</td><td class="num">−9 163 €</td><td class="num">−29 280 €</td><td class="num">−40 020 €</td></tr>
+        <tr style="background:#eef4ef;font-weight:600;"><td>Résultat net avant IR / IS</td><td class="num">21 291 €</td><td class="num">68 320 €</td><td class="num">93 380 €</td></tr>
+      </tbody>
+    </table></div>
+    <p class="table-note">An 1 en régime BNC (cotisations 22 %). An 2-3 intègrent l'hypothèse bascule SAS, rémunération gérant assimilé salarié optimisée.</p>
+
+    <h2>Trésorerie cumulée — Année 1 scénario base</h2>
+    <div class="chart-container">
+      <div class="chart-title">Trésorerie cumulée — Année 1</div>
+      <div class="chart-sub">Point d'équilibre (break-even) au M4 — Scénario base</div>
+      <canvas id="chartTreso" height="260"></canvas>
+    </div>
+
+    <h2>Break-even par scénario</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Scénario</th><th>Mois d'équilibre</th><th class="num">CA mensuel seuil</th></tr></thead>
+      <tbody>
+        <tr><td>Conservateur</td><td>M+7</td><td class="num">~900 €</td></tr>
+        <tr><td><strong>Base</strong></td><td><strong>M+3 à M+4</strong></td><td class="num"><strong>~1 350 €</strong></td></tr>
+        <tr><td>Optimiste</td><td>M+2</td><td class="num">~2 000 €</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Répartition du CA par palier — Année 2 scénario base</h2>
+    <div class="chart-container">
+      <div class="chart-title">Mix des revenus à maturité — Année 2 (123 k€)</div>
+      <div class="chart-sub">Équilibre récurrent / transactionnel / premium</div>
+      <canvas id="chartMix" height="260"></canvas>
+    </div>
+
+    <div class="callout success">
+      <div class="callout-title">BFR structurellement négatif — Avantage modèle</div>
+      L'absence de stock, de locaux et de charges salariales initiales, combinée à un <strong>encaissement immédiat par carte bancaire</strong> et un <strong>coût marginal quasi nul</strong>, assure un BFR négatif dès le premier mois commercial. La trésorerie reste positive sur l'ensemble du prévisionnel 3 ans dans les scénarios base et optimiste. Aucun financement externe n'est nécessaire à l'exploitation courante.
+    </div>
+  </div>
+</section>
+
+<!-- ====== S9 RISQUES ====== -->
+<section class="page" id="s9">
+  <div class="container">
+    <div class="section-num">SECTION 09</div>
+    <h1 class="section-title">Risques et mesures d'atténuation</h1>
+
+    <p>L'honnêteté intellectuelle étant une valeur constitutive d'AEGIS, les risques principaux sont identifiés sans complaisance.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Risque identifié</th><th>Prob.</th><th>Impact</th><th>Mesure d'atténuation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dépendance API Anthropic</strong></td><td>Moy.</td><td>Élevé</td><td>Architecture multi-fournisseur opérationnelle (Gemini Flash pour PULSE/VEILLE déjà en production). Prompt caching réduisant 50–80 % des coûts variables.</td></tr>
+        <tr><td><strong>Adoption PME lente</strong></td><td>Moy.</td><td>Modéré</td><td>Prix d'accès 250 € sous le seuil de décision individuel. Palier PULSE gratuit pour réduire la friction. Échéances réglementaires 2027 créent l'urgence intrinsèque.</td></tr>
+        <tr><td><strong>Report calendrier EU (Digital Omnibus)</strong></td><td>Fble–Moy.</td><td>Modéré</td><td>Diversification 5 piliers&nbsp;: si un règlement est différé, les quatre autres restent actifs. Le CRA est verrouillé pour déc. 2027 sans possibilité réaliste de report.</td></tr>
+        <tr><td><strong>Fondateur unique (SPOF)</strong></td><td>Fble</td><td>Élevé</td><td>Prompts système versionnés + Causal Knowledge Fabric automatisent &gt; 80 % de la production diagnostic. Documentation complète. Recrutement A2 senior planifié An 2-3. Prévoyance professionnelle.</td></tr>
+        <tr><td><strong>Validation commerciale tardive</strong></td><td>Fble</td><td>Modéré</td><td>Infrastructure dé-risquée. Premier client B2B attendu dès début mai 2026. Réseau professionnel fondateur pré-qualifié. Prix 250 € = décision sans approbation hiérarchique.</td></tr>
+        <tr><td><strong>Concurrence Big4 ou pure players IA</strong></td><td>Fble</td><td>Fble</td><td>Moat expertise tacite (32 ans), structure de coût 40× inférieure, SAAIBOM concept propriétaire, proximité terrain inaccessible aux grands cabinets.</td></tr>
+        <tr><td><strong>Risque juridique conseil réglementaire</strong></td><td>Fble</td><td>Modéré</td><td>RC Pro souscrite. Positionnement «&nbsp;intelligence&nbsp;» et non «&nbsp;conseil juridique&nbsp;». Disclaimers contractuels. Le client conserve la responsabilité finale de ses décisions.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ====== S10 PERSPECTIVES ====== -->
+<section class="page" id="s10">
+  <div class="container">
+    <div class="section-num">SECTION 10</div>
+    <h1 class="section-title">Perspectives et relation bancaire</h1>
+
+    <h2>Trajectoire 12 à 24 mois</h2>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-date">T2 2026</div><div class="timeline-content"><strong>Validation commerciale</strong> — Premier client B2B réel. Ajustement funnel. Optimisation contenu marketing LinkedIn.</div></div>
+      <div class="timeline-item"><div class="timeline-date">T3 2026</div><div class="timeline-content"><strong>Montée en charge DIAGNOSTIC + VEILLE</strong>. Franchissement seuil TVA (36 800 € BNC). <strong>Bascule juridique SAS/SASU.</strong> Ouverture compte professionnel dédié.</div></div>
+      <div class="timeline-item"><div class="timeline-date">T4 2026</div><div class="timeline-content"><strong>Diversification acquisition</strong>&nbsp;: SEO technique, partenariats sectoriels (fédérations, CCI). Finalisation dépôts marque INPI.</div></div>
+      <div class="timeline-item"><div class="timeline-date">T1–T2 2027</div><div class="timeline-content"><strong>Pic demande Machinery Regulation</strong> (échéance 20 janvier 2027). Anticipation recrutement A2. Dossiers BPI Bourse French Tech et France 2030.</div></div>
+      <div class="timeline-item"><div class="timeline-date">T3–T4 2027</div><div class="timeline-content"><strong>Pic demande CRA</strong> (échéance 11 décembre 2027). Évaluation candidature Horizon Europe EIC Accelerator.</div></div>
+      <div class="timeline-item"><div class="timeline-date">2028</div><div class="timeline-content"><strong>Expansion géographique EU</strong>&nbsp;: DACH, Benelux, Italie. Développement contrats XaaS forfaits annuels grands comptes.</div></div>
+    </div>
+
+    <h2>Besoins bancaires anticipés — À horizon 12 à 18 mois</h2>
+    <div class="callout">
+      <div class="callout-title">Services bancaires envisagés (sans engagement immédiat)</div>
+      <ul style="margin-top:8px;">
+        <li><strong>Compte professionnel SAS</strong> au T3 2026 (lors de la bascule juridique).</li>
+        <li><strong>Terminal de paiement ou facilité SEPA</strong> pour optimiser les encaissements récurrents VEILLE.</li>
+        <li><strong>Ligne de crédit court terme</strong> (10–20 k€) en soutien trésorerie lors de la pointe d'acquisition M+12 à M+18.</li>
+        <li><strong>Crédit d'investissement moyen terme</strong> (30–80 k€) en accompagnement du premier recrutement A2, avec apport personnel et garantie BPI.</li>
+        <li><strong>Produits d'épargne d'entreprise</strong> pour placement de la trésorerie excédentaire post break-even.</li>
+      </ul>
+    </div>
+
+    <h2>Ce que le banquier peut retenir</h2>
+    <ol>
+      <li><strong>Un entrepreneur structuré et transparent</strong>&nbsp;: 32 années d'expérience, méthodologie scientifique documentée, capacité à distinguer rigoureusement prouvé et attendu.</li>
+      <li><strong>Un modèle viable prouvé sur le plan technique</strong>&nbsp;: infrastructure complète validée, marges mesurées empiriquement, premier revenu de démonstration encaissé.</li>
+      <li><strong>Une validation commerciale imminente</strong>&nbsp;: premier client B2B à J+8 de l'édition du présent document.</li>
+      <li><strong>Une trajectoire financière saine</strong>&nbsp;: BFR négatif, break-even rapide, autonomie sans recours à la dette courante.</li>
+      <li><strong>Un marché adressable chiffré et non reportable</strong>&nbsp;: 200 000+ PME/ETI concernées, échéances réglementaires datées.</li>
+      <li><strong>Une différenciation défendable sur 5 à 10 ans</strong>&nbsp;: moat expertise tacite + SAAIBOM + infrastructure EU souveraine.</li>
+    </ol>
+
+    <p style="margin-top:24px;">Le présent dossier ne formule <strong>aucune demande de financement immédiate</strong>. Son objet est de construire une relation de confiance et de préparer le terrain pour les sollicitations futures dans un climat de connaissance mutuelle.</p>
+  </div>
+</section>
+
+<!-- ====== S11 ANNEXES ====== -->
+<section class="page" id="s11">
+  <div class="container">
+    <div class="section-num">SECTION 11</div>
+    <h1 class="section-title">Annexes</h1>
+
+    <h2>Annexe A — Signature électronique et validité</h2>
+    <p>Le présent document est émis par Jean-Pierre Charles, fondateur d'AEGIS Intelligence, et signé électroniquement conformément à <strong>l'article 25 du règlement (UE) n° 910/2014 eIDAS</strong>. Identifiant unique, horodatage qualifié et empreinte cryptographique SHA-256 disponibles à la demande du destinataire.</p>
+
+    <h2>Annexe B — Transparence co-production assistée par IA</h2>
+    <div class="callout">
+      <div class="callout-title">Mention de transparence obligatoire</div>
+      Ce document a été produit dans le cadre d'une <strong>co-production assistée par intelligence artificielle</strong>, conformément au principe de transparence qu'AEGIS applique à ses propres livrables clients. Le fondateur est le <strong>seul auteur responsable</strong> des données chiffrées, des hypothèses économiques, du positionnement stratégique et des engagements exprimés. L'IA a été utilisée comme outil de rédaction, de structuration et de vérification de cohérence. Cette pratique reflète la méthodologie appliquée aux diagnostics clients.
+    </div>
+
+    <h2>Annexe C — Glossaire</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Terme</th><th>Définition</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AI Act</strong></td><td>Règlement (UE) 2024/1689 encadrant les systèmes d'intelligence artificielle dans l'UE.</td></tr>
+        <tr><td><strong>CRA</strong></td><td>Cyber Resilience Act — Règlement (UE) 2024/2847 sur la cybersécurité des produits numériques.</td></tr>
+        <tr><td><strong>Machinery Regulation</strong></td><td>Règlement (UE) 2023/1230 sur les machines, remplace la Directive Machines 2006/42/CE.</td></tr>
+        <tr><td><strong>ESPR / DPP</strong></td><td>Ecodesign for Sustainable Products Regulation — Règlement (UE) 2024/1781 + Digital Product Passport.</td></tr>
+        <tr><td><strong>Battery Regulation</strong></td><td>Règlement (UE) 2023/1542 sur les batteries et déchets de batteries.</td></tr>
+        <tr><td><strong>SAAIBOM</strong></td><td>System Architecture AI &amp; Bill of Materials — nomenclature intégrée 4 couches propriétaire AEGIS.</td></tr>
+        <tr><td><strong>EISaaS</strong></td><td>Engineering Intelligence as a Service — catégorie de service formalisée par AEGIS.</td></tr>
+        <tr><td><strong>FAI</strong></td><td>First Article Inspection — procédure de validation aéronautique adaptée aux processus logiciels AEGIS.</td></tr>
+        <tr><td><strong>BFR</strong></td><td>Besoin en fonds de roulement — écart entre créances clients et dettes fournisseurs.</td></tr>
+        <tr><td><strong>BNC</strong></td><td>Bénéfices non commerciaux — régime fiscal français applicable aux professions libérales.</td></tr>
+        <tr><td><strong>TAM / SAM / SOM</strong></td><td>Total / Serviceable Available / Serviceable Obtainable Market — niveaux d'analyse du marché adressable.</td></tr>
+        <tr><td><strong>SPOF</strong></td><td>Single Point of Failure — point de défaillance unique dans une architecture ou une organisation.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Annexe D — Contact</h2>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Fondateur</div><div class="metric-value" style="font-size:18px;">Jean-Pierre Charles</div><div class="metric-sub">Ingénieur mécatronique senior</div></div>
+      <div class="metric"><div class="metric-label">Site officiel</div><div class="metric-value" style="font-size:18px;">jeanpierrecharles.com</div><div class="metric-sub">Infrastructure EU souveraine</div></div>
+      <div class="metric"><div class="metric-label">Disponibilité</div><div class="metric-value" style="font-size:16px;">Entretien sur demande</div><div class="metric-sub">En personne ou visioconférence</div></div>
+    </div>
+    <p style="margin-top:24px;font-size:13px;color:var(--muted);font-style:italic;">Le fondateur se tient à la disposition de l'établissement bancaire pour tout entretien complémentaire, présentation en personne, ou question relative aux hypothèses, chiffres ou trajectoire présentée dans le présent document. Éléments de preuve des transactions, validations techniques et références clients communicables dans un cadre confidentiel.</p>
+  </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer class="doc-footer">
+  <div class="container">
+    <p><strong>AEGIS Intelligence</strong> — Business Plan 2026, version 2 révisée — 23 avril 2026</p>
+    <p>Document confidentiel destiné exclusivement à l'établissement bancaire destinataire.</p>
+    <p>Reproduction et diffusion sans autorisation préalable interdites.</p>
+    <p style="margin-top:16px;font-size:11px;">Édition numérique — eIDAS Art. 25 — Empreinte SHA-256 disponible sur demande.</p>
+  </div>
+</footer>
+
+<script>
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#3a3a3a';
+Chart.defaults.borderColor = '#e8e4dc';
+
+// Chart 1 — CA 3 ans
+new Chart(document.getElementById('chartCA'), {
+  type: 'bar',
+  data: {
+    labels: ['Année 1', 'Année 2', 'Année 3'],
+    datasets: [
+      { label: 'Conservateur', data: [15, 70, 140], backgroundColor: '#c7a27e' },
+      { label: 'Base', data: [42, 123, 220], backgroundColor: '#0f2a44' },
+      { label: 'Optimiste', data: [60, 180, 350], backgroundColor: '#2d6a4f' }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16 } },
+      tooltip: { callbacks: { label: c => c.dataset.label + ' : ' + c.parsed.y + ' k€' } }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'CA (k€)' }, grid: { color: '#f0ece4' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Chart 2 — Trésorerie Année 1
+const enc = [400, 800, 1350, 2000, 2800, 4500, 5000, 3800, 4200, 5500, 5500, 5750];
+const opex = [733,733,733,733,733,733,933,933,933,933,933,933];
+let cum = 0;
+const treso = enc.map((e,i) => { cum += e - opex[i] - Math.round(e*0.22); return cum; });
+new Chart(document.getElementById('chartTreso'), {
+  type: 'line',
+  data: {
+    labels: ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
+    datasets: [
+      { label: 'Trésorerie cumulée (€)', data: treso, borderColor: '#0f2a44', backgroundColor: 'rgba(15,42,68,.08)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#0f2a44' },
+      { label: 'Break-even (0 €)', data: Array(12).fill(0), borderColor: '#8b3a3a', borderDash: [4,4], pointRadius: 0, fill: false }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16 } },
+      tooltip: { callbacks: { label: c => c.dataset.label + ' : ' + c.parsed.y.toLocaleString('fr-FR') + ' €' } }
+    },
+    scales: {
+      y: { title: { display: true, text: 'Trésorerie (€)' }, grid: { color: '#f0ece4' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Chart 3 — Mix CA An 2
+new Chart(document.getElementById('chartMix'), {
+  type: 'doughnut',
+  data: {
+    labels: ['DIAGNOSTIC (transactionnel)', 'VEILLE (récurrent)', 'EXPERTISE TERRAIN (premium)'],
+    datasets: [{ data: [30, 63, 30], backgroundColor: ['#8b6f47','#0f2a44','#2d6a4f'], borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16 } },
+      tooltip: { callbacks: { label: c => c.label + ' : ' + c.parsed + ' k€' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

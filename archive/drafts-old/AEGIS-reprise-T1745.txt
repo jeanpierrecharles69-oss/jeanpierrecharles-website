@@ -1,0 +1,28 @@
+=== AEGIS reprise post-absence T1745+ ===
+
+Bridge : C:\Projects\jeanpierrecharles\20260427T1455_BRIDGE_INTERMEDIAIRE-FIXES-PRE-LIVE-OPTION-BETA.md
+Branch : test/cobaye-2-en HEAD 1814b3d (NON merge main)
+Setup Supabase = A FAIRE
+
+COBAYE 5 EN (row paid TEST pour Mission N11 EN) :
+  request_id : 02dc0e51-33fd-475e-be76-da1c53bca76f
+  invoice    : AEGIS-20260427-1313
+  email      : jeanpierrecharles69+nordicenergy5@gmail.com
+
+ETAPE 1 RETOUR - SETUP SUPABASE :
+  A. https://supabase.com/dashboard -> aegis-intelligence-prod -> Settings -> API
+     - Project URL = https://<id>.supabase.co
+     - service_role secret = clic Reveal (PAS anon public)
+  B. PowerShell (REMPLACER les 2 valeurs <...>) :
+     $url = "https://<COLLER>.supabase.co"
+     $key = "<COLLER_SERVICE_ROLE>"
+     @{url=$url} | ConvertTo-Json | Out-File C:\Projects\aegis-ops\config\.aegis-supabase.json -Encoding UTF8
+     ConvertTo-SecureString $key -AsPlainText -Force | ConvertFrom-SecureString | Out-File C:\Projects\aegis-ops\config\.aegis-supabase-key.enc -Encoding UTF8
+     Remove-Variable key
+  C. Verifier :
+     (Get-Content C:\Projects\aegis-ops\config\.aegis-supabase.json | ConvertFrom-Json).url
+     # doit afficher VRAIE URL (pas xxxx)
+
+ETAPES SUIVANTES :
+  Ping Claude : "Reprise T<HHMM>, setup Supabase OK"
+  Phase C : cobaye 5bis FR (15min) -> N11 V&V.3 dry-run (5min) -> N11 TEST FR (30min) -> N11 TEST EN sur 02dc0e51-... (30min) -> V&V 2 PDFs (10min) -> GO LIVE β si OK (3h30)

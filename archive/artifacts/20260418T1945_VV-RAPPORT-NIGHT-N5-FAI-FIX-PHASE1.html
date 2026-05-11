@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V&amp;V Night N5 FAI Fix Phase 1 — AEGIS Intelligence v3.4.7</title>
+<style>
+    :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --blue: #2563eb;
+        --blue-dark: #1d4ed8;
+        --emerald: #10b981;
+        --amber: #f59e0b;
+        --red: #ef4444;
+        --code-bg: #0f172a;
+        --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 32px 16px 64px;
+        font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+    }
+    main { max-width: 960px; margin: 0 auto; }
+    header {
+        background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+        color: #fff;
+        padding: 28px 32px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+    }
+    header h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.02em; }
+    header p { margin: 4px 0; opacity: 0.9; font-size: 13px; }
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-right: 6px;
+    }
+    .badge-go { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border: 1px solid rgba(167, 243, 208, 0.4); }
+    .badge-cond { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(252, 211, 77, 0.4); }
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+    }
+    .card h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        color: var(--blue-dark);
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 8px;
+    }
+    .card h3 { margin: 16px 0 8px; font-size: 15px; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; }
+    .status-ok { color: var(--emerald); font-weight: 700; }
+    .status-warn { color: var(--amber); font-weight: 700; }
+    .status-defer { color: var(--muted); font-style: italic; }
+    code, pre {
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 12px;
+    }
+    code { background: var(--bg); padding: 2px 6px; border-radius: 4px; }
+    pre {
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 16px 18px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 12px 0;
+    }
+    .kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 13px; margin: 8px 0 12px; }
+    .kv dt { color: var(--muted); font-weight: 600; }
+    .kv dd { margin: 0; }
+    footer { text-align: center; margin-top: 32px; color: var(--muted); font-size: 11px; }
+    .check { color: var(--emerald); font-weight: 700; }
+    .cross { color: var(--red); font-weight: 700; }
+    .defer { color: var(--muted); }
+    ul.crit { padding-left: 20px; margin: 8px 0; }
+    ul.crit li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+    <h1>V&amp;V Night Builder N5 — FAI Fix chaîne intégrée Phase 1</h1>
+    <p><span class="badge badge-cond">GO CONDITIONNEL</span><span class="badge badge-go">BUILD 0 ERR</span></p>
+    <p>AEGIS Intelligence v3.4.7-night-N5 — 20260418T1945 CET</p>
+    <p>ACDC Code (Claude Code CLI Opus 4.7 1M ctx) — RC1 + RC2 systématiques</p>
+</header>
+
+<div class="card">
+    <h2>§1 Executive summary</h2>
+    <dl class="kv">
+        <dt>Mission</dt><dd>Implémenter Phase A (pièce jointe PDF email) + Phase B code (persistance Supabase avec graceful degradation) + endpoint status. Phase C PowerShell différée à Phase 2 (après activation Supabase par JP).</dd>
+        <dt>Verdict</dt><dd><strong class="status-ok">GO</strong> Phase 1 — code compile, sécurité OK, graceful degradation vérifiée par lecture. <strong class="status-warn">CONDITIONNEL</strong> V&amp;V LIVE end-to-end différée Phase 2 (nécessite JP : créer projet Supabase + configurer env Vercel).</dd>
+        <dt>Durée exécution</dt><dd>~1h50 (T1755 → T1945 CET), conforme calibration L_T1430_01 ÷2.25</dd>
+        <dt>Bridge mi-parcours</dt><dd><code>20260418T1945_BRIDGE_MI-PARCOURS-NIGHT-N5-FAI-FIX-PHASE1.md</code></dd>
+    </dl>
+</div>
+
+<div class="card">
+    <h2>§2 Fichiers modifiés / créés</h2>
+    <table>
+        <thead><tr><th>Fichier</th><th>Type</th><th>Version</th><th>Changement clé</th></tr></thead>
+        <tbody>
+            <tr><td><code>api/_lib/mailer.ts</code></td><td>Modifié</td><td>1.0.0 → 1.1.0</td><td><code>pdf_base64</code> dans <code>MailerPaymentData</code>, <code>attachments</code> nodemailer, validation 20 Mo, log <code>has_attachment</code> + <code>attachment_size_bytes</code></td></tr>
+            <tr><td><code>api/send-delivery.ts</code></td><td>Modifié</td><td>1.1.0 → 1.2.0</td><td>Accepte <code>pdf_base64</code>+<code>pdf_filename</code>, <code>download_url</code> devient fallback, sanitization filename, réponse <code>mode</code></td></tr>
+            <tr><td><code>api/_lib/email-templates.ts</code></td><td>Modifié</td><td>1.0.0 → 1.1.0</td><td>Bloc PJ vert émeraude FR/EN si <code>pdf_base64</code>, bouton lien legacy sinon</td></tr>
+            <tr><td><code>api/_lib/supabase.ts</code></td><td><strong class="check">Nouveau</strong></td><td>1.0.0</td><td>Client service_role EU, graceful degradation (<code>supabase=null</code> si env absentes), types <code>DiagnosticStatus</code>+<code>DiagnosticRequestRow</code></td></tr>
+            <tr><td><code>api/diagnostic-request.ts</code></td><td>Modifié</td><td>2.0.0 → 2.1.0</td><td>INSERT fire-and-forget Supabase avec TOUS les champs non-tronqués (product + context complets)</td></tr>
+            <tr><td><code>api/mollie-webhook.ts</code></td><td>Modifié</td><td>2.0.0 → 2.1.0</td><td>UPDATE <code>status=paid</code>+<code>paid_at</code>+<code>payment_id</code> non-bloquant avant <code>Promise.race</code> emails</td></tr>
+            <tr><td><code>api/diagnostic-status.ts</code></td><td><strong class="check">Nouveau</strong></td><td>1.0.0</td><td>GET <code>?request_id</code> ou <code>?invoice_number</code>, Bearer <code>AEGIS_OPS_TOKEN</code>, consommé Phase C</td></tr>
+            <tr><td><code>package.json</code></td><td>Modifié</td><td>—</td><td><code>+@supabase/supabase-js</code></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>§3 Critères succès V&amp;V (brief §6)</h2>
+    <table>
+        <thead><tr><th>#</th><th>Critère</th><th>Méthode</th><th>Résultat</th></tr></thead>
+        <tbody>
+            <tr>
+                <td>C1</td>
+                <td><code>npm run build</code></td>
+                <td>Vite build production</td>
+                <td><span class="check">✓ PASS</span> — <code>✓ 134 modules transformed. ✓ built in 7.29s</code></td>
+            </tr>
+            <tr>
+                <td>C2</td>
+                <td>tsc --noEmit 0 err <code>api/</code>+<code>src/</code></td>
+                <td><code>npx tsc --noEmit --project tsconfig.json | grep -vE "^drafts/"</code></td>
+                <td><span class="check">✓ PASS</span> — 0 erreur hors <code>drafts/*.jsx</code> pré-existant (hors scope)</td>
+            </tr>
+            <tr>
+                <td>C3</td>
+                <td>Phase A PJ email reçue localhost</td>
+                <td>POST <code>/api/send-delivery</code> avec base64 PDF test</td>
+                <td><span class="defer status-defer">DIFFÉRÉ Phase 2</span> — nécessite SMTP creds + destinataire réel (validation JP requise)</td>
+            </tr>
+            <tr>
+                <td>C4</td>
+                <td>Phase A <code>download_url</code> fallback fonctionne</td>
+                <td>POST sans <code>pdf_base64</code>, avec <code>download_url</code></td>
+                <td><span class="check">✓ CODE OK</span> — template <code>deliveryConfirmationHtml</code> garde bloc bouton si <code>!hasAttachment</code> (lecture ligne 258+)</td>
+            </tr>
+            <tr>
+                <td>C5</td>
+                <td>Phase A rejet PDF &gt; 20 Mo</td>
+                <td>POST avec base64 surdimensionné</td>
+                <td><span class="check">✓ CODE OK</span> — validation <code>send-delivery.ts</code> ligne 119+ (<code>attachmentSize &gt; PDF_MAX_BYTES</code>) + belt-and-braces dans <code>mailer.ts</code> (<code>throw new Error</code>)</td>
+            </tr>
+            <tr>
+                <td>C6</td>
+                <td>Phase B insertion Supabase</td>
+                <td>POST <code>/api/diagnostic-request</code> → vérif Supabase Dashboard</td>
+                <td><span class="defer status-defer">DIFFÉRÉ Phase 2</span> — nécessite projet Supabase créé (JP1). Code validé par lecture.</td>
+            </tr>
+            <tr>
+                <td>C7</td>
+                <td>Phase B graceful degradation</td>
+                <td>Supprimer vars <code>SUPABASE_*</code> → POST <code>diagnostic-request</code></td>
+                <td><span class="check">✓ CODE OK</span> — <code>supabase=null</code> si env vide ; appelants testent <code>if (supabase)</code> ; log warning via <code>logSupabaseUnavailable</code> ; pas de throw</td>
+            </tr>
+            <tr>
+                <td>C8</td>
+                <td>Phase B webhook update paid</td>
+                <td>Simuler webhook <code>status=paid</code></td>
+                <td><span class="defer status-defer">DIFFÉRÉ Phase 2</span> — nécessite projet Supabase + payload Mollie (test ou live, S6 JP)</td>
+            </tr>
+            <tr>
+                <td>C9</td>
+                <td>Phase C script dry-run</td>
+                <td>N/A Phase 1 — différée Phase 2</td>
+                <td><span class="defer status-defer">DIFFÉRÉ Phase 2</span></td>
+            </tr>
+            <tr>
+                <td>C10</td>
+                <td>Grep D48</td>
+                <td><code>grep -rE "Ingenierie|etudes techniques|Bertiniere|Terce" api/ src/</code></td>
+                <td><span class="check">✓ PASS</span> — 0 résultat (SELLER isolé dans <code>email-templates.ts</code>, contrat DRY)</td>
+            </tr>
+            <tr>
+                <td>C11</td>
+                <td>Sécurité R_T1340_01</td>
+                <td>Grep secrets/clés dans code</td>
+                <td><span class="check">✓ PASS</span> — toutes les clés via <code>process.env.*</code>, aucune valeur littérale</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>§4 Graceful degradation Supabase — preuve par lecture</h2>
+    <p>Scénario : <code>SUPABASE_URL</code> ou <code>SUPABASE_SERVICE_ROLE_KEY</code> absente des env vars Vercel.</p>
+    <pre>// api/_lib/supabase.ts (v1.0.0)
+export const supabase: SupabaseClient | null =
+    SUPABASE_URL &amp;&amp; SUPABASE_SERVICE_ROLE_KEY
+        ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { ... })
+        : null;</pre>
+    <p><strong>Appelants :</strong></p>
+    <ul class="crit">
+        <li><code>diagnostic-request.ts</code> : <code>if (supabase) { ... insert } else { logSupabaseUnavailable('diagnostic-request'); }</code> — pas de blocage.</li>
+        <li><code>mollie-webhook.ts</code> : <code>if (supabase &amp;&amp; metadata.request_id) { ... update }</code> — webhook continue sans update, emails envoyés quand même (C3-bis préservé).</li>
+        <li><code>diagnostic-status.ts</code> : <code>if (!SUPABASE_ENABLED || !supabase) return res.status(503)</code> — endpoint répond proprement 503 au client PowerShell, pas de crash process.</li>
+    </ul>
+    <p><strong>Conséquence :</strong> le site fonctionne identiquement à v3.4.6 tant que JP n'a pas activé Supabase. Migration zero-downtime.</p>
+</div>
+
+<div class="card">
+    <h2>§5 Sécurité R_T1340_01 — aucun secret exposé</h2>
+    <table>
+        <thead><tr><th>Variable</th><th>Utilisation</th><th>Exposure côté client</th></tr></thead>
+        <tbody>
+            <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><code>api/_lib/supabase.ts</code> server-only</td><td><span class="check">0</span> — dossier <code>api/</code> = fn Vercel serverless, jamais bundlée client</td></tr>
+            <tr><td><code>SUPABASE_URL</code></td><td>idem + diagnostic-status hint</td><td>N/A (URL publique projet Supabase, non secret)</td></tr>
+            <tr><td><code>AEGIS_OPS_TOKEN</code></td><td>Bearer auth <code>send-delivery</code> + <code>diagnostic-status</code></td><td><span class="check">0</span></td></tr>
+            <tr><td><code>MOLLIE_API_KEY_LIVE</code></td><td>webhook re-query (inchangé v3.4.6)</td><td><span class="check">0</span></td></tr>
+            <tr><td><code>SMTP_PASSWORD</code></td><td><code>api/_lib/mailer.ts</code> transport auth (inchangé)</td><td><span class="check">0</span></td></tr>
+        </tbody>
+    </table>
+    <p>Log <code>has_attachment</code> et <code>attachment_size_bytes</code> ajoutés — <strong>jamais le contenu base64</strong> en log (brief §3 Phase A2 confirmé).</p>
+</div>
+
+<div class="card">
+    <h2>§6 JP_INPUT_NEEDED — Phase 2 prérequis</h2>
+    <table>
+        <thead><tr><th>#</th><th>Action JP + Claude Chat Opus 4.6</th><th>Impact si non résolu</th></tr></thead>
+        <tbody>
+            <tr><td>JP1</td><td>Créer projet Supabase EU Frankfurt (free tier)</td><td>Phase B dormante — site v3.4.6 compatible</td></tr>
+            <tr><td>JP2</td><td>Exécuter schéma SQL (voir bridge §4.JP2) dans Supabase SQL Editor</td><td>Table absente → inserts échouent silencieusement</td></tr>
+            <tr><td>JP3</td><td>Récupérer <code>SUPABASE_URL</code> + <code>SUPABASE_ANON_KEY</code> + <code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Code ne peut pas se connecter</td></tr>
+            <tr><td>JP4</td><td>Configurer 3 env vars Vercel (Production + Preview ; Dev optionnel si pas de test local)</td><td>Prod+Preview dormantes</td></tr>
+            <tr><td>JP5</td><td>Smoke-test post-deploy (curl POST diagnostic-request → vérif Supabase Dashboard)</td><td>Pas de V&amp;V LIVE Phase 2</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>§7 Commits Phase 1 — prêts, push INTERDIT S6</h2>
+    <p>Message de commit unifié (convention AEGIS, voir bridge §6). Fichiers <code>git add</code> ciblé (D204 — jamais <code>-A</code>) :</p>
+    <ul class="crit">
+        <li><code>api/_lib/mailer.ts</code> · <code>api/send-delivery.ts</code> · <code>api/_lib/email-templates.ts</code></li>
+        <li><code>api/_lib/supabase.ts</code> (nouveau)</li>
+        <li><code>api/diagnostic-request.ts</code> · <code>api/mollie-webhook.ts</code></li>
+        <li><code>api/diagnostic-status.ts</code> (nouveau)</li>
+        <li><code>package.json</code> · <code>package-lock.json</code></li>
+    </ul>
+    <p>Artefacts FAI (bridge MD + ce HTML V&amp;V) : commit séparé ou inclus selon préférence JP.</p>
+    <p><strong>S6 : <code>git push origin main</code> INTERDIT pour ACDC Code. JP seul après DIVA L3.</strong></p>
+</div>
+
+<div class="card">
+    <h2>§8 Phase 2 — plan synthétique</h2>
+    <ol>
+        <li>JP + Opus Chat résolvent JP1–JP5 (Supabase créé, vars Vercel configurées, smoke-test OK)</li>
+        <li>JP déclenche nouveau prompt ACDC Code « Phase 2 Night N5 : PowerShell chaînage »</li>
+        <li>ACDC Code crée <code>C:\Projects\aegis-ops\scripts\aegis-deliver-diagnostic.ps1</code> (HORS repo)</li>
+        <li>Enchaînement : <code>-RequestId</code> → GET <code>/api/diagnostic-status</code> → prompt DIAGNOSTIC → <code>aegis-diagnostic-api.ps1</code> → <code>aegis-generate-pdf.ps1</code> → base64 → POST <code>/api/send-delivery</code> → UPDATE Supabase <code>delivered</code></li>
+        <li>V&amp;V LIVE FAI v2 : JP = client-test, chaîne complète paiement Mollie TEST → PJ reçue &lt; 15 min</li>
+        <li>Bridge retour Phase 2 + HTML V&amp;V RC2 Phase 2 (ce document est RC2 Phase 1)</li>
+    </ol>
+</div>
+
+<footer>
+    Document RC2 — Redoublement Confirmation niveau 2 (HTML justificatif V&amp;V)<br>
+    ACDC Code — Claude Code CLI Opus 4.7 1M ctx — 20260418T1945 CET<br>
+    AEGIS Intelligence v3.4.7-night-N5 Phase 1 — GO CONDITIONNEL<br>
+    Prochain jalon : Phase 2 après JP1–JP5 résolus via Claude Chat Opus 4.6 Étendue
+</footer>
+
+</main>
+</body>
+</html>

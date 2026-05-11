@@ -1,0 +1,259 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{font-family:var(--font-sans);max-width:700px;margin:0 auto;padding:1rem 0}
+.audit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.audit-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px}
+.audit-card .at{font-size:12px;font-weight:500;margin-bottom:4px}
+.audit-card .ad{font-size:11px;color:var(--color-text-secondary);line-height:1.5}
+.pass{border-left:3px solid #10b981;border-radius:0}
+.warn{border-left:3px solid #ef9f27;border-radius:0}
+.tag{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:12px;margin-right:4px}
+.tag-pass{background:var(--color-background-success);color:var(--color-text-success)}
+.tag-warn{background:var(--color-background-warning);color:var(--color-text-warning)}
+.tag-new{background:var(--color-background-info);color:var(--color-text-info)}
+.phone{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin:16px 0}
+.phone-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.phone-bar span{font-size:11px;color:var(--color-text-secondary)}
+.lang-toggle{display:flex;border-radius:6px;overflow:hidden;border:0.5px solid var(--color-border-secondary)}
+.lang-btn{font-size:11px;font-weight:500;padding:3px 10px;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.lang-btn.active{background:var(--color-background-info);color:var(--color-text-info)}
+.lang-btn:not(.active){background:var(--color-background-primary);color:var(--color-text-secondary)}
+.hero-inner{padding:16px 14px 12px;text-align:center}
+.h1{font-size:17px;font-weight:500;line-height:1.3;color:var(--color-text-primary);margin-bottom:14px}
+.h1 em{font-style:normal;color:var(--color-text-info)}
+.convergence{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 auto 10px;max-width:480px}
+.conv-card{border-radius:var(--border-radius-md);padding:12px 10px;text-align:center;border:0.5px solid var(--color-border-tertiary)}
+.conv-card .ct{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.conv-card .cs{font-size:10px;margin-top:2px;color:var(--color-text-secondary)}
+.conv-card .cd{font-size:11px;color:var(--color-text-secondary);margin-top:4px;line-height:1.4}
+.conv-eq{font-size:11px;font-weight:500;color:var(--color-text-info);text-align:center;margin:8px 0 14px}
+.maieu-intro{font-size:12px;font-weight:500;color:var(--color-text-info);text-align:center;margin-bottom:10px;letter-spacing:.02em}
+.brain-box{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);margin:0 4px;max-width:480px;margin-left:auto;margin-right:auto}
+.brain-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);border-radius:var(--border-radius-lg) var(--border-radius-lg) 0 0}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--color-text-info);flex-shrink:0}
+.brain-header .title{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+.brain-header .sub{font-size:9px;color:var(--color-text-secondary);margin-top:1px}
+.brain-header .status{font-size:9px;font-weight:500;color:var(--color-text-success);margin-left:auto;flex-shrink:0}
+.starters{padding:10px 12px 6px;display:flex;flex-wrap:wrap;gap:6px}
+.starter-btn{font-size:10px;padding:5px 10px;border-radius:16px;border:0.5px solid var(--color-border-info);background:var(--color-background-info);color:var(--color-text-info);cursor:pointer;font-family:inherit;text-align:left;line-height:1.3;transition:all .15s}
+.starter-btn:hover{border-color:var(--color-border-secondary)}
+.starter-btn .q-num{font-weight:500;opacity:.7;margin-right:2px}
+.chat-zone{margin:8px 10px;padding:10px 12px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);min-height:80px}
+.msg{padding:8px 10px;border-radius:10px;margin-bottom:8px;font-size:11px;line-height:1.6;max-width:92%}
+.msg-user{background:var(--color-background-info);border:0.5px solid var(--color-border-info);margin-left:auto}
+.msg-model{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary)}
+.msg .who{font-size:9px;font-weight:500;margin-bottom:3px}
+.msg-user .who{color:var(--color-text-info)}
+.msg-model .who{color:var(--color-text-success)}
+.msg-model p{margin-bottom:6px}
+.msg-model p:last-child{margin-bottom:0}
+.msg-model strong{font-weight:500}
+.msg-model ul{padding-left:16px;margin:4px 0}
+.msg-model li{margin-bottom:2px}
+.input-row{display:flex;gap:6px;padding:0 12px 10px;align-items:center}
+.input-row input{flex:1;font-size:11px;padding:7px 12px;border-radius:20px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-primary);font-family:inherit;outline:none}
+.send-btn{width:30px;height:30px;border-radius:50%;background:var(--color-background-info);border:0.5px solid var(--color-border-info);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.send-btn svg{width:12px;height:12px}
+.section-label{font-size:13px;font-weight:500;color:var(--color-text-primary);margin:20px 0 6px}
+.delta{font-size:11px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.flash{animation:flash .35s ease}
+@keyframes flash{0%{opacity:.3}100%{opacity:1}}
+</style>
+
+<div class="wrap">
+
+<div style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Design review — Hero v3.2 post-ACDC</div>
+<div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">Audit code source actuel vs brief BLOC C du 27/03</div>
+
+<div class="section-label">Audit brief BLOC C — 3 items</div>
+<div class="audit-grid">
+<div class="audit-card pass"><div class="at"><span class="tag tag-pass">pass</span> BUG-01 markdown</div><div class="ad">MarkdownRenderer via marked v17.0.4. CSS scoped .brain-markdown. Messages model = HTML, user = texte brut.</div></div>
+<div class="audit-card pass"><div class="at"><span class="tag tag-pass">pass</span> BUG-02 toggle langue</div><div class="ad">Event langChanged dispatched. Messages[] + input vides au changement. Pattern consentChanged.</div></div>
+<div class="audit-card pass"><div class="at"><span class="tag tag-pass">pass</span> Hero maieutique</div><div class="ad">4 starters Q1-Q4 FR+EN. maieutiqueIntro dans HeroSection. Progression elenchus-causal-contrefactuel-existentiel.</div></div>
+<div class="audit-card warn"><div class="at"><span class="tag tag-warn">hors brief</span> Pricing 4 tiers</div><div class="ad">PULSE gratuit + VEILLE 150/mois ajoutees. Trinity sub + result reedites. maxWidth 780 a 680. PDF v3.2.</div></div>
+</div>
+
+<div class="section-label">Mockup Hero — fidele au code actuel</div>
+
+<div class="phone" id="phone">
+<div class="phone-bar">
+<span>jeanpierrecharles.com — v3.2</span>
+<div class="lang-toggle">
+<button class="lang-btn active" id="btn-fr" onclick="switchLang('fr')">FR</button>
+<button class="lang-btn" id="btn-en" onclick="switchLang('en')">EN</button>
+</div>
+</div>
+
+<div class="hero-inner" style="background:var(--color-background-secondary)">
+<div style="display:inline-block;font-size:10px;font-weight:500;padding:3px 10px;border-radius:16px;background:var(--color-background-info);color:var(--color-text-info);margin-bottom:10px" id="eu-badge">27 Etats membres UE + Regions ultraperipheriques</div>
+
+<div class="h1" id="hero-h1">L'ingenieur R&D qui a concu vos systemes, <em>pilote votre transformation industrielle et conformite EU.</em></div>
+
+<div style="font-size:10px;font-weight:500;letter-spacing:.06em;color:var(--color-text-secondary);text-transform:uppercase;margin-bottom:8px" id="trinity-title">LA FORCE DE LA CONVERGENCE</div>
+
+<div class="convergence">
+<div class="conv-card" id="conv1">
+<div style="font-size:16px;margin-bottom:4px">&#x1f9e0;</div>
+<div class="ct" id="conv1t">Expertise R&D terrain</div>
+<div class="cs" id="conv1s">L'ingenieur qui a fait</div>
+<div class="cd" id="conv1d">32 ans de conception a la serie — automobile, batteries, ferroviaire, equipements industriels</div>
+</div>
+<div class="conv-card" id="conv2">
+<div style="font-size:16px;margin-bottom:4px">&#x2728;</div>
+<div class="ct" id="conv2t">AEGIS Intelligence</div>
+<div class="cs" id="conv2s">Moteur IA reglementaire</div>
+<div class="cd" id="conv2d">Analyse d'impact en &lt;30s — pas un rapport dans 4 semaines</div>
+</div>
+</div>
+<div class="conv-eq" id="conv-eq">= L'ingenieur qui a concu vos systemes est aussi celui qui pilote votre conformite. Aucun cabinet ne peut dire ca.</div>
+
+<div class="maieu-intro" id="maieu-intro">Testez votre lucidite reglementaire en 4 questions :</div>
+
+<div class="brain-box">
+<div class="brain-header">
+<div class="avatar">JP</div>
+<div style="flex:1"><div class="title" id="brain-title">AEGIS Intelligence — Analyste Conformite UE</div><div class="sub" id="brain-sub">6 groupes internationaux &middot; 8 reglements EU &middot; Config IA deterministe</div></div>
+<div class="status">En ligne</div>
+</div>
+
+<div class="starters" id="starters-zone">
+<button class="starter-btn" onclick="simulateQ(0)"><span class="q-num">Q1</span> Mon marquage CE est valide. Qu'est-ce qui change le 20 janvier 2027 ?</button>
+<button class="starter-btn" onclick="simulateQ(1)"><span class="q-num">Q2</span> Mon produit a des batteries, du logiciel et de l'IoT. Combien de reglements se croisent ?</button>
+<button class="starter-btn" onclick="simulateQ(2)"><span class="q-num">Q3</span> Un reglement change et je ne le sais pas sous 14 jours — quel risque pour mon acces marche ?</button>
+<button class="starter-btn" onclick="simulateQ(3)"><span class="q-num">Q4</span> Qui surveille mes 5 reglements simultanement et les croise avec mon produit ?</button>
+</div>
+
+<div class="chat-zone" id="chat-zone" style="display:none"></div>
+
+<div class="input-row">
+<input id="brain-input" placeholder="Posez votre question reglementaire EU..." disabled />
+<div class="send-btn"><svg viewBox="0 0 24 24" fill="none" stroke="var(--color-text-info)" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg></div>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 12px 8px">
+<span style="font-size:10px;color:var(--color-text-secondary)">Trust:</span>
+<span style="font-size:10px;color:var(--color-text-secondary)">RGPD natif</span>
+<span style="font-size:10px;color:var(--color-text-secondary)">Resultats en &lt;30s</span>
+<span style="font-size:10px;color:var(--color-text-secondary)">Diagnostic offert</span>
+</div>
+</div>
+</div>
+
+<div class="section-label">Deltas hors brief — decision JP requise</div>
+<div class="audit-grid" style="grid-template-columns:1fr">
+<div class="audit-card warn">
+<div class="at"><span class="tag tag-new">nouveau</span> Pricing 4 tiers (PULSE gratuit + VEILLE 150/mois)</div>
+<div class="ad">ACDC a ajoute 2 tiers au pricing : PULSE (lead magnet gratuit, pre-diagnostic IA Sonnet, 2 sections) et VEILLE (150/mois, alertes personnalisees, monitoring continu 5+ reglements, dashboard). L'EXPERTISE TERRAIN passe de gold a rose. Ce changement est strategiquement coherent avec le Flywheel Compliance (D265) mais n'etait pas dans le brief BLOC C.</div>
+</div>
+<div class="audit-card warn">
+<div class="at"><span class="tag tag-new">nouveau</span> Sections i18n enrichies</div>
+<div class="ad">problemSolutions (3 pain-points mappes aux services), expertiseRegs (matrice entreprise x reglements avec contexte terrain). Contenu alignee PRINCIPE FONDATEUR mais non prescrit.</div>
+</div>
+<div class="audit-card warn">
+<div class="at"><span class="tag tag-new">modifie</span> Trinity messaging + Brain maxWidth</div>
+<div class="ad">trinityItem1Sub: "Capital intellectuel industriel" a "L'ingenieur qui a fait". trinityResult reformule avec punch. Brain maxWidth hero 780 a 680px — plus compact.</div>
+</div>
+</div>
+
+</div>
+
+<script>
+var lang='fr';
+var i18n={
+fr:{
+badge:'27 Etats membres UE + Regions ultraperipheriques',
+h1:'L\'ingenieur R&D qui a concu vos systemes, <em>pilote votre transformation industrielle et conformite EU.</em>',
+triTitle:'LA FORCE DE LA CONVERGENCE',
+c1t:'Expertise R&D terrain',c1s:'L\'ingenieur qui a fait',c1d:'32 ans de conception a la serie — automobile, batteries, ferroviaire, equipements industriels',
+c2t:'AEGIS Intelligence',c2s:'Moteur IA reglementaire',c2d:'Analyse d\'impact en <30s — pas un rapport dans 4 semaines',
+conv:'= L\'ingenieur qui a concu vos systemes est aussi celui qui pilote votre conformite. Aucun cabinet ne peut dire ca.',
+maieu:'Testez votre lucidite reglementaire en 4 questions :',
+title:'AEGIS Intelligence — Analyste Conformite UE',
+sub:'6 groupes internationaux &middot; 8 reglements EU &middot; Config IA deterministe',
+placeholder:'Posez votre question reglementaire EU...',
+starters:[
+'Mon marquage CE est valide. Qu\'est-ce qui change le 20 janvier 2027 ?',
+'Mon produit a des batteries, du logiciel et de l\'IoT. Combien de reglements se croisent ?',
+'Un reglement change et je ne le sais pas sous 14 jours — quel risque pour mon acces marche ?',
+'Qui surveille mes 5 reglements simultanement et les croise avec mon produit ?'
+],
+answers:[
+'<div class="who">AEGIS Intelligence</div><p>Le <strong>Reglement Machines 2023/1230</strong> remplace la Directive Machines 2006/42/CE a compter du <strong>20 janvier 2027</strong>. Changements majeurs :</p><ul><li><strong>Composants de securite logiciels</strong> — logiciels embarques = composants de securite (Art. 2 h)</li><li><strong>Cybersecurite obligatoire</strong> — exigences Annexe III 1.1.9</li><li><strong>Machines autonomes et IA</strong> — systemes auto-evolutifs couverts</li></ul><p>Votre marquage CE actuel <strong>ne sera plus valide</strong> apres cette date.</p>',
+'<div class="who">AEGIS Intelligence</div><p>Pour batteries + logiciel + IoT, <strong>5 reglements se croisent</strong> :</p><ul><li><strong>Battery Reg 2023/1542</strong> — passeport numerique, empreinte carbone</li><li><strong>AI Act 2024/1689</strong> — classification risque logiciel</li><li><strong>CRA 2024/2847</strong> — cybersecurite elements connectes</li><li><strong>Machinery Reg 2023/1230</strong> — conformite CE machine</li><li><strong>ESPR 2024/1781</strong> — passeport numerique produit</li></ul><p>Ces interactions creent des <strong>obligations croisees</strong> qu\'aucun audit mono-reglementaire ne couvre.</p>',
+'<div class="who">AEGIS Intelligence</div><p>Risque <strong>triple et cumulatif</strong> :</p><ul><li><strong>Acces marche bloque</strong> — pas de marquage CE (Art. 21 Reg Machines)</li><li><strong>Sanctions</strong> — CRA : jusqu\'a <strong>15 M ou 2,5% CA mondial</strong> (Art. 64)</li><li><strong>Responsabilite produit</strong> — absence de veille = faute de diligence</li></ul><p>Le delai de 14 jours est la fenetre ou une alerte permet encore d\'<strong>adapter avant mise sur le marche</strong>.</p>',
+'<div class="who">AEGIS Intelligence</div><p>La reponse est <strong>personne</strong>.</p><p>Un responsable qualite suit 1-2 reglements. Le juridique suit la RGPD. Le DSI connait NIS2. Mais <strong>aucun poste ne croise</strong> AI Act x CRA x Machinery x Battery x ESPR avec votre produit.</p><p>C\'est ce que resout <strong>AEGIS Intelligence</strong> : 32 ans d\'expertise R&D terrain x IA reglementaire = veille croisee, continue, adaptee a votre produit.</p>'
+]
+},
+en:{
+badge:'27 EU member states + outermost regions',
+h1:'The R&D engineer who designed your systems, <em>pilots your industrial transformation and EU compliance.</em>',
+triTitle:'THE POWER OF CONVERGENCE',
+c1t:'Field R&D expertise',c1s:'The engineer who built it',c1d:'32 years from design to production — automotive, batteries, rail, industrial equipment',
+c2t:'AEGIS Intelligence',c2s:'Regulatory AI engine',c2d:'Impact analysis in <30s — not a report in 4 weeks',
+conv:'= The engineer who designed your systems is the one driving your compliance. No consultancy can say that.',
+maieu:'Test your regulatory awareness in 4 questions:',
+title:'AEGIS Intelligence — EU compliance analyst',
+sub:'6 international groups &middot; 8 EU regulations &middot; Deterministic AI config',
+placeholder:'Ask your EU regulatory question...',
+starters:[
+'My CE marking is valid. What changes on January 20th, 2027?',
+'My product has batteries, software and IoT. How many EU regulations overlap?',
+'A regulation changes and I don\'t know within 14 days — what\'s the risk for market access?',
+'Who monitors all 5 regulations simultaneously and cross-references them with my product?'
+],
+answers:[
+'<div class="who">AEGIS Intelligence</div><p><strong>Machinery Regulation 2023/1230</strong> replaces Directive 2006/42/EC from <strong>January 20, 2027</strong>. Key changes:</p><ul><li><strong>Software safety components</strong> — embedded software = safety component (Art. 2 h)</li><li><strong>Mandatory cybersecurity</strong> — new Annex III 1.1.9 requirements</li><li><strong>Autonomous machines and AI</strong> — self-evolving systems covered</li></ul><p>Your current CE marking <strong>will no longer be valid</strong> after this date.</p>',
+'<div class="who">AEGIS Intelligence</div><p>For batteries + software + IoT, <strong>5 EU regulations overlap</strong>:</p><ul><li><strong>Battery Reg 2023/1542</strong> — digital passport, carbon footprint</li><li><strong>AI Act 2024/1689</strong> — software risk classification</li><li><strong>CRA 2024/2847</strong> — cybersecurity connected elements</li><li><strong>Machinery Reg 2023/1230</strong> — CE machine conformity</li><li><strong>ESPR 2024/1781</strong> — digital product passport</li></ul><p>These interactions create <strong>cross-obligations</strong> no single-regulation audit covers.</p>',
+'<div class="who">AEGIS Intelligence</div><p>Risk is <strong>triple and cumulative</strong>:</p><ul><li><strong>Market access blocked</strong> — no CE marking (Art. 21 Machinery Reg)</li><li><strong>Penalties</strong> — CRA: up to <strong>15M or 2.5% global turnover</strong> (Art. 64)</li><li><strong>Product liability</strong> — absence of monitoring = due diligence failure</li></ul><p>14-day window is when early warning still allows <strong>adapting before market launch</strong>.</p>',
+'<div class="who">AEGIS Intelligence</div><p>The answer is <strong>nobody</strong>.</p><p>A quality manager monitors 1-2 regulations. Legal follows GDPR. CIO knows NIS2. But <strong>no single role cross-references</strong> AI Act x CRA x Machinery x Battery x ESPR with your product.</p><p>This is what <strong>AEGIS Intelligence</strong> solves: 32 years of field R&D x regulatory AI = continuous, cross-referenced monitoring adapted to your product.</p>'
+]
+}
+};
+
+function switchLang(l){
+lang=l;
+document.getElementById('btn-fr').className='lang-btn'+(l==='fr'?' active':'');
+document.getElementById('btn-en').className='lang-btn'+(l==='en'?' active':'');
+var d=i18n[l];
+document.getElementById('eu-badge').textContent=d.badge;
+document.getElementById('hero-h1').innerHTML=d.h1;
+document.getElementById('trinity-title').textContent=d.triTitle;
+document.getElementById('conv1t').textContent=d.c1t;
+document.getElementById('conv1s').textContent=d.c1s;
+document.getElementById('conv1d').textContent=d.c1d;
+document.getElementById('conv2t').textContent=d.c2t;
+document.getElementById('conv2s').textContent=d.c2s;
+document.getElementById('conv2d').textContent=d.c2d;
+document.getElementById('conv-eq').textContent=d.conv;
+document.getElementById('maieu-intro').textContent=d.maieu;
+document.getElementById('brain-title').textContent=d.title;
+document.getElementById('brain-sub').innerHTML=d.sub;
+document.getElementById('brain-input').placeholder=d.placeholder;
+var sz=document.getElementById('starters-zone');
+sz.innerHTML='';
+d.starters.forEach(function(s,i){
+var b=document.createElement('button');
+b.className='starter-btn';
+b.innerHTML='<span class="q-num">Q'+(i+1)+'</span> '+s;
+b.onclick=function(){simulateQ(i)};
+sz.appendChild(b);
+});
+sz.style.display='flex';
+var cz=document.getElementById('chat-zone');
+cz.style.display='none';
+cz.innerHTML='';
+document.getElementById('phone').classList.add('flash');
+setTimeout(function(){document.getElementById('phone').classList.remove('flash')},350);
+}
+
+function simulateQ(idx){
+var d=i18n[lang];
+document.getElementById('starters-zone').style.display='none';
+var cz=document.getElementById('chat-zone');
+cz.style.display='block';
+cz.innerHTML='<div class="msg msg-user"><div class="who">Vous</div>'+d.starters[idx]+'</div><div class="msg msg-model">'+d.answers[idx]+'</div>';
+cz.classList.add('flash');
+setTimeout(function(){cz.classList.remove('flash')},350);
+}
+</script>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VV-RAPPORT Governance Init — 20260506T1130 CET</title>
+<style>
+  :root {
+    --bg: #0c0f14;
+    --surface: #11151c;
+    --card: #161b24;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --border: rgba(255,255,255,0.08);
+    --accent: #3b82f6;
+    --emerald: #10b981;
+    --gold: #eab308;
+    --rose: #f43f5e;
+    --copper: #ea580c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 20px; margin: 0 0 4px; color: var(--accent); }
+  header .meta { font-family: monospace; font-size: 12px; color: var(--muted); }
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  section h2 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  section h3 { font-size: 13px; color: var(--gold); margin: 14px 0 6px; }
+  .pass { color: var(--emerald); font-weight: 700; }
+  .fail { color: var(--rose); font-weight: 700; }
+  .warn { color: var(--gold); font-weight: 700; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  th, td {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  pre {
+    background: #0a0d12;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    font-size: 12px;
+    margin: 8px 0;
+  }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: 12px; color: var(--copper); }
+  .checklist li { list-style: none; margin: 4px 0; }
+  .checklist li.ok::before { content: "[PASS] "; color: var(--emerald); font-family: monospace; font-weight: 700; }
+  .checklist li.partial::before { content: "[JP V&V] "; color: var(--gold); font-family: monospace; font-weight: 700; }
+  ul.checklist { padding-left: 0; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .kpi {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .kpi-value { font-size: 22px; font-weight: 700; color: var(--emerald); }
+  .kpi-label { font-size: 11px; color: var(--muted); }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-family: monospace;
+    font-size: 11px;
+    padding: 20px 0 4px;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>VV-RAPPORT — aegis-governance-internal init + AEGIS.md pattern</h1>
+  <div class="meta">
+    Mission : 20260506T0900_BRIEF_MISSION-EXEC-GOVERNANCE-INTERNAL-INIT-v2 &middot;
+    Executeur : ACDC Code (L1a) &middot;
+    Valideur : JP (L3 HITL) &middot;
+    Statut : <span class="pass">PASS pre-V&V visuel</span>
+  </div>
+  <div class="meta">
+    IDs definitifs : D418 / L337 / R156 (LIFECYCLE v2.11.1) &middot;
+    Convention : D48 / D80 / IEEV / R_ABS_NIGHT_01 &middot;
+    Effort reel : ~35 min (vs ~75 min estimees brief S6)
+  </div>
+</header>
+
+<section>
+  <h2>S1 &mdash; Synthese executive</h2>
+  <p>
+    Mission de fusion 5 work packages (WP0a + WP0b + WP1-WP4) executee en autonomie
+    par ACDC Code conformement au brief v2 amende T1015. Le projet
+    <code>C:\Projects\aegis-governance-internal\</code> est passe d'un squelette vide
+    (README + dossiers) a un projet Vite/React/TypeScript fonctionnel, avec le scaffold
+    Gantt Kanban v4 N4 migre, donnees refraichies LIFECYCLE v2.11.1, securise et
+    initialise git localement (1 commit, 0 remote, R_ABS_NIGHT_01 respectee).
+  </p>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-value">26 / 26</div><div class="kpi-label">AC valides (sous reserve V&V visuel JP)</div></div>
+    <div class="kpi"><div class="kpi-value">0</div><div class="kpi-label">erreurs TypeScript</div></div>
+    <div class="kpi"><div class="kpi-value">0</div><div class="kpi-label">remote / push (R_ABS_NIGHT_01)</div></div>
+    <div class="kpi"><div class="kpi-value">21</div><div class="kpi-label">fichiers commit initial</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>S2 &mdash; Garde-fous appliques</h2>
+  <table>
+    <thead><tr><th>#</th><th>Garde-fou</th><th>Statut</th><th>Verification</th></tr></thead>
+    <tbody>
+      <tr><td>G0</td><td>WP0a ecrit UNIQUEMENT CLAUDE.md + AEGIS.md dans jeanpierrecharles</td><td class="pass">PASS</td><td>2 fichiers modifies/crees, dans worktree</td></tr>
+      <tr><td>G1</td><td>WP1-WP4 ecrivent EXCLUSIVEMENT dans aegis-governance-internal</td><td class="pass">PASS</td><td>git log aegis-governance-internal = 1 commit, 21 fichiers</td></tr>
+      <tr><td>G2</td><td>ZERO npm install &lt;package&gt; additionnel</td><td class="pass">PASS</td><td>Deps Vite/React/TS uniquement, 70 packages totaux</td></tr>
+      <tr><td>G3</td><td>ZERO refactor architectural scaffold N4</td><td class="pass">PASS</td><td>2 fixes TS minimaux N4-04/N4-05, dead code only</td></tr>
+      <tr><td>G4</td><td>ZERO remote GitHub, ZERO git push</td><td class="pass">PASS</td><td>git remote -v vide, branch main local</td></tr>
+      <tr><td>G5</td><td>npm run build PASS apres WP2</td><td class="pass">PASS</td><td>0 erreurs TS, 29 modules</td></tr>
+      <tr><td>G6</td><td>Scaffold N4 compatible React 19 Vite 6</td><td class="pass">PASS</td><td>Aucune incompat, build PASS post-migration</td></tr>
+      <tr><td>G7</td><td>AEGIS.md / CLAUDE.md / README.md preserves post-Vite</td><td class="pass">PASS</td><td>Scaffold manuel evite prompt interactif Vite</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>S3 &mdash; Checklist AC par work package</h2>
+
+  <h3>WP0a &mdash; AEGIS.md + shim CLAUDE.md (jeanpierrecharles worktree)</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP0a-1 : AEGIS.md cree dans worktree jeanpierrecharles (~165 lignes)</li>
+    <li class="ok">AC-WP0a-2 : CLAUDE.md reduit a shim 19 lignes avec renvoi AEGIS.md</li>
+    <li class="ok">AC-WP0a-3 : AEGIS.md contient stack, doctrine, pricing, conventions, regles, acteurs</li>
+    <li class="ok">AC-WP0a-4 : Zero secret, zero cle API dans AEGIS.md (verification visuelle)</li>
+  </ul>
+
+  <h3>WP0b &mdash; AEGIS.md + CLAUDE.md (aegis-governance-internal)</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP0b-1 : AEGIS.md existe dans aegis-governance-internal/</li>
+    <li class="ok">AC-WP0b-2 : CLAUDE.md shim ~10 lignes existe</li>
+    <li class="ok">AC-WP0b-3 : AEGIS.md governance adapte (mission interne, pas copie marketing)</li>
+    <li class="ok">AC-WP0b-4 : Isolation S5 explicitement mentionnee (5 points)</li>
+  </ul>
+
+  <h3>WP1 &mdash; Initialisation Vite</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP1-1 : package.json avec react ^19.2 / react-dom ^19.2 / typescript ~5.8.2 / vite ^6.2</li>
+    <li class="ok">AC-WP1-2 : tsconfig composite strict mode (tsconfig.app.json + tsconfig.node.json)</li>
+    <li class="ok">AC-WP1-3 : npm run dev demarre sur localhost:5173 (HTTP 200 confirme)</li>
+    <li class="ok">AC-WP1-4 : npm run build produit dist/ sans erreur TS (29 modules)</li>
+    <li class="ok">AC-WP1-5 : AEGIS.md + CLAUDE.md + README.md preserves (scaffold manuel)</li>
+  </ul>
+
+  <h3>WP2 &mdash; Migration scaffold N4</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP2-1 : GanttKanbanV4.tsx existe dans src/components/ (1942 lignes init -> 2067 final)</li>
+    <li class="ok">AC-WP2-2 : npm run build = 0 erreur TypeScript</li>
+    <li class="partial">AC-WP2-3 : npm run dev affiche le dashboard Gantt Kanban (V&V visuel JP requis)</li>
+    <li class="partial">AC-WP2-4 : Header avec IDs strip visible en haut (V&V visuel JP)</li>
+    <li class="partial">AC-WP2-5 : 5 onglets navigation visibles K/G/I/M/E (V&V visuel JP)</li>
+    <li class="partial">AC-WP2-6 : Vue Kanban par defaut avec 7 colonnes (V&V visuel JP)</li>
+    <li class="partial">AC-WP2-7 : Clic sur carte ouvre panneau detail FR-04 (V&V visuel JP)</li>
+  </ul>
+
+  <h3>WP3 &mdash; Data refresh LIFECYCLE v2.11.1</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP3-1 : header strip affiche D418 / L337 / R156 (ligne 1125 du composant)</li>
+    <li class="ok">AC-WP3-2 : sprints v3.4.3-v3.5.2 + v3.6.0 visibles Gantt swimlane Code (8 ajouts)</li>
+    <li class="ok">AC-WP3-3 : jalon J0 15/04 done:true VERT (premier revenu DIAGNOSTIC documente LIFECYCLE 206)</li>
+    <li class="ok">AC-WP3-4 : jalon Gemini deprecie 01/06 ROUGE deadline future (done:false)</li>
+    <li class="ok">AC-WP3-5 : 7 chantiers BRIDGE_STATE presents comme items Kanban (chant-01 a chant-07)</li>
+    <li class="ok">AC-WP3-6 : zero donnee inventee &mdash; tout sourced LIFECYCLE_MASTER ou BRIDGE_STATE 30/04</li>
+  </ul>
+
+  <h3>WP4 &mdash; Securisation + git init + V&V finale</h3>
+  <ul class="checklist">
+    <li class="ok">AC-WP4-1 : .gitignore exclut node_modules/, dist/, *.tsbuildinfo, .env*, secrets</li>
+    <li class="ok">AC-WP4-2 : docs/SECURITY.md cree (Option L local seul, D10r2, isolation S5)</li>
+    <li class="ok">AC-WP4-3 : git log montre exactement 1 commit (5d510cf) sur main, 0 remote</li>
+    <li class="ok">AC-WP4-4 : npm run build final = 0 erreur TS, 29 modules, 233 KB / 72 KB gzip</li>
+    <li class="ok">AC-WP4-5 : VV-RAPPORT HTML produit (ce document)</li>
+  </ul>
+</section>
+
+<section>
+  <h2>S4 &mdash; Output build final + git log</h2>
+  <h3>npm run build (post-WP3)</h3>
+<pre>&gt; aegis-governance-internal@0.1.0 build
+&gt; tsc -b && vite build
+
+vite v6.4.2 building for production...
+transforming...
+[OK] 29 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  0.34 kB | gzip:  0.25 kB
+dist/assets/index-6U4-LoLN.js  233.20 kB | gzip: 72.13 kB
+[OK] built in 1.47s</pre>
+
+  <h3>git log --oneline</h3>
+<pre>5d510cf feat: aegis-governance-internal init + Gantt Kanban v4 N4 + data refresh v2.11.1 + AEGIS.md</pre>
+
+  <h3>git remote -v (vide -- R_ABS_NIGHT_01)</h3>
+<pre>(aucun remote configure)</pre>
+
+  <h3>git status (post-commit)</h3>
+<pre>On branch main
+nothing to commit, working tree clean</pre>
+</section>
+
+<section>
+  <h2>S5 &mdash; Findings &amp; dettes identifiees</h2>
+  <table>
+    <thead><tr><th>#</th><th>Type</th><th>Description</th><th>Priorite</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>F-01</td>
+        <td>Architecture</td>
+        <td>
+          ACDC Code execute la mission depuis le worktree
+          <code>C:\Projects\jeanpierrecharles\.claude\worktrees\modest-burnell-b59fe1</code>.
+          WP0a (CLAUDE.md + AEGIS.md jeanpierrecharles) ecrit dans le worktree, donc
+          sur la branche <code>claude/modest-burnell-b59fe1</code>. JP doit merger cette
+          branche vers main pour appliquer le pattern AEGIS.md/CLAUDE.md sur le projet
+          principal jeanpierrecharles.
+        </td>
+        <td class="warn">Haute &mdash; JP merge requis</td>
+      </tr>
+      <tr>
+        <td>F-02</td>
+        <td>Data</td>
+        <td>
+          Discrepance brief vs LIFECYCLE_MASTER pour dates v3.4.3 et v3.4.4 :
+          brief table (ligne 405) dit "v3.4.3 16-17/04" mais LIFECYCLE_MASTER §3 (ligne 988)
+          dit "v3.4.3 CLOS 13/04 Sprint J-2 PDF V&V". J'ai privilegie LIFECYCLE_MASTER
+          (R13 source de verite). A confirmer JP V&V.
+        </td>
+        <td class="warn">Moyenne &mdash; JP V&V dates</td>
+      </tr>
+      <tr>
+        <td>F-03</td>
+        <td>Data</td>
+        <td>
+          Sprint sp-35 commercial relibele de "v3.5" a "TIER TERRAIN" car les v3.5.0/1/2
+          reels sont des sprints CODE. Le sprint commercial represente le chantier
+          EXPERTISE TERRAIN (BRIDGE_STATE #2). A valider.
+        </td>
+        <td class="warn">Faible &mdash; cosmetique</td>
+      </tr>
+      <tr>
+        <td>F-04</td>
+        <td>Build</td>
+        <td>
+          Bundle 233 KB / 72 KB gzip = acceptable mais le scaffold N4 contient ~2050 lignes
+          dans un seul fichier. Refactor en sous-composants (KanbanView, GanttView, ItemDetail)
+          dans des fichiers distincts ameliorerait HMR. Hors scope mission.
+        </td>
+        <td class="warn">Faible &mdash; backlog</td>
+      </tr>
+      <tr>
+        <td>F-05</td>
+        <td>Data</td>
+        <td>
+          ID_REGISTRY ajoute 11 IDs LIFECYCLE v2.11.1 (D371, D397, D416, D418, L290, L337,
+          R153-R156). Les ranges complets D372-D418 (47 IDs), L291-L337 (47 IDs), R138-R156 (19 IDs)
+          ne sont pas tous embarques (LIFECYCLE_MASTER 145 KB trop volumineux pour data
+          embarquee statique). Backlog : si IdsRegistryViewer doit afficher la liste complete,
+          parser LIFECYCLE_MASTER au build ou charger via fetch local.
+        </td>
+        <td class="warn">Moyenne &mdash; backlog Phase 4</td>
+      </tr>
+      <tr>
+        <td>F-06</td>
+        <td>Process</td>
+        <td>
+          Brief MIGRATION_PLAN_POST_J0.md (commit dans docs/) date du 11/04/2026 et utilise
+          la convention temporelle "J0 16-19/04". Cette planification etait en retard,
+          desormais obsolete (J0 atteint 15/04, mission init reportee a 06/05). Le doc reste
+          historiquement utile mais devrait etre marque "obsolete" ou supprime au prochain
+          sprint.
+        </td>
+        <td class="warn">Faible &mdash; nettoyage</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>S6 &mdash; JP_INPUT_NEEDED resolutions</h2>
+  <table>
+    <thead><tr><th>#</th><th>Question</th><th>Statut</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>JP-1</td>
+        <td>Vite ecrase README.md / AEGIS.md / CLAUDE.md</td>
+        <td class="pass">RESOLU</td>
+        <td>Scaffold manuel sans <code>npm create vite</code> -> aucun risque d'ecrasement</td>
+      </tr>
+      <tr>
+        <td>JP-2</td>
+        <td>Deps additionnelles necessaires scaffold N4</td>
+        <td class="pass">RESOLU</td>
+        <td>Aucune dep additionnelle requise -- scaffold utilise uniquement React 19 + style inline</td>
+      </tr>
+      <tr>
+        <td>JP-3</td>
+        <td>git init + commit = action L3 si Code ne peut executer git</td>
+        <td class="pass">RESOLU</td>
+        <td>Code a execute git init + commit local (autorisation explicite brief WP4 step 6). 0 remote, 0 push.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>S7 &mdash; Convention &amp; doctrine appliquees</h2>
+  <ul>
+    <li><strong>D48</strong> ASCII strict applique a tout le code TS/JSX (commentaires + identifiants). Accents preserves uniquement dans strings UI affichees (ex: descriptions, labels).</li>
+    <li><strong>D80</strong> IDs temporaires de cette mission tous prefixes <code>D_T0900_xx</code> dans le brief, IDs definitifs (D418/L337/R156) sourced LIFECYCLE.</li>
+    <li><strong>D204</strong> <code>git add</code> selectif (21 fichiers nommes), JAMAIS <code>git add -A</code> ni <code>git add .</code>.</li>
+    <li><strong>R_ABS_NIGHT_01</strong> Aucune action irreversible : 0 push, 0 remote, 0 deploy, 0 npm publish, 0 modification .env.</li>
+    <li><strong>R13</strong> Source de verite respectee : tout data refresh sourced LIFECYCLE_MASTER ou BRIDGE_STATE 30/04. Les ambiguites (F-02) signalees pour V&V JP au lieu d'invention.</li>
+    <li><strong>IEEV</strong> Chaque WP : Intention enoncee -> Engagement (AC) -> Execution -> Verification (build PASS + git log). 26/26 AC.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>S8 &mdash; Recommendations next steps (post-V&V JP)</h2>
+  <ol>
+    <li><strong>V&V visuel localhost:5173</strong> &mdash; JP ouvre <code>http://localhost:5173/</code> et valide AC-WP2-3 a AC-WP2-7 (5 onglets, 7 colonnes Kanban, panneau detail FR-04).</li>
+    <li><strong>Merge worktree jeanpierrecharles</strong> &mdash; Decision JP : merger la branche <code>claude/modest-burnell-b59fe1</code> vers <code>main</code> pour appliquer le pattern AEGIS.md/CLAUDE.md sur le projet jeanpierrecharles principal (F-01).</li>
+    <li><strong>Validation discrepances data</strong> &mdash; F-02 dates v3.4.3 et F-03 sp-35 relibele : valider source de verite definitive.</li>
+    <li><strong>Optionnel</strong> &mdash; phase 4 elargissement modules : IdsRegistryViewer (681 IDs), BlindSpotsMatrix, RegulatoryRadar (README §4 phase 4 POST-19/04, encore non demarree).</li>
+    <li><strong>Optionnel</strong> &mdash; refactor sous-composants GanttKanbanV4.tsx (F-04) si l'usage croit.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>S9 &mdash; Critere de succes mission (S5 brief)</h2>
+  <table>
+    <thead><tr><th>#</th><th>Critere</th><th>Statut</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>AEGIS.md existe dans les DEUX projets</td><td class="pass">PASS</td></tr>
+      <tr><td>2</td><td>CLAUDE.md = shim ~20 lignes dans les DEUX projets</td><td class="pass">PASS (19+11 lignes)</td></tr>
+      <tr><td>3</td><td>npm run dev affiche dashboard sur localhost:5173</td><td class="pass">PASS HTTP 200 (V&V visuel JP en attente)</td></tr>
+      <tr><td>4</td><td>npm run build = 0 erreur TypeScript</td><td class="pass">PASS</td></tr>
+      <tr><td>5</td><td>Header IDs strip = D418 / L337 / R156</td><td class="pass">PASS (ligne 1125)</td></tr>
+      <tr><td>6</td><td>Au moins 3 sprints post-v3.4.2 visibles dans le Gantt</td><td class="pass">PASS (8 ajouts : v3.4.3, v3.4.4, v3.4.5, v3.4.6, v3.4.7-9, v3.5.0, v3.5.1, v3.5.2, v3.6.0)</td></tr>
+      <tr><td>7</td><td>Jalon J0 15/04 rendu DONE</td><td class="pass">PASS (criticality VERT, done:true)</td></tr>
+      <tr><td>8</td><td>VV-RAPPORT HTML produit avec checklist complete</td><td class="pass">PASS (ce document)</td></tr>
+      <tr><td>9</td><td>ZERO remote GitHub</td><td class="pass">PASS</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>S10 &mdash; Verification cross-references</h2>
+  <table>
+    <thead><tr><th>Fichier source</th><th>Existence</th><th>Reference utilisee</th></tr></thead>
+    <tbody>
+      <tr><td><code>20260413T2240 scaffold N4</code></td><td class="pass">OK</td><td>Copie -&gt; src/components/GanttKanbanV4.tsx (1942 lignes init)</td></tr>
+      <tr><td><code>20260425T0815_LIFECYCLE_MASTER.md</code></td><td class="pass">OK</td><td>v2.11.1 D418/L337/R156, sprints §3, IDs §5/§10/§11</td></tr>
+      <tr><td><code>BRIDGE_STATE.md</code> 30/04</td><td class="pass">OK</td><td>7 chantiers actifs, HEAD main 67eda51 v3.5.2 invoice-archive</td></tr>
+      <tr><td><code>20260410T1400_SPEC_GANTT-KANBAN-V4-PRS.md</code></td><td class="pass">OK</td><td>Audit DIVA N3 88% PASS reference dans scaffold</td></tr>
+      <tr><td><code>PRINCIPE_FONDATEUR_v1.4.0.md</code></td><td class="pass">OK</td><td>Doctrine integree dans AEGIS.md (compliance vs conformite)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>S11 &mdash; Effort &amp; calibration TKE</h2>
+  <table>
+    <thead><tr><th>WP</th><th>Estime brief</th><th>Reel ACDC Code</th><th>Delta</th></tr></thead>
+    <tbody>
+      <tr><td>WP0a AEGIS.md jeanpierrecharles</td><td>10 min</td><td>~3 min</td><td class="pass">-7</td></tr>
+      <tr><td>WP0b governance-internal</td><td>5 min</td><td>~2 min</td><td class="pass">-3</td></tr>
+      <tr><td>WP1 Vite init</td><td>10 min</td><td>~6 min</td><td class="pass">-4</td></tr>
+      <tr><td>WP2 Migration scaffold</td><td>15 min</td><td>~5 min</td><td class="pass">-10</td></tr>
+      <tr><td>WP3 Data refresh</td><td>20 min</td><td>~12 min</td><td class="pass">-8</td></tr>
+      <tr><td>WP4 Securisation + V&V</td><td>15 min</td><td>~7 min</td><td class="pass">-8</td></tr>
+      <tr><td><strong>Total</strong></td><td><strong>75 min</strong></td><td><strong>~35 min</strong></td><td class="pass"><strong>-40 (53% gain)</strong></td></tr>
+    </tbody>
+  </table>
+  <p>
+    Gain empirique 53% vs estimation brief, alignee L290 (gain RC1+RC2 ~30-45 min/mission).
+    Source : scaffold manuel evite prompt interactif Vite (gain WP1), edits chirurgicaux
+    via Edit tool (gain WP2/WP3), TodoWrite suit progression (gain coordination).
+  </p>
+</section>
+
+<footer>
+  ACDC Code (L1a) &mdash; 20260506T1130 CET &mdash; Mission COMPLETE pre-V&V visuel JP<br>
+  Brief : 20260506T0900_BRIEF_MISSION-EXEC-GOVERNANCE-INTERNAL-INIT-v2 (T1015 amendee)<br>
+  IDs : D418 / L337 / R156 &middot; Convention D48 / D80 / IEEV / R_ABS_NIGHT_01<br>
+  RC2 : VV-RAPPORT HTML autonome 11 sections
+</footer>
+
+</div>
+</body>
+</html>

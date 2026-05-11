@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1584">
+<title>AEGIS Intelligence LinkedIn Banner v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .export-bar {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .export-btn {
+    padding: 12px 32px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .export-btn:hover { background: #2563eb; }
+  .export-btn:disabled { background: #475569; cursor: wait; }
+  .export-info {
+    color: #94a3b8;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+  }
+
+  .banner {
+    position: relative;
+    width: 1584px;
+    height: 396px;
+    background: #080e1c;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  /* Background canvas — drawn via JS for clean export */
+  .bg-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1584px;
+    height: 396px;
+    z-index: 0;
+  }
+
+  .main-title {
+    position: absolute; top: 48px; left: 340px; z-index: 10;
+  }
+  .main-title h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 42px;
+    letter-spacing: 3px;
+    line-height: 1.1;
+    color: #ffffff;
+  }
+  .main-title h1 .accent { color: #60a5fa; }
+
+  .subtitle {
+    position: absolute; top: 168px; left: 340px; z-index: 10;
+  }
+  .subtitle p {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 28px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    line-height: 1.3;
+  }
+  .subtitle p strong { color: #cbd5e1; font-weight: 600; }
+
+  .shield-area {
+    position: absolute; right: 80px; top: 24px;
+    width: 280px; height: 220px; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .shield-svg {
+    width: 140px; height: 160px;
+  }
+  .shield-label {
+    margin-top: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700; font-size: 26px;
+    letter-spacing: 4px; color: #ffffff;
+  }
+  .shield-tagline {
+    margin-top: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500; font-size: 16px;
+    letter-spacing: 3px; color: #60a5fa;
+    text-transform: uppercase;
+  }
+
+  .pillars-line {
+    position: absolute; bottom: 72px;
+    left: 15%; right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #3b82f650, transparent);
+    z-index: 9;
+  }
+  .pillars-bar {
+    position: absolute; bottom: 16px; left: 0;
+    width: 100%; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+  }
+  .pillars-inner { display: flex; align-items: center; gap: 0; }
+  .pillar-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 21px; letter-spacing: 3px;
+    color: #e2e8f0; padding: 0 24px;
+  }
+  .pillar-item.active {
+    color: #ffffff;
+  }
+  .pillar-sep {
+    color: #475569; font-size: 21px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .corner-tl {
+    position: absolute; top: 12px; left: 320px;
+    width: 40px; height: 40px;
+    border-top: 2px solid #1e3a5f;
+    border-left: 2px solid #1e3a5f;
+    z-index: 8;
+  }
+  .corner-br {
+    position: absolute; bottom: 80px; right: 20px;
+    width: 40px; height: 40px;
+    border-bottom: 2px solid #1e3a5f;
+    border-right: 2px solid #1e3a5f;
+    z-index: 8;
+  }
+  .scan-line {
+    position: absolute; top: 240px; left: 340px; right: 400px;
+    height: 1px;
+    background: linear-gradient(90deg, #3b82f600, #3b82f640, #3b82f600);
+    z-index: 8;
+  }
+  .vert-accent {
+    position: absolute; top: 40px; left: 325px;
+    width: 2px; height: 220px;
+    background: linear-gradient(180deg, #1e40af40, #3b82f620, transparent);
+    z-index: 8;
+  }
+</style>
+</head>
+<body>
+
+<div class="export-bar">
+  <button class="export-btn" id="exportBtn" onclick="exportPNG()">⬇ Télécharger PNG (1584×396)</button>
+  <span class="export-info" id="exportStatus">Cliquer pour générer le fichier PNG LinkedIn</span>
+</div>
+
+<div class="banner" id="banner">
+  <!-- Background drawn on canvas for clean export -->
+  <canvas class="bg-canvas" id="bgCanvas" width="1584" height="396"></canvas>
+
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="vert-accent"></div>
+  <div class="scan-line"></div>
+
+  <div class="main-title">
+    <h1>INDUSTRIAL<br>TRANSFORMATION <span class="accent">5.0</span></h1>
+  </div>
+
+  <div class="subtitle">
+    <p><strong>AI-Driven Innovation</strong> &amp;<br><strong>EU Regulatory Compliance</strong></p>
+  </div>
+
+  <div class="shield-area">
+    <svg class="shield-svg" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#4a6fa5" />
+          <stop offset="30%" style="stop-color:#8badd4" />
+          <stop offset="50%" style="stop-color:#c0d4ea" />
+          <stop offset="70%" style="stop-color:#8badd4" />
+          <stop offset="100%" style="stop-color:#3d5a80" />
+        </linearGradient>
+        <linearGradient id="shieldInner" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a2a42" />
+          <stop offset="50%" style="stop-color:#0d1b2a" />
+          <stop offset="100%" style="stop-color:#1a2a42" />
+        </linearGradient>
+        <linearGradient id="shieldAccent" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.8" />
+          <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.4" />
+        </linearGradient>
+      </defs>
+      <path d="M60 4 L112 28 L112 75 Q112 110 60 136 Q8 110 8 75 L8 28 Z"
+            fill="url(#shieldGrad)" stroke="#8badd4" stroke-width="1.5"/>
+      <path d="M60 14 L102 34 L102 73 Q102 104 60 126 Q18 104 18 73 L18 34 Z"
+            fill="url(#shieldInner)" stroke="#4a6fa5" stroke-width="0.5"/>
+      <g transform="translate(60,70)" fill="none" stroke="url(#shieldAccent)" stroke-width="2.5" stroke-linecap="round">
+        <path d="M0,-32 L-18,20 M0,-32 L18,20 M-11,2 L11,2"/>
+        <circle cx="0" cy="-4" r="26" stroke-width="1" opacity="0.4"/>
+        <line x1="-20" y1="28" x2="20" y2="28" stroke-width="1.5" opacity="0.5"/>
+      </g>
+    </svg>
+    <div class="shield-label">AEGIS</div>
+    <div class="shield-tagline">Regulatory Intelligence</div>
+  </div>
+
+  <div class="pillars-line"></div>
+
+  <div class="pillars-bar">
+    <div class="pillars-inner">
+      <span class="pillar-item active">AI Act</span>
+      <span class="pillar-sep">│</span>
+      <span class="pillar-item">CRA</span>
+      <span class="pillar-sep">│</span>
+      <span class="pillar-item">Machinery</span>
+      <span class="pillar-sep">│</span>
+      <span class="pillar-item">ESPR</span>
+      <span class="pillar-sep">│</span>
+      <span class="pillar-item">Battery Reg</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Draw background on canvas (avoids html2canvas issues with CSS gradients)
+function drawBackground() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1584, H = 396;
+
+  // Base gradient
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#060a14');
+  bg.addColorStop(0.25, '#0d1424');
+  bg.addColorStop(0.5, '#111c33');
+  bg.addColorStop(0.75, '#0d1828');
+  bg.addColorStop(1, '#080e1c');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Glow effects
+  function drawGlow(cx, cy, rx, ry, color) {
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+    grd.addColorStop(0, color);
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  drawGlow(550, -60, 250, 150, 'rgba(30,64,175,0.08)');
+  drawGlow(1200, 450, 300, 150, 'rgba(30,58,95,0.09)');
+  drawGlow(1100, 100, 150, 100, 'rgba(96,165,250,0.03)');
+
+  // Circuit board lines
+  ctx.strokeStyle = 'rgba(59,130,246,0.12)';
+  ctx.lineWidth = 1;
+  const hLines = [
+    [100,60,500], [600,60,800], [250,120,600], [700,120,1200],
+    [50,180,300], [800,180,1200], [400,240,1000], [150,300,500],
+    [700,300,1000], [500,350,900]
+  ];
+  hLines.forEach(([x,y,x2]) => {
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x2,y); ctx.stroke();
+  });
+  const vLines = [
+    [200,30,180], [500,60,240], [600,100,300], [800,50,180],
+    [1000,120,300], [1200,60,300], [1400,100,300]
+  ];
+  vLines.forEach(([x,y,h]) => {
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+h); ctx.stroke();
+  });
+
+  // Circuit nodes
+  const nodes = [
+    [497,60,3], [597,120,3], [797,180,3], [997,240,4],
+    [697,300,3], [797,60,3], [1197,120,4], [897,350,3],
+    [197,60,3], [297,180,3], [497,300,4]
+  ];
+  nodes.forEach(([x,y,r]) => {
+    ctx.fillStyle = 'rgba(59,130,246,0.25)';
+    ctx.shadowColor = 'rgba(59,130,246,0.3)';
+    ctx.shadowBlur = r * 2;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.shadowBlur = 0;
+
+  // Subtle dot grid
+  ctx.fillStyle = 'rgba(255,255,255,0.012)';
+  for (let x = 0; x < W; x += 80) {
+    for (let y = 0; y < H; y += 80) {
+      ctx.beginPath();
+      ctx.arc(x + 20, y + 20, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// Draw background on load
+window.addEventListener('load', () => {
+  document.fonts.ready.then(drawBackground);
+});
+
+// Export PNG using canvas compositing
+async function exportPNG() {
+  const btn = document.getElementById('exportBtn');
+  const status = document.getElementById('exportStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération en cours...';
+  status.textContent = 'Attendez quelques secondes...';
+
+  try {
+    await document.fonts.ready;
+
+    const W = 1584, H = 396;
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = W;
+    exportCanvas.height = H;
+    const ctx = exportCanvas.getContext('2d');
+
+    // 1. Draw background from our canvas
+    const bgCanvas = document.getElementById('bgCanvas');
+    ctx.drawImage(bgCanvas, 0, 0);
+
+    // 2. Draw decorative lines
+    // Corner TL
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(320, 12); ctx.lineTo(360, 12);
+    ctx.moveTo(320, 12); ctx.lineTo(320, 52);
+    ctx.stroke();
+
+    // Corner BR
+    ctx.beginPath();
+    ctx.moveTo(1564, 316); ctx.lineTo(1524, 316);
+    ctx.moveTo(1564, 316); ctx.lineTo(1564, 276);
+    ctx.stroke();
+
+    // Vert accent
+    const vertGrad = ctx.createLinearGradient(325, 40, 325, 260);
+    vertGrad.addColorStop(0, 'rgba(30,64,175,0.25)');
+    vertGrad.addColorStop(0.5, 'rgba(59,130,246,0.12)');
+    vertGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = vertGrad;
+    ctx.fillRect(325, 40, 2, 220);
+
+    // Scan line
+    const scanGrad = ctx.createLinearGradient(340, 0, 1184, 0);
+    scanGrad.addColorStop(0, 'transparent');
+    scanGrad.addColorStop(0.5, 'rgba(59,130,246,0.25)');
+    scanGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = scanGrad;
+    ctx.fillRect(340, 240, 844, 1);
+
+    // Pillars separator line
+    const pillGrad = ctx.createLinearGradient(W*0.15, 0, W*0.85, 0);
+    pillGrad.addColorStop(0, 'transparent');
+    pillGrad.addColorStop(0.5, 'rgba(59,130,246,0.31)');
+    pillGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = pillGrad;
+    ctx.fillRect(W*0.15, 324, W*0.7, 1);
+
+    // 3. Draw title
+    ctx.font = '800 42px Orbitron, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textBaseline = 'top';
+    ctx.fillText('INDUSTRIAL', 340, 48);
+    // Measure "TRANSFORMATION " width to position "5.0"
+    const transText = 'TRANSFORMATION ';
+    ctx.fillText(transText, 340, 94);
+    const transW = ctx.measureText(transText).width;
+    ctx.fillStyle = '#60a5fa';
+    ctx.fillText('5.0', 340 + transW, 94);
+
+    // 4. Draw subtitle
+    ctx.font = '600 28px Rajdhani, sans-serif';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('AI-Driven Innovation', 340, 168);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '500 28px Rajdhani, sans-serif';
+    ctx.fillText(' &', 340 + ctx.measureText('AI-Driven Innovation').width, 168);
+    ctx.font = '600 28px Rajdhani, sans-serif';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('EU Regulatory Compliance', 340, 202);
+
+    // 5. Draw shield SVG via image
+    const svgEl = document.querySelector('.shield-svg');
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        // Shield position: right:80, center in 280px area, top:24
+        const shieldX = W - 80 - 140 - 70; // center of shield-area
+        const shieldY = 24 + 10;
+        ctx.drawImage(img, shieldX, shieldY, 140, 160);
+        URL.revokeObjectURL(svgUrl);
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = svgUrl;
+    });
+
+    // 6. Draw AEGIS label
+    ctx.font = '700 26px Orbitron, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('AEGIS', W - 80 - 140, 204);
+
+    // 7. Draw Regulatory Intelligence
+    ctx.font = '500 16px Rajdhani, sans-serif';
+    ctx.fillStyle = '#60a5fa';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('REGULATORY  INTELLIGENCE', W - 80 - 140, 230);
+
+    // 8. Draw pillar items
+    ctx.textAlign = 'center';
+    ctx.font = '400 21px "Share Tech Mono", monospace';
+
+    const pillars = ['AI Act', 'CRA', 'Machinery', 'ESPR', 'Battery Reg'];
+    const pillarY = H - 30;
+    const totalW = 700;
+    const startX = (W - totalW) / 2;
+    const spacing = totalW / pillars.length;
+
+    pillars.forEach((p, i) => {
+      const x = startX + spacing * i + spacing / 2;
+      ctx.fillStyle = i === 0 ? '#ffffff' : '#e2e8f0';
+      ctx.fillText(p, x, pillarY);
+
+      // Separator
+      if (i < pillars.length - 1) {
+        const sepX = startX + spacing * (i + 1);
+        ctx.fillStyle = '#475569';
+        ctx.fillText('│', sepX, pillarY);
+      }
+    });
+
+    // 9. Download
+    ctx.textAlign = 'start';
+    const link = document.createElement('a');
+    link.download = 'aegis-intelligence-linkedin-banner.png';
+    link.href = exportCanvas.toDataURL('image/png');
+    link.click();
+
+    btn.textContent = '✅ PNG téléchargé !';
+    status.textContent = 'Fichier: aegis-intelligence-linkedin-banner.png (1584×396)';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '⬇ Télécharger PNG (1584×396)';
+    }, 4000);
+
+  } catch (err) {
+    btn.textContent = '❌ Erreur';
+    status.textContent = 'Erreur : ' + err.message;
+    console.error(err);
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

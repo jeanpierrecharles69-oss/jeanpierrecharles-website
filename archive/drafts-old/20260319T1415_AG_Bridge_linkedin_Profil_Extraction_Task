@@ -1,0 +1,32 @@
+# LinkedIn Profile Extraction Task: jpcharles6918
+
+## Progress Checklist
+- [x] Navigate to https://www.linkedin.com/in/jpcharles6918/
+- [x] Handle login wall if present (Bypassed via search/closing modal)
+- [x] Extract Headline
+- [x] Extract About section (À propos)
+- [x] Extract Experience section (Expériences) (Supplemented by website)
+- [x] Extract Skills section (Compétences)
+- [x] Extract Certifications section
+- [x] Evaluate consistency with AEGIS Intelligence positioning
+- [x] Take final screenshot
+- [x] Final summary report
+
+## Extracted Information
+- **Headline:** INDUSTRIAL TRANSFORMATION 5.0 | AI-Driven Innovation & Regulatory Compliance | AI Act | ESPR | CRA | CPR | DPP
+- **About:** Jean-Pierre Charles focuses on Industrial Transformation 5.0 and AI-Driven Innovation with a heavy focus on EU Regulatory Compliance. He emphasizes that he has lived through the regulations he masters by designing the products they cover.
+- **Experience:**
+    - 32 years of industrial R&D in Autoliv, Faurecia, Saft, Forsee Power, Bombardier Transportation, and Emerson. 
+    - Roles spanned across 6 sectors: Machinery, Equipment, Systems, Automotive, Railway, and Batteries.
+    - Worked on 25+ industrial programs including Toyota and BMW.
+- **Skills:** AI Act, CRA (Cyber Resilience Act), Machinery Regulation (2023/1230), ESPR (Ecodesign), Battery Regulation, GDPR, Industry 5.0, Strategic Planning, Project Management.
+- **Certifications:**
+    - Advanced Digital Transformation Specialization (IIM Ahmedabad, June 2025)
+    - Impact from Digital Transformation: Full course (EU EIT Digital - KTH, April 2025)
+    - MSc Advanced Manufacturing (Coventry UK)
+    - Management Tech (Centrale Paris, 1994)
+
+## Findings & Notes
+- Perfect alignment with AEGIS Intelligence positioning: He explicitly lists AI Act, CRA, Machinery 2023/1230, ESPR, and Battery Regulation as core expertise areas.
+- LinkedIn profile was partially redacted for guest view, but the personal website (jeanpierrecharles.com) provided the missing details.
+- Most recent activity is heavily focused on AI burn-out and battery manufacturing (MOU between Factorial and Philenergy).

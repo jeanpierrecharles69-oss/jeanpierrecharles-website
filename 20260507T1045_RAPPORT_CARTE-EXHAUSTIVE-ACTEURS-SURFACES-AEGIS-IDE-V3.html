@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Carte Exhaustive Acteurs/Surfaces IDE V3 — Anatomie causale System Prompt vs Wrapper Desktop</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0e0e0e;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --card: #1a1a1a;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --t1: #e8e6e0;
+  --t2: #9c9a92;
+  --t3: #6b6a64;
+  --accent: #c8a46e;
+  --accent2: #8b7340;
+  --red: #e05c5c;
+  --red-bg: rgba(224,92,92,0.08);
+  --red-border: rgba(224,92,92,0.25);
+  --green: #5cb88a;
+  --green-bg: rgba(92,184,138,0.08);
+  --green-border: rgba(92,184,138,0.25);
+  --amber: #d4a84b;
+  --amber-bg: rgba(212,168,75,0.08);
+  --amber-border: rgba(212,168,75,0.25);
+  --purple: #a78bda;
+  --purple-bg: rgba(167,139,218,0.08);
+  --purple-border: rgba(167,139,218,0.25);
+  --teal: #5cb8b2;
+  --teal-bg: rgba(92,184,178,0.08);
+  --teal-border: rgba(92,184,178,0.25);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 28px 80px;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  margin: 0 0 56px;
+  padding: 36px 0 28px;
+  border-bottom: 1px solid var(--border2);
+}
+
+header .eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding: 4px 12px;
+  border: 1px solid var(--accent2);
+  border-radius: 2px;
+}
+
+header h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+  line-height: 1.2;
+}
+
+header .subtitle {
+  font-size: 15px;
+  color: var(--t2);
+  font-weight: 300;
+  font-style: italic;
+  max-width: 720px;
+  margin: 0 auto 22px;
+}
+
+header .meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--t3);
+}
+
+header .meta span {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg2);
+}
+
+/* SECTIONS */
+section {
+  margin: 0 0 56px;
+}
+
+section h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--accent);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+section h2::before {
+  content: attr(data-num);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--t3);
+  margin-right: 14px;
+  letter-spacing: 0.1em;
+}
+
+section .lead {
+  color: var(--t2);
+  font-size: 14px;
+  margin-bottom: 28px;
+  max-width: 920px;
+}
+
+section h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--t1);
+  margin: 28px 0 12px;
+  letter-spacing: 0;
+}
+
+p { margin: 0 0 14px; color: var(--t1); }
+p.muted { color: var(--t2); font-size: 13px; }
+
+code, .mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--bg3);
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--accent);
+}
+
+/* LAYERED DIAGRAM (visuel central) */
+.layered-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin: 32px auto 28px;
+  max-width: 880px;
+}
+
+.layer {
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 22px 28px;
+  position: relative;
+  background: var(--card);
+}
+
+.layer .layer-tag {
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  background: var(--bg);
+  padding: 2px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+}
+
+.layer-1 { border-color: var(--purple-border); background: linear-gradient(180deg, var(--purple-bg) 0%, var(--card) 100%); }
+.layer-1 .layer-tag { color: var(--purple); border-color: var(--purple-border); }
+
+.layer-2 { border-color: var(--amber-border); background: linear-gradient(180deg, var(--amber-bg) 0%, var(--card) 100%); }
+.layer-2 .layer-tag { color: var(--amber); border-color: var(--amber-border); }
+
+.layer-3 { border-color: var(--green-border); background: linear-gradient(180deg, var(--green-bg) 0%, var(--card) 100%); }
+.layer-3 .layer-tag { color: var(--green); border-color: var(--green-border); }
+
+.layer h4 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--t1);
+  margin-bottom: 4px;
+}
+
+.layer .layer-role {
+  font-size: 12px;
+  color: var(--t2);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+
+.layer .layer-content {
+  font-size: 13.5px;
+  color: var(--t1);
+  line-height: 1.7;
+}
+
+.layer .layer-content .quote {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--bg);
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent);
+  margin: 10px 0;
+}
+
+.arrow-down {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.arrow-down::before {
+  content: '';
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--border2) 0%, var(--accent) 100%);
+}
+.arrow-down::after {
+  content: '▼';
+  position: absolute;
+  bottom: -2px;
+  color: var(--accent);
+  font-size: 10px;
+}
+.arrow-down .label {
+  position: absolute;
+  left: calc(50% + 14px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* DISCORDANCE BOX */
+.discordance {
+  margin-top: 36px;
+  padding: 22px 26px;
+  border: 1px solid var(--red-border);
+  background: var(--red-bg);
+  border-radius: 4px;
+}
+.discordance .tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--red);
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border: 1px solid var(--red-border);
+  border-radius: 2px;
+}
+.discordance h4 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 18px;
+  color: var(--t1);
+  margin-bottom: 10px;
+}
+.discordance ul {
+  list-style: none;
+  padding: 0;
+}
+.discordance li {
+  padding: 6px 0 6px 22px;
+  position: relative;
+  font-size: 13.5px;
+  color: var(--t1);
+}
+.discordance li::before {
+  content: '↪';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+}
+
+/* PEARL GRID (N1/N2/N3) */
+.pearl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.pearl-card {
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 22px 22px 24px;
+  background: var(--card);
+  position: relative;
+}
+
+.pearl-card .level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.pearl-card h4 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 19px;
+  color: var(--t1);
+  margin-bottom: 6px;
+}
+
+.pearl-card .subtitle {
+  font-size: 12px;
+  color: var(--t3);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+
+.pearl-card p {
+  font-size: 13px;
+  color: var(--t1);
+  line-height: 1.6;
+}
+
+.pearl-card .quote-mono {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--bg);
+  padding: 8px 12px;
+  border-left: 2px solid var(--accent);
+  margin: 12px 0 0;
+  word-wrap: break-word;
+}
+
+/* IMPLICATIONS TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+table th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  color: var(--t2);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--t1);
+  vertical-align: top;
+}
+
+table tr:hover td { background: var(--bg2); }
+
+table .ok { color: var(--green); font-weight: 500; }
+table .ko { color: var(--red); font-weight: 500; }
+
+/* V2 REFERENCE */
+.v2-callout {
+  border: 1px solid var(--teal-border);
+  background: var(--teal-bg);
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-top: 16px;
+}
+.v2-callout h4 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 17px;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+
+/* FOOTER */
+footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--t3);
+  letter-spacing: 0.05em;
+}
+
+/* RESPONSIVE */
+@media (max-width: 760px) {
+  .pearl-grid { grid-template-columns: 1fr; }
+  header h1 { font-size: 28px; }
+  section h2 { font-size: 22px; }
+  .container { padding: 32px 18px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="eyebrow">AEGIS Intelligence — Carte IDE V3</div>
+  <h1>Anatomie causale de l'environnement Claude<br>System Prompt vs Wrapper Desktop</h1>
+  <div class="subtitle">Extension V3 du rapport « Carte Exhaustive Acteurs/Surfaces AEGIS IDE » — formalisation de la distinction couche cœur Anthropic vs surcouche client Desktop, et du protocole Gate D206 comme résolution causale.</div>
+  <div class="meta">
+    <span>D418 / L337 / R156</span>
+    <span>20260507T1045 CET</span>
+    <span>Opus 4.7 Adaptatif</span>
+    <span>Desktop v1.6259.1 (5095e7)</span>
+    <span>D10r2 MAINTENU</span>
+  </div>
+</header>
+
+<!-- ═══ SECTION A : PRÉAMBULE ═══ -->
+<section>
+  <h2 data-num="01">Préambule causal</h2>
+  <p class="lead">À l'ouverture de la session 20260507T0935 (post MAJ Desktop v1.6259.1), JP a soulevé une question légitime restée jusqu'alors implicite : pourquoi l'annonce textuelle du <em>system prompt</em> Anthropic indique-t-elle « web/mobile chat interface » alors que l'environnement réel est manifestement ACDC Desktop avec MCP Filesystem actif ? Cette section formalise la distinction et son traitement opérationnel.</p>
+  <p>L'environnement Claude perçu par AEGIS résulte de la <strong>superposition de trois couches distinctes</strong>. La confusion vient du fait que la <strong>couche cœur</strong> annonce textuellement un environnement, alors que la <strong>surcouche client</strong> en modifie la réalité fonctionnelle sans modifier l'annonce textuelle. Sans protocole de vérification empirique, Claude croit l'annonce et calibre ses outils en conséquence — risque de mauvaise sélection d'outils ou d'affirmations erronées sur les capacités disponibles.</p>
+</section>
+
+<!-- ═══ SECTION B : ANATOMIE EN COUCHES (visuel central) ═══ -->
+<section>
+  <h2 data-num="02">Anatomie en trois couches</h2>
+  <p class="lead">Le diagramme ci-dessous représente la stratification réelle de l'environnement. Chaque couche a une <strong>source</strong> distincte, une <strong>autorité</strong> distincte, et une <strong>visibilité</strong> distincte pour Claude. La discordance entre la couche 1 (textuelle) et la couche 3 (empirique) est le cœur du problème.</p>
+
+  <div class="layered-diagram">
+
+    <!-- Couche 1 -->
+    <div class="layer layer-1">
+      <div class="layer-tag">Couche 01 — Cœur Anthropic</div>
+      <h4>System Prompt Anthropic</h4>
+      <div class="layer-role">Source : envoyé par Anthropic à chaque session — identique tous clients (web, mobile, Desktop)</div>
+      <div class="layer-content">
+        Texte cœur définissant l'identité Claude, ses règles de comportement, son cadre de sécurité. Mentionne explicitement l'interface attendue.
+        <span class="quote">« Claude is currently operating in a web or mobile chat interface run by Anthropic. »</span>
+        <strong>Autorité</strong> : maximale (Anthropic). <strong>Visibilité</strong> : intégrale (Claude le lit en clair). <strong>Mutabilité</strong> : aucune côté utilisateur.
+      </div>
+    </div>
+
+    <div class="arrow-down"><span class="label">superposition silencieuse</span></div>
+
+    <!-- Couche 2 -->
+    <div class="layer layer-2">
+      <div class="layer-tag">Couche 02 — Surcouche client</div>
+      <h4>Wrapper Desktop (Electron + CC embarqué)</h4>
+      <div class="layer-role">Source : application Claude for Windows v1.6259.1 — distincte selon le client utilisé</div>
+      <div class="layer-content">
+        Surcouche logicielle qui injecte des capacités supplémentaires sans modifier le texte du system prompt cœur. Active des outils MCP, des onglets (Chat, Cowork, Code), des tools deferred chargés à la demande via <code>tool_search</code>. Le binaire Desktop évolue à son propre rythme (cycle ~hebdomadaire) indépendamment du modèle. <br><br>
+        <strong>Autorité</strong> : intermédiaire (Anthropic, mais distribuée par binaire client). <strong>Visibilité</strong> : opaque pour Claude (pas de texte explicite sur la surcouche). <strong>Mutabilité</strong> : MAJ automatique du binaire.
+      </div>
+    </div>
+
+    <div class="arrow-down"><span class="label">manifestation empirique</span></div>
+
+    <!-- Couche 3 -->
+    <div class="layer layer-3">
+      <div class="layer-tag">Couche 03 — Réalité fonctionnelle</div>
+      <h4>Environnement empirique observable</h4>
+      <div class="layer-role">Source : preuve directe par appel d'outil — seule source de vérité opérationnelle</div>
+      <div class="layer-content">
+        Capacités réellement disponibles dans la session : MCP Filesystem connecté, répertoires autorisés, outils deferred découvrables via <code>tool_search</code>, intégrations Chrome, Google Drive, Gmail, Calendar, Gamma.
+        <span class="quote">tool_search('filesystem') → 5 outils chargés<br>list_allowed_directories → C:\Projects, C:\Users\jpcha\.antigravity, Downloads, C:\Projects\Documents</span>
+        <strong>Autorité</strong> : empirique absolue (preuve d'exécution). <strong>Visibilité</strong> : conditionnelle (Claude doit appeler l'outil pour la révéler). <strong>Signature</strong> : 4 dirs = ACDC Desktop confirmé.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Discordance -->
+  <div class="discordance">
+    <div class="tag">Discordance cœur ↔ réalité</div>
+    <h4>La couche 1 dit « web ». La couche 3 prouve « Desktop ». Que croire ?</h4>
+    <ul>
+      <li><strong>Sans Gate D206</strong> — Claude croit la Couche 1 (annonce textuelle), suppose absence d'outils MCP, refuse d'écrire des fichiers locaux, propose à JP d'utiliser des téléchargements via <code>create_file</code>. Friction inutile, perte de capacités réelles.</li>
+      <li><strong>Avec Gate D206</strong> — Claude appelle <code>tool_search('filesystem')</code> + <code>list_allowed_directories</code>, observe la signature ACDC Desktop, bascule mentalement sur Couche 3 comme source de vérité, déploie les bons outils.</li>
+      <li><strong>Cause racine</strong> — l'annonce du system prompt cœur ne peut pas être mise à jour dynamiquement par le wrapper client. C'est une limitation architecturale, pas un bug. La résolution est protocolaire (vérification empirique), pas technique.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ SECTION C : GATE D206 — Pearl 3 niveaux ═══ -->
+<section>
+  <h2 data-num="03">Gate D206 — Résolution causale Pearl</h2>
+  <p class="lead">La Gate D206 (mémoire #30) formalise le protocole de vérification empirique exclusive (VEE v1.1, 24/04/2026). Elle est exprimée selon les trois niveaux de Judea Pearl : Observation, Intervention, Contrefactuel — alignée avec la règle absolue L_T1230_01 (mémoire #26).</p>
+
+  <div class="pearl-grid">
+
+    <div class="pearl-card">
+      <div class="level">N1 — OBSERVATION</div>
+      <h4>Constat de la discordance</h4>
+      <div class="subtitle">Que voit-on quand on lit le system prompt ?</div>
+      <p>L'annonce textuelle déclare un environnement (« web/mobile »). En parallèle, le contexte de session contient des éléments suggérant une surcouche : références à des outils non chargés par défaut, présence de fichiers projet en <code>/mnt/project/</code>, mentions de filesystem MCP dans les memories. Signal d'incohérence déclenché.</p>
+      <span class="quote-mono">Wrapper announce ≠ runtime reality</span>
+    </div>
+
+    <div class="pearl-card">
+      <div class="level">N2 — INTERVENTION</div>
+      <h4>Action de vérification empirique</h4>
+      <div class="subtitle">Qu'arrive-t-il si on agit pour observer ?</div>
+      <p>Claude exécute <code>tool_search('filesystem')</code>, puis <code>list_allowed_directories</code>. Le retour est binaire : soit aucun outil filesystem n'est disponible (claude.ai web/mobile pur), soit 4 répertoires sont autorisés (ACDC Desktop confirmé). L'intervention bascule la source de vérité de la Couche 1 vers la Couche 3.</p>
+      <span class="quote-mono">tool_search → list_allowed_directories → signature</span>
+    </div>
+
+    <div class="pearl-card">
+      <div class="level">N3 — CONTREFACTUEL</div>
+      <h4>Que se serait-il passé sans D206ㅤ?</h4>
+      <div class="subtitle">Et si le protocole n'avait pas été appliqué ?</div>
+      <p>Sans Gate D206, Claude répond depuis la Couche 1 et propose des contournements inutiles (téléchargements, copier-coller manuel, recommandations basées sur l'hypothèse d'absence d'outils). Le coût est triple : token (réponse plus longue), friction utilisateur (étapes manuelles), risque d'erreur (fausses affirmations sur les capacités).</p>
+      <span class="quote-mono">Pas de D206 → réponses sub-optimales transversales</span>
+    </div>
+
+  </div>
+
+  <h3>Allowed directories réels — signature empirique ACDC Desktop</h3>
+  <p class="muted">Les 4 répertoires retournés par <code>list_allowed_directories</code> constituent la signature non-falsifiable de l'environnement Desktop AEGIS. Toute autre signature (par exemple aucun répertoire, ou répertoires différents) caractérise un environnement distinct.</p>
+  <table>
+    <thead>
+      <tr><th>Répertoire</th><th>Rôle AEGIS</th><th>Statut</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>C:\Projects</code></td><td>Racine de tous les projets — KB jeanpierrecharles, aegis-ops, aegis-governance-internal, Deshaies, etc.</td><td class="ok">RW</td></tr>
+      <tr><td><code>C:\Users\jpcha\.antigravity</code></td><td>Workspace Antigravity (édition statique uniquement, D10r2)</td><td class="ok">RW</td></tr>
+      <tr><td><code>C:\Users\jpcha\Downloads</code></td><td>Boîte de réception fichiers temporaires</td><td class="ok">RW</td></tr>
+      <tr><td><code>C:\Projects\Documents</code></td><td>Documents partagés inter-projets (LinkedIn analytics, certificats France Travail, etc.)</td><td class="ok">RW</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ SECTION D : IMPLICATIONS OPÉRATIONNELLES AEGIS ═══ -->
+<section>
+  <h2 data-num="04">Implications opérationnelles AEGIS</h2>
+  <p class="lead">La distinction couche cœur vs surcouche client a des conséquences concrètes sur la conduite des sessions Claude pour AEGIS. Les règles ci-dessous sont déjà gravées en mémoire et constituent la doctrine opérationnelle.</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:24%">Règle</th><th style="width:38%">Mécanisme</th><th>Conséquence opérationnelle</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Gate D206</strong> (mémoire #30)</td>
+        <td><code>tool_search('filesystem')</code> + <code>list_allowed_directories</code> avant tout call et avant toute affirmation sur l'environnement ou les capacités.</td>
+        <td>Première action absolue de chaque session, silencieuse, non narrée à JP.</td>
+      </tr>
+      <tr>
+        <td><strong>VEE v1.1</strong> — Vérification Empirique Exclusive</td>
+        <td>Appel d'outil réel &gt; lecture du wrapper system prompt. L'absence d'un outil dans la liste visible ne signifie pas son indisponibilité (deferred).</td>
+        <td>Aucune affirmation « cet outil n'existe pas » sans tentative d'appel ou de chargement.</td>
+      </tr>
+      <tr>
+        <td><strong>Auto-ID D51 v1.2</strong> (mémoire #16)</td>
+        <td>Identité modèle déduite du system prompt = INDICATIVE. Seul JP via UI = source de vérité empirique.</td>
+        <td>Ne jamais écrire « Modèle X ✅ » sans confirmation JP UI. Pas d'alerte sur l'état de l'UI sans preuve directe.</td>
+      </tr>
+      <tr>
+        <td><strong>R_T0935_02</strong> — Dual-Lang Discipline</td>
+        <td>Recherches/analyses/raisonnements en anglais (calibration native dense). Restitution à JP en français droit au but, sans mélange FR/EN, sans verbiage.</td>
+        <td>Économie token majeure, signal/bruit maximal, dérive Opus 4.7 contenue.</td>
+      </tr>
+      <tr>
+        <td><strong>D10r2 MODE RESTREINT</strong></td>
+        <td>CC CLI npm absent (D183), Cowork VM bundle interdit, Computer Use limité au Code tab Preview ON, pas d'auto-modification binaire.</td>
+        <td>Surface d'attaque minimale même si la surcouche client expose de nouvelles capacités.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ SECTION E : RÉFÉRENCE V2 ═══ -->
+<section>
+  <h2 data-num="05">Continuité avec la V2 — 16 acteurs IDE</h2>
+  <p class="lead">La V2 (27/04/2026) cartographiait exhaustivement les 16 acteurs/surfaces de l'environnement AEGIS IDE avec leurs niveaux ACOOS et leurs risques cyber. La V3 ne remplace pas la V2 : elle ajoute la couche causale manquante qui explique <em>pourquoi</em> Gate D206 est la première action absolue de chaque session.</p>
+
+  <div class="v2-callout">
+    <h4>Synthèse des 16 acteurs V2 — pour mémoire</h4>
+    <p style="font-size:13px;color:var(--t1);">
+      <strong>L3</strong> : JP HITL (Surface + S24+). <strong>L2</strong> : ACDC Chat Opus (Desktop Chat tab). <strong>L1a</strong> : ACDC Code (Desktop Code tab). <strong>L1b</strong> : Claude.ai Sonnet (mobile/web). <strong>L0 collecte</strong> : Perplexity (D81). <strong>L0 services</strong> : Gemini Flash, Opus API, Mollie, Supabase, Gandi SMTP, GitHub. <strong>L0 connecteurs</strong> : Google Drive/Gmail/Calendar, Gamma. <strong>L0 édition</strong> : Antigravity. <strong>INTERDIT D10r2</strong> : Cowork VM. <strong>Contrôlé</strong> : Native Messaging (Chrome préservé, Edge/Chromium nettoyés auto).
+    </p>
+    <p class="muted" style="margin-top:10px;">Référence complète : <code>20260427T1000_RAPPORT_CARTE-EXHAUSTIVE-ACTEURS-SURFACES-AEGIS-IDE-V2.md</code></p>
+  </div>
+
+  <h3>Apport spécifique V3</h3>
+  <p>La V2 décrit les 16 acteurs mais traite implicitement l'environnement Claude comme « connu ». La V3 explicite que cet environnement est <strong>stratifié en 3 couches</strong>, que les couches 1 et 3 peuvent être en discordance, et que cette discordance se résout par un protocole nommé (Gate D206) plutôt que par la confiance dans l'annonce textuelle. Cette explicitation est le verrou logique manquant dans la doctrine ACOOS.</p>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  20260507T1045 CET — RAPPORT V3 — Anatomie causale System Prompt vs Wrapper Desktop — D10r2 MAINTENU — R_T0935_02 DUAL-LANG appliquée — Continuité V2 préservée
+</footer>
+
+</div>
+</body>
+</html>

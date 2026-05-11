@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS Intelligence — Session 20260402T1105 — Patrimoine Mémoriel</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  --bg:#0e0e0e; --bg2:#161616; --bg3:#1e1e1e; --card:#1a1a1a;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --t1:#e8e6e0; --t2:#9c9a92; --t3:#6b6a64; --accent:#c8a46e;
+  --red:#e05c5c; --red-bg:rgba(224,92,92,0.08); --red-border:rgba(224,92,92,0.25);
+  --green:#5cb88a; --green-bg:rgba(92,184,138,0.08); --green-border:rgba(92,184,138,0.25);
+  --amber:#d4a84b; --amber-bg:rgba(212,168,75,0.08); --amber-border:rgba(212,168,75,0.25);
+  --purple:#a78bda; --purple-bg:rgba(167,139,218,0.08); --purple-border:rgba(167,139,218,0.25);
+  --teal:#5cb8b2; --teal-bg:rgba(92,184,178,0.08); --teal-border:rgba(92,184,178,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg); color:var(--t1);
+  font-family:'DM Sans',sans-serif; font-size:14px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* WIDE LAYOUT — exploite 2880/1920 avec scaling 150-200% */
+.container {
+  max-width:1680px;
+  width:92vw;
+  margin:0 auto;
+  padding:36px 40px;
+}
+
+/* HEADER */
+header {
+  text-align:center; margin:0 0 40px; padding:32px 0 28px;
+  border-bottom:1px solid var(--border2);
+}
+header h1 {
+  font-family:'Instrument Serif',serif; font-size:36px; font-weight:400;
+  color:var(--t1); letter-spacing:-0.02em; margin:0 0 8px;
+}
+header .subtitle { font-size:15px; color:var(--t2); font-weight:300; }
+header .ids {
+  display:inline-flex; gap:12px; margin:14px 0 0; font-size:13px;
+  color:var(--accent); font-weight:500; letter-spacing:0.03em;
+  background:rgba(200,164,110,0.06); padding:7px 20px; border-radius:6px;
+  border:0.5px solid rgba(200,164,110,0.15);
+}
+
+/* DUAL COLUMN LAYOUT */
+.dual {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:32px;
+  margin:0 0 40px;
+}
+
+/* SECTION */
+.section { margin:0 0 40px; }
+.section-header {
+  display:flex; align-items:center; gap:12px;
+  margin:0 0 18px; padding:0 0 10px; border-bottom:1px solid var(--border);
+}
+.section-num {
+  width:30px; height:30px; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700;
+}
+.section-title {
+  font-family:'Instrument Serif',serif; font-size:24px; font-weight:400; color:var(--t1);
+}
+.section-date { margin-left:auto; font-size:12px; color:var(--t3); }
+
+/* GANTT */
+.gantt-row { display:flex; align-items:stretch; margin:0 0 5px; }
+.gantt-label {
+  min-width:220px; font-size:13px; color:var(--t1);
+  padding:7px 12px; display:flex; align-items:center; gap:8px;
+}
+.gantt-track { flex:1; display:flex; position:relative; min-height:32px; }
+.gantt-col { flex:1; border-right:0.5px solid var(--border); min-height:32px; }
+.gantt-col:last-child { border-right:none; }
+.gantt-hdr {
+  font-size:11px; color:var(--t3); text-align:center;
+  padding:4px 0; font-weight:500; letter-spacing:0.03em;
+}
+.gantt-bar {
+  position:absolute; height:22px; top:5px; border-radius:3px;
+  font-size:10px; display:flex; align-items:center;
+  padding:0 8px; font-weight:500; white-space:nowrap; overflow:hidden;
+}
+
+.g-done { background:rgba(92,184,138,0.15); color:var(--green); border:0.5px solid var(--green-border); }
+.g-active { background:var(--amber-bg); color:var(--amber); border:0.5px solid var(--amber-border); }
+.g-blocked { background:var(--red-bg); color:var(--red); border:0.5px solid var(--red-border); }
+.g-cond { background:var(--purple-bg); color:var(--purple); border:0.5px solid var(--purple-border); }
+.g-pending { background:rgba(255,255,255,0.03); color:var(--t3); border:0.5px dashed var(--border2); }
+.g-prep { background:var(--purple-bg); color:var(--purple); border:0.5px solid var(--purple-border); }
+.g-exec { background:var(--amber-bg); color:var(--amber); border:0.5px solid var(--amber-border); }
+.g-gate { background:var(--red-bg); color:var(--red); border:0.5px solid var(--red-border); }
+
+.badge { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:500; }
+.b-done { background:var(--green-bg); color:var(--green); border:0.5px solid var(--green-border); }
+.b-active { background:var(--amber-bg); color:var(--amber); border:0.5px solid var(--amber-border); }
+.b-blocked { background:var(--red-bg); color:var(--red); border:0.5px solid var(--red-border); }
+.b-cond { background:var(--purple-bg); color:var(--purple); border:0.5px solid var(--purple-border); }
+.b-pending { background:rgba(255,255,255,0.03); color:var(--t3); border:0.5px dashed var(--border2); }
+
+/* KPI CARDS */
+.kpi-grid {
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px; margin:0 0 20px;
+}
+.kpi {
+  background:var(--card); border:0.5px solid var(--border2);
+  border-radius:10px; padding:16px 18px;
+}
+.kpi .label {
+  font-size:11px; color:var(--t3); margin:0 0 5px;
+  text-transform:uppercase; letter-spacing:0.05em;
+}
+.kpi .val { font-size:28px; font-weight:300; font-family:'Instrument Serif',serif; }
+.kpi .sub { font-size:11px; margin:3px 0 0; }
+
+/* BARS */
+.bar-row { display:flex; align-items:center; gap:12px; margin:0 0 10px; font-size:13px; }
+.bar-label { min-width:180px; color:var(--t2); }
+.bar-track {
+  flex:1; height:20px; background:var(--bg3);
+  border-radius:3px; overflow:hidden; border:0.5px solid var(--border);
+}
+.bar-fill { height:100%; border-radius:2px; }
+.bar-val { min-width:50px; text-align:right; font-weight:500; }
+
+/* TABLE */
+table { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0; }
+th {
+  text-align:left; padding:9px 12px; color:var(--t3); font-weight:500;
+  border-bottom:1px solid var(--border2); font-size:11px;
+  text-transform:uppercase; letter-spacing:0.05em;
+}
+td { padding:9px 12px; border-bottom:0.5px solid var(--border); color:var(--t1); }
+
+.verdict {
+  display:inline-block; font-size:10px; padding:3px 10px;
+  border-radius:3px; font-weight:500;
+}
+.v-red { background:var(--red-bg); color:var(--red); border:0.5px solid var(--red-border); }
+.v-green { background:var(--green-bg); color:var(--green); border:0.5px solid var(--green-border); }
+.v-amber { background:var(--amber-bg); color:var(--amber); border:0.5px solid var(--amber-border); }
+
+/* ALERT */
+.alert {
+  padding:14px 18px; border-radius:8px; font-size:13px;
+  margin:14px 0; border:0.5px solid; line-height:1.5;
+}
+.alert-red { border-color:var(--red-border); color:var(--red); background:var(--red-bg); }
+
+/* VERDICT PANELS */
+.verdict-row { display:flex; gap:14px; margin:18px 0; }
+.verdict-panel { flex:1; padding:16px 18px; border-radius:10px; border:0.5px solid; }
+.verdict-panel h4 { font-size:14px; font-weight:500; margin:0 0 6px; }
+.verdict-panel p { font-size:12px; color:var(--t2); line-height:1.5; }
+.vp-red { border-color:var(--red-border); background:var(--red-bg); }
+.vp-red h4 { color:var(--red); }
+.vp-green { border-color:var(--green-border); background:var(--green-bg); }
+.vp-green h4 { color:var(--green); }
+
+/* KANBAN */
+.kanban { display:flex; gap:12px; margin:14px 0; }
+.kb-col {
+  flex:1; border-radius:10px; border:0.5px solid var(--border);
+  padding:12px; background:var(--bg2);
+}
+.kb-title {
+  font-size:10px; font-weight:500; color:var(--t3);
+  margin:0 0 10px; text-transform:uppercase; letter-spacing:0.06em;
+}
+.kb-card {
+  font-size:12px; padding:9px 12px; border-radius:6px; margin:0 0 6px;
+  color:var(--t1); border:0.5px solid var(--border2);
+  background:var(--card); line-height:1.4;
+}
+
+/* PERSONAS — 3 COLUMNS on wide screen */
+.personas-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+
+.persona {
+  border:0.5px solid var(--border2); border-radius:12px;
+  padding:20px; background:var(--card);
+}
+.persona-header { display:flex; align-items:center; gap:12px; margin:0 0 14px; }
+.persona-icon {
+  width:44px; height:44px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; font-weight:700; font-family:'Instrument Serif',serif;
+}
+.persona-name { font-size:17px; font-weight:500; color:var(--t1); letter-spacing:0.04em; }
+.persona-sub { font-size:11px; color:var(--t3); }
+
+.persona-grid { display:grid; grid-template-columns:1fr; gap:7px; }
+.pg-item {
+  font-size:12px; padding:9px 11px; border-radius:6px;
+  border:0.5px solid var(--border); background:var(--bg2);
+}
+.pg-label {
+  font-weight:500; color:var(--t3); font-size:9px;
+  margin:0 0 3px; text-transform:uppercase; letter-spacing:0.04em;
+}
+.pg-val { color:var(--t2); }
+
+.tag {
+  display:inline-block; font-size:9px; padding:2px 8px;
+  border-radius:3px; font-weight:500;
+}
+.t-on { background:var(--green-bg); color:var(--green); border:0.5px solid var(--green-border); }
+.t-off { background:rgba(255,255,255,0.03); color:var(--t3); border:0.5px solid var(--border); }
+.t-req { background:var(--amber-bg); color:var(--amber); border:0.5px solid var(--amber-border); }
+
+/* LEGEND */
+.legend {
+  display:flex; gap:18px; flex-wrap:wrap; margin:14px 0 0;
+  font-size:11px; color:var(--t3);
+}
+.legend span { display:flex; align-items:center; gap:6px; }
+.ldot { width:9px; height:9px; border-radius:2px; }
+
+/* SUB-SECTION */
+.sub-section { margin:18px 0; }
+.sub-title {
+  font-size:14px; font-weight:500; color:var(--t2);
+  margin:0 0 12px; padding:0 0 6px; border-bottom:0.5px solid var(--border);
+}
+
+/* FOOTER */
+footer {
+  text-align:center; padding:32px 0; border-top:1px solid var(--border);
+  margin:40px 0 0; color:var(--t3); font-size:12px;
+}
+footer .sig {
+  font-family:'Instrument Serif',serif; font-size:18px;
+  color:var(--accent); margin:0 0 6px;
+}
+
+/* RESPONSIVE */
+@media (max-width:1200px) {
+  .dual { grid-template-columns:1fr; }
+  .personas-grid { grid-template-columns:1fr; }
+}
+@media (max-width:700px) {
+  .container { padding:20px 16px; width:100vw; }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .gantt-label { min-width:120px; font-size:11px; }
+  .kanban { flex-direction:column; }
+  .verdict-row { flex-direction:column; }
+  .bar-label { min-width:100px; }
+  header h1 { font-size:24px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>AEGIS Intelligence — Patrimoine Mémoriel</h1>
+<div class="subtitle">Session 20260402T1105 CET — Audit Boost #1 × Option B × TLA S18 × Skilled Personas</div>
+<div class="ids">D329 / L225 / R104 · LIFECYCLE v2.8.0 · D10r2 MAINTENU</div>
+</header>
+
+<!-- ══════════ DUAL LAYOUT: S13 + BOOST ══════════ -->
+<div class="dual">
+
+<!-- SECTION 1: S13 TIMELINE -->
+<div class="section" style="margin:0">
+<div class="section-header"><div class="section-num" style="background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-border)">1</div><div class="section-title">Bloc D — Campagne MKT S13</div><div class="section-date">24–31/03</div></div>
+
+<div class="gantt-row"><div class="gantt-label" style="color:var(--t3);font-weight:500;font-size:11px;min-width:180px">Action</div><div class="gantt-track"><div class="gantt-col"><div class="gantt-hdr">Lu24</div></div><div class="gantt-col"><div class="gantt-hdr">Ma25</div></div><div class="gantt-col"><div class="gantt-hdr">Me26</div></div><div class="gantt-col"><div class="gantt-hdr">Je27</div></div><div class="gantt-col"><div class="gantt-hdr">Ve28</div></div><div class="gantt-col"><div class="gantt-hdr">Sa29</div></div><div class="gantt-col"><div class="gantt-hdr">Di30</div></div><div class="gantt-col"><div class="gantt-hdr">Lu31</div></div></div></div>
+
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-done">RÉDIGÉ</span> Post #3 CRA</div><div class="gantt-track"><div class="gantt-bar g-done" style="left:0%;width:25%">24/03</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-blocked">RETARD</span> Post #4 SBOM</div><div class="gantt-track"><div class="gantt-bar g-blocked" style="left:25%;width:25%">26–28</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-cond">COND.</span> Post #5 CRA retour</div><div class="gantt-track"><div class="gantt-bar g-cond" style="left:75%;width:25%">Si soumission</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-pending">À FAIRE</span> Ex-collègues</div><div class="gantt-track"><div class="gantt-bar g-pending" style="left:50%;width:37.5%">Template</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-active">ACTIF</span> Boost 50 € / 5j</div><div class="gantt-track"><div class="gantt-bar g-active" style="left:25%;width:62.5%">26/03→31/03</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="min-width:180px"><span class="badge b-blocked">DEADLINE</span> CRA soumission</div><div class="gantt-track"><div class="gantt-bar g-blocked" style="left:50%;width:50%">31/03 minuit</div></div></div>
+
+<div class="legend"><span><div class="ldot" style="background:var(--green)"></div>Fait</span><span><div class="ldot" style="background:var(--amber)"></div>Actif</span><span><div class="ldot" style="background:var(--red)"></div>Retard</span><span><div class="ldot" style="background:var(--purple)"></div>Cond.</span><span><div class="ldot" style="border:0.5px dashed var(--t3)"></div>À faire</span></div>
+</div>
+
+<!-- SECTION 2: BOOST AUDIT (right column) -->
+<div class="section" style="margin:0">
+<div class="section-header"><div class="section-num" style="background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)">2</div><div class="section-title">Audit Boost #1 — Pearl</div><div class="section-date">50 € HT</div></div>
+
+<div class="kpi-grid" style="grid-template-columns:repeat(2,1fr)">
+<div class="kpi"><div class="label">CPC réel</div><div class="val" style="color:var(--red)">8,33 €</div><div class="sub" style="color:var(--red)">Cible &lt; 5 € · TLA 0,50–2 €</div></div>
+<div class="kpi"><div class="label">CTR</div><div class="val" style="color:var(--red)">0,13 %</div><div class="sub" style="color:var(--red)">Cible &gt; 0,50 % · 4× sous</div></div>
+<div class="kpi"><div class="label">Clics site</div><div class="val" style="color:var(--amber)">6</div><div class="sub" style="color:var(--amber)">Fourchette 5–15</div></div>
+<div class="kpi"><div class="label">Coût / follower</div><div class="val" style="color:var(--amber)">16,67 €</div><div class="sub" style="color:var(--t3)">3 followers</div></div>
+</div>
+
+<div class="bar-row"><div class="bar-label">Entry level</div><div class="bar-track"><div class="bar-fill" style="width:41%;background:var(--red)"></div></div><div class="bar-val" style="color:var(--red)">41 %</div></div>
+<div class="bar-row"><div class="bar-label">Senior</div><div class="bar-track"><div class="bar-fill" style="width:31%;background:var(--amber)"></div></div><div class="bar-val" style="color:var(--amber)">31 %</div></div>
+<div class="bar-row"><div class="bar-label">Manager</div><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--teal)"></div></div><div class="bar-val">8 %</div></div>
+<div class="bar-row"><div class="bar-label">Director+VP+CxO+Owner</div><div class="bar-track"><div class="bar-fill" style="width:9%;background:var(--green)"></div></div><div class="bar-val" style="color:var(--green)">9 %</div></div>
+
+<div class="alert alert-red"><strong>72 % non-décideurs.</strong> Cible AEGIS (Director+) = 9 %. Budget gaspillé à 91 %.</div>
+
+<div class="verdict-row">
+<div class="verdict-panel vp-red"><h4>NO-GO Boost</h4><p>CPC 4×, CTR 4× sous cible, audience diluée</p></div>
+<div class="verdict-panel vp-green"><h4>GO Option B</h4><p>Organique + newsletter. TLA S18.</p></div>
+</div>
+</div>
+
+</div><!-- end dual -->
+
+<!-- FULL WIDTH: Industries + Signals side by side -->
+<div class="dual" style="margin:0 0 40px">
+<div>
+<div class="sub-title">Industries atteintes</div>
+<table><tr><th>Industrie</th><th>%</th><th>Cible ?</th></tr>
+<tr><td>IT Services</td><td>6 %</td><td><span class="verdict v-amber">Périphérique</span></td></tr>
+<tr><td>Construction</td><td>5 %</td><td><span class="verdict v-amber">Périphérique</span></td></tr>
+<tr><td>Motor Vehicle Mfg</td><td>3 %</td><td><span class="verdict v-green">Cible directe</span></td></tr>
+<tr><td>Industrial Machinery Mfg</td><td>3 %</td><td><span class="verdict v-green">Cible directe</span></td></tr>
+<tr><td>Business Consulting</td><td>4 %</td><td><span class="verdict v-red">Hors cible</span></td></tr>
+<tr><td>Law Practice / Legal</td><td>5 %</td><td><span class="verdict v-red">Hors cible</span></td></tr></table>
+</div>
+<div>
+<div class="sub-title">Signaux positifs</div>
+<table><tr><th>Signal</th><th>Valeur</th><th>Analyse</th></tr>
+<tr><td>Profile viewers</td><td style="color:var(--green)">9</td><td>Curiosité profil JP</td></tr>
+<tr><td>Faurecia / FORVIA</td><td style="color:var(--green)">1 %</td><td>Ex-employeur — réseau activé</td></tr>
+<tr><td>Thales, EDF, Safran</td><td>&lt; 1 %</td><td>Fournisseurs PME = cible indirecte</td></tr>
+<tr><td>Damien Cadiou</td><td style="color:var(--green)">Viewer</td><td>Resp. Dept ASD — lead potentiel</td></tr>
+<tr><td>Business Strategist Ind. Machinery</td><td style="color:var(--green)">Viewer</td><td>Profil cible parfait AEGIS</td></tr></table>
+</div>
+</div>
+
+<!-- ══════════ SECTION 3: TLA GANTT ══════════ -->
+<div class="section">
+<div class="section-header"><div class="section-num" style="background:var(--teal-bg);color:var(--teal);border:0.5px solid var(--teal-border)">3</div><div class="section-title">TLA micro-pilote — S14 → S22</div><div class="section-date">P2 · GO/NO-GO fin mai · 100–150 €</div></div>
+
+<div class="gantt-row"><div class="gantt-label" style="color:var(--t3);font-weight:500;font-size:11px">Tâche</div><div class="gantt-track"><div class="gantt-col"><div class="gantt-hdr">S14</div></div><div class="gantt-col"><div class="gantt-hdr">S15</div></div><div class="gantt-col"><div class="gantt-hdr">S16</div></div><div class="gantt-col"><div class="gantt-hdr">S17</div></div><div class="gantt-col"><div class="gantt-hdr">S18</div></div><div class="gantt-col"><div class="gantt-hdr">S19</div></div><div class="gantt-col"><div class="gantt-hdr">S20</div></div><div class="gantt-col"><div class="gantt-hdr">S21</div></div><div class="gantt-col"><div class="gantt-hdr">S22</div></div></div></div>
+<div class="gantt-row"><div class="gantt-label">Page entreprise LinkedIn</div><div class="gantt-track"><div class="gantt-bar g-prep" style="left:0%;width:22%">S14–S15</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Ad Account Campaign Manager</div><div class="gantt-track"><div class="gantt-bar g-prep" style="left:11%;width:22%">S15–S16</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Story Arc 3 posts séquencés</div><div class="gantt-track"><div class="gantt-bar g-prep" style="left:22%;width:22%">S16–S17</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Publication 3 posts organiques</div><div class="gantt-track"><div class="gantt-bar g-exec" style="left:22%;width:33%">S16–S18</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Lancement TLA micro-pilote</div><div class="gantt-track"><div class="gantt-bar g-exec" style="left:44%;width:22%">S18–S19 · 100–150 €</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Collecte métriques + analyse Pearl</div><div class="gantt-track"><div class="gantt-bar g-exec" style="left:55%;width:22%">S19–S20</div></div></div>
+<div class="gantt-row"><div class="gantt-label" style="font-weight:500;color:var(--red)">GATE — GO/NO-GO scale</div><div class="gantt-track"><div class="gantt-bar g-gate" style="left:77%;width:12%">S21</div></div></div>
+<div class="gantt-row"><div class="gantt-label">Si GO → TLA 300 €/mois</div><div class="gantt-track"><div class="gantt-bar g-pending" style="left:78%;width:22%">S21–S22+</div></div></div>
+
+<div class="sub-section"><div class="sub-title">Kanban — État au 02/04/2026</div>
+<div class="kanban">
+<div class="kb-col"><div class="kb-title">Backlog</div><div class="kb-card">Page entreprise LinkedIn <span class="tag t-req">S14</span></div><div class="kb-card">Ad Account Campaign Manager <span class="tag t-req">S15</span></div><div class="kb-card">Story Arc 3 posts <span class="tag t-req">S16</span></div></div>
+<div class="kb-col"><div class="kb-title">En cours</div><div class="kb-card" style="opacity:0.3;font-style:italic;border-style:dashed">Vide — TLA non démarré</div></div>
+<div class="kb-col"><div class="kb-title">Gate</div><div class="kb-card">Prérequis TLA complets <span class="tag" style="background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)">S17</span></div><div class="kb-card">GO/NO-GO scale-up <span class="tag" style="background:var(--red-bg);color:var(--red);border:0.5px solid var(--red-border)">S21</span></div></div>
+<div class="kb-col"><div class="kb-title">Fait</div><div class="kb-card">Boost #1 invalidé <span class="tag t-on">S13</span></div><div class="kb-card">Benchmarks TLA documentés <span class="tag t-on">24/03</span></div></div>
+</div></div>
+</div>
+
+<!-- ══════════ SECTION 4: PERSONAS — 3 COL ══════════ -->
+<div class="section">
+<div class="section-header"><div class="section-num" style="background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border)">4</div><div class="section-title">3 Skilled Conversation Personas</div><div class="section-date">Extended Thinking calibré · V&V intégrée</div></div>
+
+<div class="personas-grid">
+<div class="persona" style="border-left:3px solid var(--purple)">
+<div class="persona-header"><div class="persona-icon" style="background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border)">S</div><div><div class="persona-name">STRATÈGE</div><div class="persona-sub">Analyse, audit, ROI, positionnement</div></div></div>
+<div class="persona-grid">
+<div class="pg-item"><div class="pg-label">Extended Thinking</div><div class="pg-val"><span class="tag t-req">OBLIGATOIRE</span></div></div>
+<div class="pg-item"><div class="pg-label">Environnement</div><div class="pg-val">Web project ou Desktop</div></div>
+<div class="pg-item"><div class="pg-label">Livrables</div><div class="pg-val">Bridges stratégie, Pearl 3 niveaux, ROI</div></div>
+<div class="pg-item"><div class="pg-label">V&V</div><div class="pg-val">Pearl complète, sources vérifiées, IDs D80</div></div>
+</div></div>
+
+<div class="persona" style="border-left:3px solid var(--green)">
+<div class="persona-header"><div class="persona-icon" style="background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)">B</div><div><div class="persona-name">BÂTISSEUR</div><div class="persona-sub">Code, sprint, n8n, scripts</div></div></div>
+<div class="persona-grid">
+<div class="pg-item"><div class="pg-label">Extended Thinking</div><div class="pg-val"><span class="tag t-off">STANDARD</span></div></div>
+<div class="pg-item"><div class="pg-label">Environnement</div><div class="pg-val">Desktop + MCP + Chrome (Opus)</div></div>
+<div class="pg-item"><div class="pg-label">Livrables</div><div class="pg-val">Briefs ACDC, PS1, TS/JSX, configs</div></div>
+<div class="pg-item"><div class="pg-label">V&V</div><div class="pg-val">Code compilable, double livraison, D10r2</div></div>
+</div></div>
+
+<div class="persona" style="border-left:3px solid var(--amber)">
+<div class="persona-header"><div class="persona-icon" style="background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-border)">C</div><div><div class="persona-name">COMMUNICANT</div><div class="persona-sub">Posts LinkedIn, newsletter, GSEO</div></div></div>
+<div class="persona-grid">
+<div class="pg-item"><div class="pg-label">Extended Thinking</div><div class="pg-val"><span class="tag t-on">ACTIVÉ</span></div></div>
+<div class="pg-item"><div class="pg-label">Environnement</div><div class="pg-val">Web project ou mobile S24+</div></div>
+<div class="pg-item"><div class="pg-label">Livrables</div><div class="pg-val">Posts LinkedIn, newsletters, articles</div></div>
+<div class="pg-item"><div class="pg-label">V&V</div><div class="pg-val">D48, ton expertise ≠ conseil, zéro Big4</div></div>
+</div></div>
+</div>
+
+<div class="sub-section"><div class="sub-title">Matrice Extended Thinking</div>
+<table><tr><th>Session</th><th>Persona</th><th>Mode</th></tr>
+<tr><td>Audit, SWOT, benchmark, ROI, décisions stratégiques</td><td style="color:var(--purple)">STRATÈGE</td><td><span class="tag t-req">OBLIGATOIRE</span></td></tr>
+<tr><td>Sprint code, bug fix, déploiement, MAJ Desktop</td><td style="color:var(--green)">BÂTISSEUR</td><td><span class="tag t-off">STANDARD</span></td></tr>
+<tr><td>Posts LinkedIn, newsletter, articles GSEO, pitchbook</td><td style="color:var(--amber)">COMMUNICANT</td><td><span class="tag t-on">ACTIVÉ</span></td></tr>
+<tr><td>Bridges consolidation simples</td><td style="color:var(--t3)">Tout</td><td><span class="tag t-off">STANDARD</span></td></tr></table>
+</div>
+</div>
+
+<footer>
+<div class="sig">AEGIS Intelligence</div>
+<div>Session 20260402T1105 · Opus 4.6 · D329 / L225 / R104 · D10r2 MAINTENU</div>
+<div style="margin:4px 0 0">jeanpierrecharles.com · Jean-Pierre Charles · 32 ans d'expertise industrielle</div>
+<div style="margin:6px 0 0;color:var(--t3)">Optimisé Surface Pro 11 · 2880×1920 · width:92vw / max-width:1680px</div>
+</footer>
+
+</div>
+</body>
+</html>

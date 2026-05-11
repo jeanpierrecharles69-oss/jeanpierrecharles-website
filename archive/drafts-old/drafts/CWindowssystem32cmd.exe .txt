@@ -1,0 +1,51 @@
+PowerShell 7.6.0
+PS C:\Users\jpcha> cd C:\Projects\jeanpierrecharles\drafts\night-build\20260412
+PS C:\Projects\jeanpierrecharles\drafts\night-build\20260412> python -m http.server 8765
+Python est introuvable ; exÚcutez sans arguments Ó installer Ó partir du Microsoft Store ou dÚsactivez ce raccourci dans ParamÞtres > Applications > paramÞtres d
+PS C:\Projects\jeanpierrecharles\drafts\night-build\20260412> cd C:\Projects\jeanpierrecharles\drafts\night-build\20260412
+PS C:\Projects\jeanpierrecharles\drafts\night-build\20260412> npx serve -p 8765 .
+Need to install the following packages:
+serve@14.2.6
+Ok to proceed? (y) y
+
+   ┌───────────────────────────────────────────┐
+   │                                           │
+   │   Serving!                                │
+   │                                           │
+   │   - Local:    http://localhost:8765       │
+   │   - Network:  http://192.168.1.125:8765   │
+   │                                           │
+   │   Copied local address to clipboard!      │
+   │                                           │
+   └───────────────────────────────────────────┘
+
+ HTTP  12/04/2026 09:32:56 ::1 GET /
+ HTTP  12/04/2026 09:32:56 ::1 Returned 200 in 101 ms
+ HTTP  12/04/2026 09:32:56 ::1 GET /favicon.ico
+ HTTP  12/04/2026 09:32:56 ::1 Returned 404 in 8 ms
+ HTTP  12/04/2026 09:33:23 ::1 GET /v4-jsx/
+ HTTP  12/04/2026 09:33:23 ::1 Returned 200 in 7 ms
+ HTTP  12/04/2026 09:33:33 ::1 GET /
+ HTTP  12/04/2026 09:33:33 ::1 Returned 200 in 11 ms
+ HTTP  12/04/2026 09:33:35 ::1 GET /bridges/
+ HTTP  12/04/2026 09:33:35 ::1 Returned 200 in 23 ms
+ HTTP  12/04/2026 09:33:41 ::1 GET /preview/
+ HTTP  12/04/2026 09:33:41 ::1 Returned 200 in 7 ms
+ HTTP  12/04/2026 09:33:43 ::1 GET /preview/preview-gantt-kanban-v4-n2.html
+ HTTP  12/04/2026 09:33:43 ::1 Returned 301 in 5 ms
+ HTTP  12/04/2026 09:33:43 ::1 GET /preview/preview-gantt-kanban-v4-n2
+ HTTP  12/04/2026 09:33:43 ::1 Returned 200 in 27 ms
+ HTTP  12/04/2026 09:33:43 ::1 GET /v4-jsx/gantt-kanban-v4-scaffold-n2.jsx
+ HTTP  12/04/2026 09:33:43 ::1 Returned 200 in 8 ms
+ HTTP  12/04/2026 09:34:44 ::1 GET /preview/
+ HTTP  12/04/2026 09:34:44 ::1 Returned 200 in 8 ms
+ HTTP  12/04/2026 09:34:46 ::1 GET /preview/preview-gantt-kanban-v4-n2
+ HTTP  12/04/2026 09:34:46 ::1 Returned 304 in 3 ms
+ HTTP  12/04/2026 09:34:46 ::1 GET /v4-jsx/gantt-kanban-v4-scaffold-n2.jsx
+ HTTP  12/04/2026 09:34:46 ::1 Returned 304 in 3 ms
+ HTTP  12/04/2026 09:35:53 ::1 GET /.well-known/appspecific/com.chrome.devtools.json
+ HTTP  12/04/2026 09:35:53 ::1 Returned 404 in 9 ms
+ HTTP  12/04/2026 09:38:24 ::1 GET /.well-known/appspecific/com.chrome.devtools.json
+ HTTP  12/04/2026 09:38:24 ::1 Returned 404 in 3 ms
+ HTTP  12/04/2026 09:47:52 ::1 GET /.well-known/appspecific/com.chrome.devtools.json
+ HTTP  12/04/2026 09:47:52 ::1 Returned 404 in 5 ms
