@@ -29,7 +29,7 @@ import { sendVeilleMonthlyReport } from './_lib/mailer.js';
  * Version : 1.0.0 -- 20260508 -- creation S5
  */
 
-export const config = { maxDuration: 300 };
+export const config = { maxDuration: 300, memory: 512 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
