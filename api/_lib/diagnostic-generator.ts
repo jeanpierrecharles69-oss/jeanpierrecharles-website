@@ -130,9 +130,17 @@ async function callOpus(systemPrompt: string, userPrompt: string): Promise<{ tex
         throw new Error('ANTHROPIC_API_KEY not configured');
     }
 
+    // P0 fix T1930 : passage en streaming SSE (stream: true).
+    // Cause racine "fetch failed" a 300_226ms exact = Node.js undici headersTimeout
+    // par defaut = 300_000ms. Opus 4.6 met ~6 min a generer 32k tokens en mode
+    // non-streaming -> undici coupe la connexion AVANT que les headers de reponse
+    // ne soient totalement recus. En mode streaming SSE chaque event keep-alive
+    // la connexion et undici ne coupe jamais.
+    // Garde-fou supplementaire : AbortSignal.timeout(700_000) (< 800s Vercel maxDuration).
     const requestBody = {
         model: OPUS_MODEL,
         max_tokens: OPUS_MAX_TOKENS,
+        stream: true,
         system: [
             {
                 type: 'text',
@@ -149,8 +157,10 @@ async function callOpus(systemPrompt: string, userPrompt: string): Promise<{ tex
             'x-api-key': apiKey,
             'anthropic-version': ANTHROPIC_VERSION,
             'content-type': 'application/json',
+            'accept': 'text/event-stream',
         },
         body: JSON.stringify(requestBody),
+        signal: AbortSignal.timeout(700_000),
     });
 
     if (!response.ok) {
@@ -158,20 +168,70 @@ async function callOpus(systemPrompt: string, userPrompt: string): Promise<{ tex
         throw new Error(`anthropic_${response.status}: ${errText.slice(0, 300)}`);
     }
 
-    const data = await response.json() as {
-        content?: Array<{ type: string; text?: string }>;
-        usage?: DiagnosticOutput['opusUsage'];
-    };
-    const text = (data.content || [])
-        .filter((c) => c.type === 'text')
-        .map((c) => c.text || '')
-        .join('\n');
+    if (!response.body) {
+        throw new Error('opus_no_response_body');
+    }
 
-    if (!text || text.trim().length === 0) {
+    // Parsing SSE manuel : on accumule les content_block_delta.text_delta dans collectedText
+    // et on lit l'usage final depuis message_start + message_delta.usage.
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let collectedText = '';
+    let usage: DiagnosticOutput['opusUsage'] | undefined;
+
+    try {
+        for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            // Les events SSE sont separes par \n\n ; chaque event a une ligne "data: {...}".
+            let nlIdx = buffer.indexOf('\n');
+            while (nlIdx !== -1) {
+                const line = buffer.slice(0, nlIdx).trim();
+                buffer = buffer.slice(nlIdx + 1);
+                nlIdx = buffer.indexOf('\n');
+                if (!line.startsWith('data:')) continue;
+                const dataStr = line.slice(5).trim();
+                if (!dataStr || dataStr === '[DONE]') continue;
+                try {
+                    const ev = JSON.parse(dataStr) as {
+                        type?: string;
+                        message?: { usage?: DiagnosticOutput['opusUsage'] };
+                        delta?: { type?: string; text?: string };
+                        usage?: { output_tokens?: number };
+                    };
+                    if (ev.type === 'message_start' && ev.message?.usage) {
+                        usage = ev.message.usage;
+                    } else if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta' && typeof ev.delta.text === 'string') {
+                        collectedText += ev.delta.text;
+                    } else if (ev.type === 'message_delta' && ev.usage && usage) {
+                        // message_delta apporte output_tokens final
+                        usage = { ...usage, output_tokens: ev.usage.output_tokens };
+                    } else if (ev.type === 'error') {
+                        const errEv = ev as unknown as { error?: { type?: string; message?: string } };
+                        throw new Error(`anthropic_stream_error: ${errEv.error?.type || 'unknown'} ${errEv.error?.message || ''}`.trim());
+                    }
+                } catch (parseErr) {
+                    // Une seule event mal-formed ne doit pas tuer le parsing ; on ne re-throw
+                    // que les anthropic_stream_error explicites.
+                    if (parseErr instanceof Error && parseErr.message.startsWith('anthropic_stream_error')) {
+                        throw parseErr;
+                    }
+                    // sinon, skip silencieusement (ligne SSE corrompue rare)
+                }
+            }
+        }
+    } finally {
+        try { reader.releaseLock(); } catch { /* ignore */ }
+    }
+
+    if (!collectedText || collectedText.trim().length === 0) {
         throw new Error('opus_empty_response');
     }
 
-    return { text, usage: data.usage };
+    return { text: collectedText, usage };
 }
 
 // === Markdown -> PDF rendering ===
