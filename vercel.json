@@ -1,12 +1,14 @@
 {
   "functions": {
     "api/**/*.ts": {
-      "memory": 256,
-      "maxDuration": 300,
+      "memory": 1024,
+      "maxDuration": 800,
       "includeFiles": "config/**"
     }
   },
-  "regions": ["cdg1"],
+  "regions": [
+    "cdg1"
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -40,12 +42,30 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; connect-src 'self' https://api.mollie.com https://generativelanguage.googleapis.com https://api.anthropic.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; frame-src https://www.mollie.com https://*.mollie.com; object-src 'none'; base-uri 'self'" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), payment=(self https://*.mollie.com)" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; connect-src 'self' https://api.mollie.com https://generativelanguage.googleapis.com https://api.anthropic.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; frame-src https://www.mollie.com https://*.mollie.com; object-src 'none'; base-uri 'self'"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=(), payment=(self https://*.mollie.com)"
+        }
       ]
     }
   ]

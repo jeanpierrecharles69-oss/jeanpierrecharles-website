@@ -29,7 +29,7 @@ import { sendDiagnosticDelivery, sendDiagnosticFailureOps } from './_lib/mailer.
  * Version : 1.0.0 -- 20260508 -- creation S4
  */
 
-export const config = { maxDuration: 300, memory: 1024 };
+export const config = { maxDuration: 800, memory: 1024 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
