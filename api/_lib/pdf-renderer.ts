@@ -73,7 +73,7 @@ async function getBrowserConfig(): Promise<BrowserConfig> {
         return {
             executablePath,
             args: chromium.args,
-            headless: chromium.headless as 'shell' | boolean,
+            headless: true,
         };
     }
 
@@ -127,7 +127,7 @@ export async function renderPdfFromHtml(input: PdfRenderInput): Promise<PdfRende
     try {
         const page = await browser.newPage();
         await page.setContent(input.html, {
-            waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+            waitUntil: ['load', 'domcontentloaded'],
             timeout: 60_000,
         });
         await page.emulateMediaType('print');

@@ -161,7 +161,7 @@ function renderCoverHtml(input: DiagnosticHtmlInput): string {
 
     const customerLine = htmlEscape(input.customer_company || input.customer_name || '');
     const customerSub = htmlEscape(input.customer_name || '');
-    const location = [input.city, input.country].filter(Boolean).map(htmlEscape).join(', ');
+    const location = [input.city, input.country].filter((s): s is string => Boolean(s)).map(htmlEscape).join(', ');
 
     return `
 <section class="cover-page">
