@@ -219,7 +219,6 @@ async function callGemini(
         generationConfig: {
             maxOutputTokens: config.maxTokens,
             temperature: config.temperature ?? 0.7,
-            thinkingConfig: { thinkingBudget: 0 },
         },
     };
 
@@ -246,6 +245,10 @@ async function callGemini(
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
             });
+        } else {
+            // Body already consumed -- bubble up with stored errText
+            console.error(`Gemini API error (mode=${mode}):`, response.status, errText);
+            return res.status(response.status).json({ error: 'Gemini API error', details: errText });
         }
     }
 
