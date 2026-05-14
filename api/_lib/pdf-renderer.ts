@@ -140,6 +140,12 @@ export async function renderPdfFromHtml(input: PdfRenderInput): Promise<PdfRende
             headerTemplate: input.headerTemplate ?? '<div></div>',
             footerTemplate: input.footerTemplate ?? buildDefaultFooter(input.invoice_number),
             preferCSSPageSize: false,
+            // N12.D F1 (P0) correctif T2125 : signets PDF (bookmarks) navigables Adobe/Edge.
+            // tagged: true active accessibilite PDF/UA. outline: true (Puppeteer >=22.7) genere
+            // les bookmarks panneau lateral depuis la structure headings HTML (h1, h2, h3).
+            // outline requires tagged. Cf. brief 20260513T2110 F1.
+            tagged: true,
+            outline: true,
         });
 
         const pdf = Buffer.from(pdfData);
