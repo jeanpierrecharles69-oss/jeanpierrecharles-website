@@ -396,7 +396,13 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             });
 
             // R3: Banner "analyse preliminaire" (conserve de v3.3.5)
-            const banner = document.createElement('div');
+            // OB6 (P1) correctif T0905 14/05 : banner converti en <a> cliquable
+            // (texte mort dans PDF v3.3.5 -> URL jeanpierrecharles.com cliquable).
+            const banner = document.createElement('a');
+            banner.href = 'https://jeanpierrecharles.com';
+            banner.target = '_blank';
+            banner.rel = 'noopener';
+            banner.style.display = 'block';
             banner.style.textAlign = 'center';
             banner.style.fontSize = '10px';
             banner.style.color = '#0A3D62';
@@ -405,6 +411,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             banner.style.background = '#eff6ff';
             banner.style.borderRadius = '8px';
             banner.style.border = '1px solid #bfdbfe';
+            banner.style.textDecoration = 'none';
             banner.textContent = lang === 'fr'
                 ? 'Analyse préliminaire — Poursuivez la conversation sur jeanpierrecharles.com'
                 : 'Preliminary analysis — Continue the conversation at jeanpierrecharles.com';
@@ -418,13 +425,16 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
             ctaBanner.style.borderLeft = '4px solid #0A3D62';
             ctaBanner.style.borderRadius = '2px';
             ctaBanner.style.pageBreakInside = 'avoid';
+            // OB6 (P1) correctif T0905 14/05 : CTA button <div> -> <a href> pour
+            // rendre le bouton "Demander/Request the Diagnostic" cliquable dans le PDF
+            // exporte (html2pdf preserve les <a href> mais ignore les <div> stylises).
             ctaBanner.innerHTML = lang === 'fr'
                 ? `<div style="font-size:11px;color:#1a1a1a;line-height:1.5;text-align:center">
                     <strong>Ce pre-diagnostic vous a ete utile ?</strong><br>
                     Pour une analyse approfondie — graphe causal inter-reglements, scenarios de non-conformite chiffres, feuille de route CAPEX/OPEX, sources juridiques sourcees — passez au <strong>DIAGNOSTIC AEGIS complet, 250 EUR</strong>.
                    </div>
                    <div style="margin-top:10px;text-align:center">
-                    <div style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px">Demander le Diagnostic &rarr;</div>
+                    <a href="https://jeanpierrecharles.com/#pricing" target="_blank" rel="noopener" style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px;text-decoration:none">Demander le Diagnostic &rarr;</a>
                     <div style="font-size:9px;color:#5a6578;margin-top:4px">jeanpierrecharles.com/#pricing</div>
                    </div>`
                 : `<div style="font-size:11px;color:#1a1a1a;line-height:1.5;text-align:center">
@@ -432,7 +442,7 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
                     For a deep analysis — inter-regulation dependency graph, quantified non-compliance scenarios, CAPEX/OPEX roadmap, sourced legal references — upgrade to the <strong>full AEGIS DIAGNOSTIC, 250 EUR</strong>.
                    </div>
                    <div style="margin-top:10px;text-align:center">
-                    <div style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px">Request the Diagnostic &rarr;</div>
+                    <a href="https://jeanpierrecharles.com/#pricing" target="_blank" rel="noopener" style="display:inline-block;padding:8px 20px;background:#0A3D62;color:white;font-size:11px;font-weight:600;border-radius:20px;text-decoration:none">Request the Diagnostic &rarr;</a>
                     <div style="font-size:9px;color:#5a6578;margin-top:4px">jeanpierrecharles.com/#pricing</div>
                    </div>`;
             wrapper.appendChild(ctaBanner);

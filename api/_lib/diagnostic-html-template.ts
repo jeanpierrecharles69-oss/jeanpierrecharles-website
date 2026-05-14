@@ -112,6 +112,37 @@ ${items}
 </section>`;
 }
 
+// OB5 (P1) correctif T0905 14/05 : injecter des liens EUR-Lex cliquables sur les
+// references reglementaires formelles "Reglement/Regulation/Directive (UE/EU) YYYY/NNNN"
+// detectees dans le HTML genere par marked. Post-traitement deterministe zero-regression
+// sur la sortie Opus (aucune modification du system prompt v1.5.3).
+// Brief 20260514T0900_BRIEF_ACDC-CODE-OB5-OB6-SOURCES-EURLEX-CTA-PULSE.md sec 1.
+const EUR_LEX_LINKS: Record<string, string> = {
+    '2024/1689': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1689',  // AI Act
+    '2024/2847': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R2847',  // CRA
+    '2023/1230': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1230',  // Machinery Reg
+    '2024/1781': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1781',  // ESPR
+    '2023/1542': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1542',  // Battery Reg
+    '2016/679':  'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32016R0679',  // RGPD
+    '2023/2854': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R2854',  // Data Act
+    '2024/2853': 'https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024L2853',  // PLD
+};
+
+function injectEurLexLinks(html: string): string {
+    let result = html;
+    for (const [ref, url] of Object.entries(EUR_LEX_LINKS)) {
+        // Pattern : "Reglement (UE) 2024/1689" ou "Regulation (EU) 2024/1689" ou "Directive (UE) 2024/2853".
+        // Lookbehinds negatifs : pas deja dans href="..." et pas deja entre <a...> tags.
+        // Lookahead negatif : pas suivi de </a> (double-wrap prevention).
+        const pattern = new RegExp(
+            `(?<!href="[^"]*?)(?<!<a[^>]*>)((?:R[eè]glement|Regulation|Directive)\\s*\\(?(?:UE|EU)\\)?\\s*${ref.replace('/', '\\/')})(?!</a>)`,
+            'gi'
+        );
+        result = result.replace(pattern, `<a href="${url}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline">$1</a>`);
+    }
+    return result;
+}
+
 function renderBodyHtml(markdown: string): string {
     const used = new Map<string, number>();
     const localMarked = new Marked();
@@ -128,7 +159,8 @@ function renderBodyHtml(markdown: string): string {
             },
         },
     });
-    return localMarked.parse(markdown, { async: false }) as string;
+    const rawHtml = localMarked.parse(markdown, { async: false }) as string;
+    return injectEurLexLinks(rawHtml);
 }
 
 function renderCoverHtml(input: DiagnosticHtmlInput): string {
@@ -229,6 +261,64 @@ function renderSignatureHtml(input: DiagnosticHtmlInput): string {
         <p class="signature-rights">${rights}</p>
         <p class="signature-coprod">${coprod}</p>
         <p class="signature-sla">${sla}</p>
+    </div>
+</section>`;
+}
+
+// N12.D F2 (P0) correctif T2125 : bloc SIGNATURE NUMERIQUE eIDAS Article 25.
+// Insere AVANT la signature-page "Fin du diagnostic" existante.
+// SHA-256 du PDF = placeholder (paradoxe auto-reference resolu par sidecar metadata.json
+// L2 Option A roadmap N13 = Option B 2-pass).
+// Cf. brief 20260513T2110 F2 + reference baseline LaTeX p.28 AEGIS-20260421-1222.pdf.
+function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
+    const isFr = input.lang === 'fr';
+    const title = isFr ? 'Signature num&eacute;rique' : 'Digital signature';
+    const subtitle = isFr
+        ? 'Compliance Gouvernance Int&eacute;gr&eacute;e &mdash; eIDAS Article 25'
+        : 'Integrated Compliance Governance &mdash; eIDAS Article 25';
+    const labelApprover = isFr ? 'Approuv&eacute; par' : 'Approved by';
+    const labelTimestamp = isFr ? 'Horodatage' : 'Timestamp';
+    const labelHash = isFr ? 'Empreinte PDF (SHA-256)' : 'PDF fingerprint (SHA-256)';
+    const placeholder = isFr
+        ? '[Empreinte disponible dans le sidecar metadata.json apr&egrave;s g&eacute;n&eacute;ration]'
+        : '[Fingerprint available in metadata.json sidecar after generation]';
+    const note = isFr
+        ? 'Signature &eacute;lectronique simple &mdash; eIDAS Article 25. L\'empreinte SHA-256 permet de v&eacute;rifier l\'int&eacute;grit&eacute; du rapport par recalcul ind&eacute;pendant.'
+        : 'Simple electronic signature &mdash; eIDAS Article 25. The SHA-256 fingerprint allows verification of the report\'s integrity via independent recalculation.';
+    const approver = 'Jean-Pierre CHARLES';
+    const dateObj = input.issue_date ?? new Date();
+    // Format ISO 8601 avec timezone CET (Europe/Paris) : 2026-05-13T21:25:00+02:00
+    const isoTimestamp = dateObj.toISOString().replace('Z', '+00:00');
+    // Convert to CET (UTC+2 DST or UTC+1 standard) approximation
+    const cetOffset = -dateObj.getTimezoneOffset(); // minutes east of UTC
+    const sign = cetOffset >= 0 ? '+' : '-';
+    const absOffset = Math.abs(cetOffset);
+    const offsetH = String(Math.floor(absOffset / 60)).padStart(2, '0');
+    const offsetM = String(absOffset % 60).padStart(2, '0');
+    const localIso = new Date(dateObj.getTime() + cetOffset * 60 * 1000)
+        .toISOString()
+        .replace('Z', `${sign}${offsetH}:${offsetM}`);
+    return `
+<section class="digital-signature-page">
+    <div class="digital-signature-card">
+        <h2 class="digital-signature-title">${title}</h2>
+        <p class="digital-signature-subtitle">${subtitle}</p>
+        <div class="digital-signature-grid">
+            <div class="digital-signature-row">
+                <span class="digital-signature-label">${labelApprover}</span>
+                <span class="digital-signature-value">${approver}</span>
+            </div>
+            <div class="digital-signature-row">
+                <span class="digital-signature-label">${labelTimestamp}</span>
+                <span class="digital-signature-value mono">${htmlEscape(localIso)}</span>
+            </div>
+        </div>
+        <div class="digital-signature-hash-block">
+            <div class="digital-signature-hash-label">${labelHash}</div>
+            <div class="digital-signature-hash-value mono">${placeholder}</div>
+        </div>
+        <p class="digital-signature-note"><em>${note}</em></p>
+        <p class="digital-signature-iso-utc mono">UTC: ${htmlEscape(isoTimestamp)}</p>
     </div>
 </section>`;
 }
@@ -506,27 +596,139 @@ a:hover { text-decoration: underline; }
 }
 .body-content strong { font-weight: 700; color: var(--aegis-text); }
 .body-content em { font-style: italic; }
+/* ===== TABLES OB3 (P1) correctif T2125 ===== */
+/* table-layout fixed = colonnes uniformes (vs auto = decalage marked-generated).
+   Padding accru + marge generique pour respiration. */
 .body-content table {
     width: 100%;
+    table-layout: auto;
     border-collapse: collapse;
-    margin: 0.25cm 0;
-    font-size: 9pt;
+    margin: 0.45cm 0 0.55cm 0;
+    font-size: 9.2pt;
     page-break-inside: avoid;
+    border: 0.3pt solid var(--aegis-light-grey);
 }
 .body-content table th {
     background: var(--aegis-blue);
     color: #ffffff;
     text-align: left;
-    padding: 0.18cm 0.25cm;
-    font-weight: 700;
-    border: 0.3pt solid var(--aegis-blue);
+    padding: 0.22cm 0.30cm;
+    font-weight: 600;
+    border-bottom: 1pt solid var(--aegis-blue);
+    border-right: 0.3pt solid var(--aegis-blue-light);
+    vertical-align: middle;
+    line-height: 1.30;
 }
+.body-content table th:last-child { border-right: 0; }
 .body-content table td {
-    padding: 0.16cm 0.25cm;
-    border: 0.3pt solid var(--aegis-light-grey);
+    padding: 0.20cm 0.30cm;
+    border-bottom: 0.3pt solid var(--aegis-light-grey);
+    border-right: 0.3pt solid var(--aegis-light-grey);
     vertical-align: top;
+    line-height: 1.35;
 }
+.body-content table td:last-child { border-right: 0; }
+.body-content table tr:last-child td { border-bottom: 0; }
 .body-content table tr:nth-child(even) td { background: var(--aegis-shade); }
+.body-content table strong { font-weight: 700; color: var(--aegis-blue); }
+
+/* ===== DIGITAL SIGNATURE PAGE (F2) ===== */
+.digital-signature-page {
+    page-break-before: always;
+    break-before: page;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22cm;
+    padding: 0 1cm;
+}
+.digital-signature-card {
+    border: 1.2pt solid var(--aegis-blue);
+    border-radius: 8pt;
+    padding: 1.2cm 1.4cm;
+    max-width: 16cm;
+    width: 100%;
+    text-align: center;
+    background: var(--aegis-shade);
+}
+.digital-signature-title {
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--aegis-blue);
+    margin: 0 0 0.25cm 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5pt;
+}
+.digital-signature-subtitle {
+    font-size: 10.5pt;
+    color: var(--aegis-blue-light);
+    margin: 0 0 0.9cm 0;
+    font-style: italic;
+}
+.digital-signature-grid {
+    border-top: 0.4pt solid var(--aegis-light-grey);
+    border-bottom: 0.4pt solid var(--aegis-light-grey);
+    padding: 0.45cm 0.5cm;
+    margin-bottom: 0.6cm;
+    text-align: left;
+}
+.digital-signature-row {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 0.25cm;
+    line-height: 1.4;
+}
+.digital-signature-row:last-child { margin-bottom: 0; }
+.digital-signature-label {
+    font-weight: 700;
+    color: var(--aegis-blue);
+    font-size: 9.5pt;
+    min-width: 4cm;
+    flex-shrink: 0;
+}
+.digital-signature-value {
+    font-size: 10pt;
+    color: var(--aegis-text);
+    flex: 1;
+}
+.digital-signature-value.mono {
+    font-family: Consolas, 'Courier New', monospace;
+    color: var(--aegis-blue);
+    font-size: 9.5pt;
+}
+.digital-signature-hash-block {
+    background: #ffffff;
+    border: 0.5pt solid var(--aegis-light-grey);
+    border-radius: 4pt;
+    padding: 0.45cm 0.4cm;
+    margin: 0 0 0.6cm 0;
+}
+.digital-signature-hash-label {
+    font-size: 8.5pt;
+    color: var(--aegis-grey);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    margin-bottom: 0.2cm;
+}
+.digital-signature-hash-value {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 9pt;
+    color: var(--aegis-blue);
+    word-break: break-all;
+    line-height: 1.5;
+}
+.digital-signature-note {
+    font-size: 8.5pt;
+    color: var(--aegis-grey);
+    line-height: 1.45;
+    margin: 0.2cm 0;
+}
+.digital-signature-iso-utc {
+    font-size: 7.5pt;
+    color: var(--aegis-grey);
+    margin: 0.6cm 0 0 0;
+}
 
 /* ===== SIGNATURE PAGE ===== */
 .signature-page {
@@ -580,6 +782,7 @@ export function renderDiagnosticHtml(input: DiagnosticHtmlInput): string {
     const tocHtml = renderTocHtml(headings, input.lang);
     const bodyHtml = renderBodyHtml(input.markdown_opus);
     const coverHtml = renderCoverHtml(input);
+    const digitalSignatureHtml = renderDigitalSignatureHtml(input);
     const signatureHtml = renderSignatureHtml(input);
     const css = buildCss();
 
@@ -601,6 +804,7 @@ ${tocHtml}
 <main class="body-content">
 ${bodyHtml}
 </main>
+${digitalSignatureHtml}
 ${signatureHtml}
 </body>
 </html>`;
