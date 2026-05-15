@@ -137,6 +137,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
         }
 
+        // D_T1105_02 : LIVE host whitelist (defense-in-depth bridge forensique T1100 §3)
+        // Symetrique mollie-checkout.ts D_T1105_01.
+        const host = req.headers['host'] || req.headers['x-forwarded-host'] || '';
+        const PRODUCTION_HOSTS = ['jeanpierrecharles.com', 'www.jeanpierrecharles.com'];
+        if (MOLLIE_API_KEY?.startsWith('live_') && !PRODUCTION_HOSTS.includes(String(host))) {
+            console.error(JSON.stringify({
+                event: 'mollie_live_host_block',
+                host: String(host),
+                origin,
+                mode: MOLLIE_MODE,
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(403).json({
+                error: 'Live payments are only allowed on the production domain.',
+                host: String(host),
+            });
+        }
+
         // --- Step 1 : Create Mollie customer (REQUIS pour sequenceType:'first' subscription recurrente)
         // Mollie API v2 exige customerId pour tout paiement first/recurring (FIX 422 customerId field)
         const customerName = (typeof customer_name === 'string' && customer_name.trim()) || 'Client AEGIS';

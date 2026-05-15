@@ -181,6 +181,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
         }
 
+        // D_T1105_01 : LIVE host whitelist (defense-in-depth bridge forensique T1100 §3)
+        // Bloque tout paiement LIVE depuis un host non-canonique (ex. alias .vercel.app du
+        // Production deployment, confondu avec un Preview). Symetrique au garde-fou env/cle L101-108.
+        const host = req.headers['host'] || req.headers['x-forwarded-host'] || '';
+        const PRODUCTION_HOSTS = ['jeanpierrecharles.com', 'www.jeanpierrecharles.com'];
+        if (MOLLIE_API_KEY?.startsWith('live_') && !PRODUCTION_HOSTS.includes(String(host))) {
+            console.error(JSON.stringify({
+                event: 'mollie_live_host_block',
+                host: String(host),
+                origin,
+                mode: MOLLIE_MODE,
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(403).json({
+                error: 'Live payments are only allowed on the production domain.',
+                host: String(host),
+            });
+        }
+
         const response = await fetch(MOLLIE_API_URL, {
             method: 'POST',
             headers: {

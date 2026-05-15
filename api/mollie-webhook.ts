@@ -402,19 +402,86 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             if (invoiceNumber) {
                 try {
+                    // D_T1105_03 : enrichissement Supabase avant generation facture (fix regression 15/05).
+                    // Cause racine : metadata Mollie limite 1KB (cf. commit bca9afc), tronque
+                    // silencieusement quand product_description/regulations/customer_company depassent.
+                    // Source canonique = diagnostic_requests/veille_requests table (deja ecrite par
+                    // diagnostic-request.ts/veille-request.ts avant le checkout). Fallback sur metadata
+                    // si SELECT echoue (preserve robustesse).
+                    let customerName = metadata.customer_name || undefined;
+                    let customerCompany = metadata.customer_company || undefined;
+                    let customerEmail = metadata.email || undefined;
+                    let sectorVal = metadata.sector || undefined;
+                    let regulationsList: string[] | undefined = metadata.regulations
+                        ? (metadata.regulations as string).split(', ').filter((s: string) => s.trim().length > 0)
+                        : undefined;
+                    let contextVal = metadata.context || undefined;
+
+                    if (supabase && metadata.request_id) {
+                        try {
+                            const enrichPromise = supabase
+                                .from(targetTable)
+                                .select('first_name, last_name, company, email, sector, regulations, context')
+                                .eq('request_id', metadata.request_id)
+                                .single();
+                            const enrichTimeout = new Promise<{ data: null; error: { message: string } }>((_, reject) =>
+                                setTimeout(() => reject(new Error('invoice_enrichment_timeout_2s')), 2000)
+                            );
+                            const { data: clientRow } = await Promise.race([enrichPromise, enrichTimeout]) as {
+                                data: {
+                                    first_name?: string | null;
+                                    last_name?: string | null;
+                                    company?: string | null;
+                                    email?: string | null;
+                                    sector?: string | null;
+                                    regulations?: string | string[] | null;
+                                    context?: string | null;
+                                } | null;
+                                error: unknown;
+                            };
+                            if (clientRow) {
+                                const fullName = [clientRow.first_name, clientRow.last_name].filter(Boolean).join(' ').trim();
+                                if (fullName) customerName = fullName;
+                                if (clientRow.company) customerCompany = clientRow.company;
+                                if (clientRow.email) customerEmail = clientRow.email;
+                                if (clientRow.sector) sectorVal = clientRow.sector;
+                                if (clientRow.regulations) {
+                                    regulationsList = Array.isArray(clientRow.regulations)
+                                        ? clientRow.regulations
+                                        : (clientRow.regulations as string).split(',').map(r => r.trim()).filter(Boolean);
+                                }
+                                if (clientRow.context) contextVal = clientRow.context;
+                                console.log(JSON.stringify({
+                                    event: 'invoice_supabase_enrichment_ok',
+                                    payment_id: id,
+                                    request_id: metadata.request_id,
+                                    target_table: targetTable,
+                                    timestamp: new Date().toISOString(),
+                                }));
+                            }
+                        } catch (ee: unknown) {
+                            console.warn(JSON.stringify({
+                                event: 'invoice_supabase_enrichment_failed',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                error: (ee as Error)?.message || 'unknown',
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+                    }
+
                     const invoice = generateInvoicePdf({
                         invoice_number: invoiceNumber,
                         product: isVeille ? 'veille' : 'diagnostic',
                         lang: (metadata.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en',
                         amount: isVeille ? '150.00' : '250.00',
-                        customer_name: metadata.customer_name || undefined,
-                        customer_company: metadata.customer_company || undefined,
-                        customer_email: metadata.email || undefined,
-                        sector: metadata.sector || undefined,
-                        regulations: metadata.regulations
-                            ? (metadata.regulations as string).split(', ').filter((s: string) => s.trim().length > 0)
-                            : undefined,
-                        context: metadata.context || undefined,
+                        customer_name: customerName,
+                        customer_company: customerCompany,
+                        customer_email: customerEmail,
+                        sector: sectorVal,
+                        regulations: regulationsList,
+                        context: contextVal,
                     });
                     invoicePdfBase64 = invoice.base64;
                     invoicePdfFilename = invoice.filename;
