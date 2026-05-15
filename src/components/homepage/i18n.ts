@@ -188,7 +188,7 @@ export const i18n = {
                     "Alertes réglementaires personnalisées par email",
                     "Monitoring expert 5+ règlements EU",
                     "Rapport mensuel d'intelligence réglementaire",
-                    "Analyse Pearl causale des mutations détectées",
+                    "Analyse causale des mutations réglementaires détectées",
                     "Session Q&A trimestrielle incluse (30 min)",
                 ],
                 notIncluded: [
@@ -577,7 +577,7 @@ export const i18n = {
                     "Personalised regulatory alerts by email",
                     "Expert monitoring of 5+ EU regulations",
                     "Monthly regulatory intelligence report",
-                    "Pearl causal analysis of detected changes",
+                    "Causal analysis of detected regulatory changes",
                     "Quarterly Q&A session included (30 min)",
                 ],
                 notIncluded: [
