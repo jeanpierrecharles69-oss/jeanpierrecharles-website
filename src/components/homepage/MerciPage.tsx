@@ -298,8 +298,8 @@ export default function MerciPage() {
             const rowDetailTxt = isVeille
                 ? t.veilleInvoiceDetail
                 : (isFr
-                    ? 'Analyse Pearl 3 niveaux, graphe causal, feuille de route Gantt, rapport PDF 40+ pages'
-                    : 'Pearl 3-level analysis, causal graph, Gantt roadmap, 40+ page PDF report');
+                    ? 'Diagnostic expert 5 piliers EU, cartographie risques, feuille de route, rapport PDF'
+                    : 'Expert 5-pillar EU diagnostic, risk mapping, roadmap, PDF report');
 
             // Row content
             y += 5;
