@@ -29,7 +29,7 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const OPUS_MODEL = 'claude-opus-4-6';
 const OPUS_MAX_TOKENS = 32768;
-const SYSTEM_PROMPT_PATH = 'config/diagnostic-system-prompt-v1.5.3.txt';
+const SYSTEM_PROMPT_PATH = 'config/diagnostic-system-prompt-v1.5.4.txt';
 
 // === Types ===
 

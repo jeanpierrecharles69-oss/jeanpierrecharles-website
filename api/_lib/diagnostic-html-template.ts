@@ -287,17 +287,26 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
         : 'Simple electronic signature &mdash; eIDAS Article 25. The SHA-256 fingerprint allows verification of the report\'s integrity via independent recalculation.';
     const approver = 'Jean-Pierre CHARLES';
     const dateObj = input.issue_date ?? new Date();
-    // Format ISO 8601 avec timezone CET (Europe/Paris) : 2026-05-13T21:25:00+02:00
+    // ISO 8601 UTC pour archivage machine et reproductibilite (bloc UTC: bas de carte).
     const isoTimestamp = dateObj.toISOString().replace('Z', '+00:00');
-    // Convert to CET (UTC+2 DST or UTC+1 standard) approximation
-    const cetOffset = -dateObj.getTimezoneOffset(); // minutes east of UTC
-    const sign = cetOffset >= 0 ? '+' : '-';
-    const absOffset = Math.abs(cetOffset);
-    const offsetH = String(Math.floor(absOffset / 60)).padStart(2, '0');
-    const offsetM = String(absOffset % 60).padStart(2, '0');
-    const localIso = new Date(dateObj.getTime() + cetOffset * 60 * 1000)
-        .toISOString()
-        .replace('Z', `${sign}${offsetH}:${offsetM}`);
+    // C3 correctif T1345 15/05 : horodatage principal affiche localise selon langue.
+    // FR -> CET Paris (Intl Europe/Paris + locale fr-FR). EN -> UTC ISO 8601.
+    // Vercel Lambda runtime TZ=UTC : getTimezoneOffset() retourne 0 -> on s'appuie sur
+    // Intl.DateTimeFormat (timeZone explicite) plutot que sur l'offset machine.
+    const displayTimestamp = isFr
+        ? dateObj
+              .toLocaleString('fr-FR', {
+                  timeZone: 'Europe/Paris',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false,
+              })
+              .replace(',', '') + ' CET'
+        : isoTimestamp + ' UTC';
     return `
 <section class="digital-signature-page">
     <div class="digital-signature-card">
@@ -310,7 +319,7 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
             </div>
             <div class="digital-signature-row">
                 <span class="digital-signature-label">${labelTimestamp}</span>
-                <span class="digital-signature-value mono">${htmlEscape(localIso)}</span>
+                <span class="digital-signature-value mono">${htmlEscape(displayTimestamp)}</span>
             </div>
         </div>
         <div class="digital-signature-hash-block">
