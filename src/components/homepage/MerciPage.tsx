@@ -250,17 +250,28 @@ export default function MerciPage() {
                     custLines.push(isFr ? 'Client veille AEGIS' : 'AEGIS Watch customer');
                 }
             } else {
-                // DIAGNOSTIC : comportement existant inchangé (AC-10 0 régression)
+                // DIAGNOSTIC : C10b correctif T1600 (OBS facture bloc CLIENT vide observe smoke T1405).
+                // Symetrisation avec branche VEILLE : afficher d'abord Nom + Entreprise client
+                // en gras (identite B2B standard), puis le scope diagnostic en details.
+                // Fallback final si sessionStorage perdu (lien email direct) ET pas de nom client.
+                if (diag?.name) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    setText(C.text);
+                    doc.text(diag.name as string, col2X, cy);
+                    cy += 4.5;
+                }
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 setText('#475569');
+                if (diag?.company) custLines.push(diag.company as string);
+                if (diag?.email) custLines.push(diag.email as string);
                 if (diag?.sector) custLines.push(`${isFr ? 'Secteur' : 'Sector'} : ${diag.sector}`);
                 if (diag?.sectors?.length) custLines.push(`${isFr ? 'Secteurs' : 'Sectors'} : ${diag.sectors.join(', ')}`);
                 if (diag?.product) custLines.push(`${isFr ? 'Produit' : 'Product'} : ${diag.product}`);
                 if (diag?.regs?.length) custLines.push(`${isFr ? 'Règlements' : 'Regulations'} : ${diag.regs.join(', ')}`);
-                if (diag?.context) custLines.push(`${isFr ? 'Contexte' : 'Context'} : ${diag.context}`);
-                if (custLines.length === 0) {
-                    custLines.push(isFr ? 'Diagnostic Technique de Conformité' : 'Technical Compliance Diagnostic');
+                if (custLines.length === 0 && !diag?.name) {
+                    custLines.push(isFr ? 'Client diagnostic AEGIS' : 'AEGIS Diagnostic customer');
                 }
             }
 

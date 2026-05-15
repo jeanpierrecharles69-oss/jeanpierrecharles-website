@@ -129,10 +129,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const langKey = lang === 'en' ? 'en' : 'fr';
         const description = langKey === 'en' ? productConfig.description_en : productConfig.description_fr;
 
-        // Determiner base URL pour redirect
-        const baseUrl = origin.includes('localhost')
-            ? origin
-            : 'https://jeanpierrecharles.com';
+        // Determiner base URL pour redirect (C10a correctif T1600).
+        // Localhost dev : reflechi l'origin (developpement local).
+        // Preview/Production : utilise WEBHOOK_BASE_URL deja conditionnel (preview branch URL
+        // si VERCEL_BRANCH_URL existe, sinon production). Cela evite que la MerciPage Preview
+        // redirige vers le domaine production (constat smoke T1405 : URL prod sur Preview).
+        const baseUrl = origin.includes('localhost') ? origin : WEBHOOK_BASE_URL;
 
         // Creation paiement Mollie v2
         const mollieBody = {

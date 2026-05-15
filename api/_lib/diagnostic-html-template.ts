@@ -153,7 +153,12 @@ function renderBodyHtml(markdown: string): string {
                 const inlineHtml = (this as { parser: { parseInline: (toks: Token[]) => string } }).parser.parseInline(tokens);
                 if (depth === 2 || depth === 3) {
                     const slug = slugify(text, used);
-                    return `<h${depth} id="${slug}">${inlineHtml}</h${depth}>`;
+                    // C7 fix T1600 OBS10 (bookmarks doubles) : ancre `id` sur un `<a>` sibling
+                    // au lieu d'etre directement sur le `<h2>`/`<h3>`. Cause originelle Puppeteer
+                    // `tagged: true + outline: true` indexait deux entrees pour un meme heading
+                    // avec id (heading element + link target), affichage Adobe = "TextText" concatene.
+                    // L'ancre `<a id="">` est inline sans contenu visuel, scroll TOC reste fonctionnel.
+                    return `<a id="${slug}" class="anchor"></a><h${depth}>${inlineHtml}</h${depth}>`;
                 }
                 return `<h${depth}>${inlineHtml}</h${depth}>`;
             },
@@ -327,7 +332,6 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
             <div class="digital-signature-hash-value mono">${placeholder}</div>
         </div>
         <p class="digital-signature-note"><em>${note}</em></p>
-        <p class="digital-signature-iso-utc mono">UTC: ${htmlEscape(isoTimestamp)}</p>
     </div>
 </section>`;
 }
