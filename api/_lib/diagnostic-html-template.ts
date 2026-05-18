@@ -153,7 +153,12 @@ function renderBodyHtml(markdown: string): string {
                 const inlineHtml = (this as { parser: { parseInline: (toks: Token[]) => string } }).parser.parseInline(tokens);
                 if (depth === 2 || depth === 3) {
                     const slug = slugify(text, used);
-                    return `<h${depth} id="${slug}">${inlineHtml}</h${depth}>`;
+                    // C7 fix T1600 OBS10 (bookmarks doubles) : ancre `id` sur un `<a>` sibling
+                    // au lieu d'etre directement sur le `<h2>`/`<h3>`. Cause originelle Puppeteer
+                    // `tagged: true + outline: true` indexait deux entrees pour un meme heading
+                    // avec id (heading element + link target), affichage Adobe = "TextText" concatene.
+                    // L'ancre `<a id="">` est inline sans contenu visuel, scroll TOC reste fonctionnel.
+                    return `<a id="${slug}" class="anchor"></a><h${depth}>${inlineHtml}</h${depth}>`;
                 }
                 return `<h${depth}>${inlineHtml}</h${depth}>`;
             },
@@ -267,9 +272,10 @@ function renderSignatureHtml(input: DiagnosticHtmlInput): string {
 
 // N12.D F2 (P0) correctif T2125 : bloc SIGNATURE NUMERIQUE eIDAS Article 25.
 // Insere AVANT la signature-page "Fin du diagnostic" existante.
-// SHA-256 du PDF = placeholder (paradoxe auto-reference resolu par sidecar metadata.json
-// L2 Option A roadmap N13 = Option B 2-pass).
-// Cf. brief 20260513T2110 F2 + reference baseline LaTeX p.28 AEGIS-20260421-1222.pdf.
+// N12.A DT-02 (P1) correctif T1010 18/05 : placeholder `{{PDF_SHA256}}` substitue par
+// double-passe Puppeteer dans diagnostic-generator.ts (+10s vs +8min Opus). PDF1 produit
+// le hash, PDF2 contient le hash. Le hash affiche est celui de PDF1 (note eIDAS dedicated).
+// Cf. brief 20260518T1000 sec A2 + brief 20260513T2110 F2 + baseline LaTeX p.28.
 function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
     const isFr = input.lang === 'fr';
     const title = isFr ? 'Signature num&eacute;rique' : 'Digital signature';
@@ -279,25 +285,35 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
     const labelApprover = isFr ? 'Approuv&eacute; par' : 'Approved by';
     const labelTimestamp = isFr ? 'Horodatage' : 'Timestamp';
     const labelHash = isFr ? 'Empreinte PDF (SHA-256)' : 'PDF fingerprint (SHA-256)';
-    const placeholder = isFr
-        ? '[Empreinte disponible dans le sidecar metadata.json apr&egrave;s g&eacute;n&eacute;ration]'
-        : '[Fingerprint available in metadata.json sidecar after generation]';
+    // N12.A DT-02 : marqueur substitue dans diagnostic-generator.ts apres premiere passe Puppeteer.
+    // Si la substitution n'a pas lieu (cas de test isole), le marqueur reste visible -> signal
+    // explicite de la dette plutot qu'un faux SHA-256.
+    const placeholder = '{{PDF_SHA256}}';
     const note = isFr
-        ? 'Signature &eacute;lectronique simple &mdash; eIDAS Article 25. L\'empreinte SHA-256 permet de v&eacute;rifier l\'int&eacute;grit&eacute; du rapport par recalcul ind&eacute;pendant.'
-        : 'Simple electronic signature &mdash; eIDAS Article 25. The SHA-256 fingerprint allows verification of the report\'s integrity via independent recalculation.';
+        ? 'Signature &eacute;lectronique simple &mdash; eIDAS Article 25. Empreinte SHA-256 calcul&eacute;e sur le document avant insertion de la pr&eacute;sente empreinte (double-passe Puppeteer N12.A). V&eacute;rification independante : re-rendre le document avec le marqueur original et recalculer le SHA-256.'
+        : 'Simple electronic signature &mdash; eIDAS Article 25. Fingerprint computed on the document before insertion of this fingerprint (N12.A double-pass Puppeteer). Independent verification: re-render the document with the original marker and recompute the SHA-256.';
     const approver = 'Jean-Pierre CHARLES';
     const dateObj = input.issue_date ?? new Date();
-    // Format ISO 8601 avec timezone CET (Europe/Paris) : 2026-05-13T21:25:00+02:00
+    // ISO 8601 UTC pour archivage machine et reproductibilite (bloc UTC: bas de carte).
     const isoTimestamp = dateObj.toISOString().replace('Z', '+00:00');
-    // Convert to CET (UTC+2 DST or UTC+1 standard) approximation
-    const cetOffset = -dateObj.getTimezoneOffset(); // minutes east of UTC
-    const sign = cetOffset >= 0 ? '+' : '-';
-    const absOffset = Math.abs(cetOffset);
-    const offsetH = String(Math.floor(absOffset / 60)).padStart(2, '0');
-    const offsetM = String(absOffset % 60).padStart(2, '0');
-    const localIso = new Date(dateObj.getTime() + cetOffset * 60 * 1000)
-        .toISOString()
-        .replace('Z', `${sign}${offsetH}:${offsetM}`);
+    // C3 correctif T1345 15/05 : horodatage principal affiche localise selon langue.
+    // FR -> CET Paris (Intl Europe/Paris + locale fr-FR). EN -> UTC ISO 8601.
+    // Vercel Lambda runtime TZ=UTC : getTimezoneOffset() retourne 0 -> on s'appuie sur
+    // Intl.DateTimeFormat (timeZone explicite) plutot que sur l'offset machine.
+    const displayTimestamp = isFr
+        ? dateObj
+              .toLocaleString('fr-FR', {
+                  timeZone: 'Europe/Paris',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false,
+              })
+              .replace(',', '') + ' CET'
+        : isoTimestamp + ' UTC';
     return `
 <section class="digital-signature-page">
     <div class="digital-signature-card">
@@ -310,7 +326,7 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
             </div>
             <div class="digital-signature-row">
                 <span class="digital-signature-label">${labelTimestamp}</span>
-                <span class="digital-signature-value mono">${htmlEscape(localIso)}</span>
+                <span class="digital-signature-value mono">${htmlEscape(displayTimestamp)}</span>
             </div>
         </div>
         <div class="digital-signature-hash-block">
@@ -318,7 +334,6 @@ function renderDigitalSignatureHtml(input: DiagnosticHtmlInput): string {
             <div class="digital-signature-hash-value mono">${placeholder}</div>
         </div>
         <p class="digital-signature-note"><em>${note}</em></p>
-        <p class="digital-signature-iso-utc mono">UTC: ${htmlEscape(isoTimestamp)}</p>
     </div>
 </section>`;
 }

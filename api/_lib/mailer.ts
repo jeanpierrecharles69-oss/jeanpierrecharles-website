@@ -753,6 +753,119 @@ Entrepreneur individuel | TVA non applicable, art. 293 B du CGI
 }
 
 /**
+ * G3 QA Gate — Notification JP avant livraison client (D_T0955_G3_01).
+ * Pipeline : Opus genere PDF -> stockage Supabase qa_status='pending' -> ce mail a JP.
+ * JP clique APPROUVER ou REJETER -> /api/admin-approve declenche envoi client.
+ *
+ * Signature explicite (pattern sendClientDiagnostic) pour eviter pollution MailerPaymentData
+ * avec champs one-shot (approveUrl, rejectUrl). PDF rapport en piece jointe pour
+ * lecture directe dans client mail JP sans ouvrir navigateur.
+ */
+export async function sendQANotificationEmail(params: {
+    invoiceNumber: string;
+    requestId: string;
+    customerName: string;
+    customerCompany?: string;
+    customerEmail: string;
+    lang: 'fr' | 'en';
+    sector?: string;
+    approveUrl: string;
+    rejectUrl: string;
+    pdfBase64: string;
+    pdfFilename: string;
+    opusUsageInfo?: string;
+}): Promise<void> {
+    const {
+        invoiceNumber,
+        requestId,
+        customerName,
+        customerCompany,
+        customerEmail,
+        lang,
+        sector,
+        approveUrl,
+        rejectUrl,
+        pdfBase64,
+        pdfFilename,
+        opusUsageInfo,
+    } = params;
+
+    const buf = Buffer.from(pdfBase64, 'base64');
+    if (buf.byteLength > PDF_MAX_BYTES) {
+        throw new Error(`QA PDF too large: ${buf.byteLength} bytes (max ${PDF_MAX_BYTES})`);
+    }
+
+    const reqShort = requestId.slice(0, 8);
+    const subject = `[AEGIS QA] DIAGNOSTIC ${invoiceNumber} en attente validation`;
+    const generatedAt = new Date().toLocaleString('fr-FR', {
+        timeZone: 'Europe/Paris',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:'Segoe UI',system-ui,sans-serif;color:#0f172a;background:#f8fafc;margin:0;padding:20px">
+<div style="max-width:620px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+<div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);padding:24px;text-align:center;color:#fff">
+<h1 style="margin:0;font-size:18px;font-weight:800">[AEGIS QA] DIAGNOSTIC en attente validation</h1>
+<p style="margin:6px 0 0;font-size:12px;opacity:0.9">${escapeBasicHtml(invoiceNumber)} &mdash; #REQ-${escapeBasicHtml(reqShort)}</p>
+</div>
+<div style="padding:24px">
+<div style="background:#faf5ff;border:1px solid #c4b5fd;border-radius:10px;padding:14px;margin-bottom:18px;color:#4c1d95;font-size:13px;line-height:1.6">
+<strong>QA Gate G3 actif</strong> &mdash; Le rapport DIAGNOSTIC est genere. Le client n'a PAS encore recu le PDF.<br>
+Verifie le rapport ci-joint, puis clique APPROUVER (envoi client) ou REJETER (intervention manuelle).
+</div>
+
+<table style="width:100%;font-size:13px;line-height:1.8">
+<tr><td style="width:140px;color:#64748b;font-weight:600">Client</td><td>${escapeBasicHtml(customerName)}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Entreprise</td><td>${escapeBasicHtml(customerCompany || 'N/A')}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Email destinataire</td><td>${escapeBasicHtml(customerEmail)}</td></tr>
+<tr><td style="color:#64748b;font-weight:600">Langue rapport</td><td>${lang.toUpperCase()}</td></tr>
+${sector ? `<tr><td style="color:#64748b;font-weight:600">Secteur</td><td>${escapeBasicHtml(sector)}</td></tr>` : ''}
+<tr><td style="color:#64748b;font-weight:600">Genere le</td><td>${generatedAt} CET</td></tr>
+${opusUsageInfo ? `<tr><td style="color:#64748b;font-weight:600">Opus usage</td><td><code style="font-size:11px">${escapeBasicHtml(opusUsageInfo)}</code></td></tr>` : ''}
+<tr><td style="color:#64748b;font-weight:600">Facture</td><td><code>${escapeBasicHtml(invoiceNumber)}</code></td></tr>
+<tr><td style="color:#64748b;font-weight:600">Request ID</td><td><code style="font-size:11px">${escapeBasicHtml(requestId)}</code></td></tr>
+</table>
+
+<div style="margin:24px 0;text-align:center">
+<a href="${approveUrl}" style="display:inline-block;background:#16a34a;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;margin:0 8px">&#x2705; APPROUVER ET LIVRER</a>
+<a href="${rejectUrl}" style="display:inline-block;background:#dc2626;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;margin:0 8px">&#x274C; REJETER</a>
+</div>
+
+<div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:12px;font-size:12px;color:#78350f;line-height:1.5">
+<strong>Rappel SLA :</strong> livraison avant 19h CET jour ouvre. Le rapport PDF est en piece jointe pour lecture directe.
+</div>
+</div>
+<div style="padding:14px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8">
+Email automatique AEGIS Intelligence &mdash; G3 QA Gate
+</div>
+</div></body></html>`;
+
+    await getTransport().sendMail({
+        from: `"${SMTP_FROM_NAME}" <${SMTP_FROM_EMAIL}>`,
+        to: OPS_NOTIFY_EMAIL,
+        subject,
+        html,
+        text: htmlToPlainText(html),
+        attachments: [{
+            filename: pdfFilename,
+            content: buf,
+            contentType: 'application/pdf',
+        }],
+    });
+
+    logMailer({
+        event: 'mailer_sent',
+        request_id: requestId,
+        recipient_type: 'ops_qa_gate',
+        invoice_number: invoiceNumber,
+        pdf_size_bytes: buf.byteLength,
+        timestamp: new Date().toISOString(),
+    });
+}
+
+/**
  * S4 Mission N11 — DIAGNOSTIC failure ops alert (Voie B Opus/PDF a echoue).
  * Email JP pour intervention manuelle (relance generate-diagnostic ou fallback PS1).
  */

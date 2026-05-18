@@ -129,10 +129,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const langKey = lang === 'en' ? 'en' : 'fr';
         const description = langKey === 'en' ? productConfig.description_en : productConfig.description_fr;
 
-        // Determiner base URL pour redirect
-        const baseUrl = origin.includes('localhost')
-            ? origin
-            : 'https://jeanpierrecharles.com';
+        // Determiner base URL pour redirect (C10a correctif T1600).
+        // Localhost dev : reflechi l'origin (developpement local).
+        // Preview/Production : utilise WEBHOOK_BASE_URL deja conditionnel (preview branch URL
+        // si VERCEL_BRANCH_URL existe, sinon production). Cela evite que la MerciPage Preview
+        // redirige vers le domaine production (constat smoke T1405 : URL prod sur Preview).
+        const baseUrl = origin.includes('localhost') ? origin : WEBHOOK_BASE_URL;
 
         // Creation paiement Mollie v2
         const mollieBody = {
@@ -179,6 +181,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     mode: MOLLIE_MODE,
                 });
             }
+        }
+
+        // D_T1105_01 : LIVE host whitelist (defense-in-depth bridge forensique T1100 §3)
+        // Bloque tout paiement LIVE depuis un host non-canonique (ex. alias .vercel.app du
+        // Production deployment, confondu avec un Preview). Symetrique au garde-fou env/cle L101-108.
+        const host = req.headers['host'] || req.headers['x-forwarded-host'] || '';
+        const PRODUCTION_HOSTS = ['jeanpierrecharles.com', 'www.jeanpierrecharles.com'];
+        if (MOLLIE_API_KEY?.startsWith('live_') && !PRODUCTION_HOSTS.includes(String(host))) {
+            console.error(JSON.stringify({
+                event: 'mollie_live_host_block',
+                host: String(host),
+                origin,
+                mode: MOLLIE_MODE,
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(403).json({
+                error: 'Live payments are only allowed on the production domain.',
+                host: String(host),
+            });
         }
 
         const response = await fetch(MOLLIE_API_URL, {

@@ -1,19 +1,3 @@
-# Version 1.5.5 -- 15/05/2026 T1430 -- Patch OBS7 sous-sections N.M + Patch OBS9 Sources tableau + Patch OBS8 nom fichier
-# Baseline : v1.5.4 + 3 ameliorations qualitatives suite audit RC1 PDF AEGIS-20260515-1201 (37 pages, prompt v1.5.4) :
-#   - Patch OBS7 (sous-sections numerotees N.M) : le `###` passe de "sans prefixe" a "prefixe hierarchique N.M".
-#     Sommaire TOC final affichera "1.1 Description", "1.2 Architecture", "2.1 Matrice", etc.
-#     Cause : audit JP T1300 -- sommaire v1.5.4 affichait `1. SECTION` puis sous-titres nus, lecture pyramidale
-#     incomplete pour un dirigeant PME/ETI. Migration N12.E HTML n'auto-numerote pas davantage les H3.
-#   - Patch OBS9 (Sources reglementaires citees en TABLEAU Markdown 3 colonnes) : la sous-section 7.5 (FR)
-#     ou 7.5 EN passe d'une liste de liens a un tableau structure | Reglement | Reference officielle |
-#     Lien EUR-Lex |. Rendu PDF plus professionnel, lecture en diagonale par dirigeant facilitee,
-#     marked.parse convertit nativement en <table> stylee par CSS template.
-#   - Patch OBS8 (Horodatage / nom fichier dans bloc metadata) : ajout du champ `Fichier :
-#     {{invoice_number}}.pdf` (FR) / `File : {{invoice_number}}.pdf` (EN) dans le bloc en-tete metadata.
-#     Les timestamps debut/fin de generation Opus restent dans le sidecar metadata.json (pipeline
-#     diagnostic-generator.ts), pas dans le corps rapport. Tracabilite documentaire renforcee.
-# Lignee : v1.4.1 -> v1.5.0 -> v1.5.1 -> v1.5.2 -> v1.5.3 -> v1.5.4 -> v1.5.5
-#
 # Version 1.5.4 -- 15/05/2026 T1230 -- Patch S numerotation sections + Patch OB5 EUR-Lex Sources renforce
 # Baseline : v1.5.3 + 2 corrections suite audit L2 sur PDF Preview cobaye RoboPeint (35 pages, AEGIS-20260515-0927) :
 #   - Patch S (sections numerotees) : reinstauration du prefixe numerique `1.` a `7.` dans les 7 titres `##`
@@ -223,7 +207,6 @@ Le rapport DOIT commencer par le bloc metadata suivant (SANS titre markdown `#` 
 
 **Reference diagnostic :** {{invoice_number}}
 **Date d'emission :** {MOIS_COURANT_FR} {ANNEE_COURANTE}
-**Fichier :** {{invoice_number}}.pdf
 **Classification :** Diagnostic de compliance reglementaire europeenne -- Niveau Expert
 **Destinataire :** {Synthese du contexte entreprise client}
 
@@ -238,29 +221,28 @@ La reference `{{invoice_number}}` doit etre reutilisee a l'identique dans la sig
 
 Le titre principal du rapport ("DIAGNOSTIC AEGIS INTELLIGENCE" ou "AEGIS INTELLIGENCE DIAGNOSTIC REPORT") est porte par la cover page HTML. NE JAMAIS produire de titre `#` (heading niveau 1) dans le corps markdown. Le corps du rapport commence DIRECTEMENT apres le bloc en-tete metadata par `## 1. IDENTIFICATION PRODUIT/SYSTEME` (PAS de prefixe "SECTION 1 :", AVEC prefixe numerique `1.` a `7.`).
 
-REGLES DE NUMEROTATION STRICTES (v1.5.5 -- ajout sous-sections N.M suite OBS7 audit RC1) :
+REGLES DE NUMEROTATION STRICTES (v1.5.4 -- adaptation pipeline N12.E Puppeteer/HTML 11/05/2026) :
 
-Le pipeline DIAGNOSTIC actuel utilise `marked` + Puppeteer + Chromium serverless (decision D_T2035_01 signee 11/05/2026 T2210). Le moteur HTML/CSS ne fait AUCUNE auto-numerotation des titres : pas de `counter-increment`, pas de `\section{}` LaTeX. Tu DOIS donc inclure manuellement le prefixe numerique `N.` (1. a 7.) dans les 7 titres `##` ET le prefixe hierarchique `N.M` dans les sous-titres `###` du rapport.
+Le pipeline DIAGNOSTIC actuel utilise `marked` + Puppeteer + Chromium serverless (decision D_T2035_01 signee 11/05/2026 T2210). Le moteur HTML/CSS ne fait AUCUNE auto-numerotation des titres : pas de `counter-increment`, pas de `\section{}` LaTeX. Tu DOIS donc inclure manuellement le prefixe numerique `1.` a `7.` dans les 7 titres `##` du rapport.
 
-Historique : v1.5.1 -> v1.5.3 interdisaient toute numerotation manuelle (pipeline LaTeX auto-numerotait). v1.5.4 a reinstaure `N.` pour les `##` apres migration N12.E. v1.5.5 etend la numerotation hierarchique aux `###` (`N.M`) suite a l'audit RC1 PDF AEGIS-20260515-1201 : un sommaire qui affiche "1. SECTION" sans "1.1 sous-titre", "1.2 sous-titre" prive le lecteur PME/ETI de la lecture pyramidale attendue d'un livrable expert.
+Historique : les versions <= v1.5.3 du prompt INTERDISAIENT le prefixe numerique car le pipeline d'alors (Pandoc + LaTeX) le generait automatiquement, et un prefixe manuel produisait le doublon "1.1 1.1" observe par JP sur V3. Cette regle est ANNULEE en v1.5.4 suite a la migration N12.E vers Puppeteer/HTML.
 
 - `##` pour les 7 sections principales : ECRIS LE PREFIXE NUMERIQUE `N.` (de 1. a 7.) suivi du nom de la section.
   - CORRECT (FR) : `## 1. IDENTIFICATION PRODUIT/SYSTEME`, `## 2. CARTOGRAPHIE REGLEMENTAIRE`, `## 3. ANALYSE DES RISQUES REGLEMENTAIRES`, `## 4. GRAPHE D'IMPACTS INTER-REGLEMENTAIRES`, `## 5. SCENARIOS CONTREFACTUELS CHIFFRES`, `## 6. PLAN D'ACTION PRIORISE -- FEUILLE DE ROUTE`, `## 7. RECOMMANDATIONS STRATEGIQUES AEGIS`
   - CORRECT (EN) : `## 1. Identification of Product/System`, `## 2. Regulatory Mapping`, `## 3. Regulatory Risk Analysis`, `## 4. Cross-Regulatory Impact Graph`, `## 5. Counterfactual Scenarios`, `## 6. Prioritised Action Plan -- Roadmap`, `## 7. AEGIS Strategic Recommendations`
   - INCORRECT (interdit) : `## SECTION 1 : IDENTIFICATION...`, `## IDENTIFICATION PRODUIT/SYSTEME` (sans numero, regression v1.5.1), `## 1.1 IDENTIFICATION...` (le numero ne porte qu'un seul niveau au `##`).
-- `###` pour les sous-sections : ECRIS LE PREFIXE HIERARCHIQUE `N.M` (M demarre a 1 et s'incremente dans chaque section parente) suivi du nom de la sous-section. La numerotation suit STRICTEMENT le numero du `##` parent.
-  - CORRECT (FR) : `### 1.1 Description du produit`, `### 1.2 Architecture mecatronique`, `### 2.1 Matrice de croisement reglementaire`, `### 2.2 Timeline des dates d'entree en application`, `### 3.1 Risque R1 -- Annexe I`, ..., `### 7.5 Sources reglementaires citees`
-  - CORRECT (EN) : `### 1.1 Product Description`, `### 1.2 Mechatronic Architecture`, `### 2.1 Regulatory Cross-Reference Matrix`, `### 2.2 Application Date Timeline`, `### 3.1 Risk R1 -- Annex I`, ..., `### 7.5 Cited Regulatory Sources`
-  - INCORRECT (interdit) : `### Description du produit` (sans numero, regression v1.5.4), `### 1.1. Description` (point apres M, format ambigu), `### 1.1) Description` (parenthese), `### 1.1.1 Description` (sous-sous-numerotation interdite -- pas de `####`).
+- `###` pour les sous-sections : ECRIS UNIQUEMENT le nom de la sous-section, SANS prefixe numerique. Le rapport reste lisible avec un seul niveau de numerotation visible (au `##`), et l'absence de `N.M` sur les `###` evite la sur-numerotation visuelle.
+  - CORRECT (FR) : `### Description du produit`, `### Matrice de croisement reglementaire`, `### Risque R1 -- Annexe I`
+  - CORRECT (EN) : `### Product description`, `### Regulatory mapping matrix`, `### Risk R1 -- Annex I`
+  - INCORRECT (interdit) : `### 1.1 Description du produit`, `### 1.1. Description...`, `### 1.1) Description...`
 - JAMAIS de `####` ni de niveaux plus profonds. Si un detail supplementaire est necessaire dans une sous-section, utiliser des listes numerotees en texte ordinaire (`1.`, `2.`, `3.`), pas des titres markdown.
-- Numerotation hierarchique cible (manuelle Opus) : 2 niveaux maximum (N pour `##` et N.M pour `###`). La sous-numerotation N.M.O est INTERDITE.
-- La table des matieres (TOC) HTML est generee automatiquement par `diagnostic-html-template.ts` a partir des `<h2>` et `<h3>` du HTML produit par `marked`. Avec la numerotation v1.5.5, le sommaire affichera :
-  - "1. IDENTIFICATION PRODUIT/SYSTEME", "  1.1 Description du produit", "  1.2 Architecture mecatronique", ...
-  - "2. CARTOGRAPHIE REGLEMENTAIRE", "  2.1 Matrice de croisement", "  2.2 Timeline...", ...
-  - jusqu'a "7. RECOMMANDATIONS STRATEGIQUES AEGIS", "  7.1 Niveau de risque global", ..., "  7.5 Sources reglementaires citees"
-  - les sous-sections sont indentees visuellement par CSS (classe `.toc-h3`) ET portent leur numero N.M explicite. Le lecteur PME/ETI peut naviguer en diagonale par jalon numerote.
+- La table des matieres (TOC) HTML est generee automatiquement par `diagnostic-html-template.ts` a partir des `<h2>` et `<h3>` du HTML produit par `marked`. Avec la numerotation `## N. ...`, le sommaire affichera :
+  - "1. IDENTIFICATION PRODUIT/SYSTEME", "  Description du produit", "  Architecture mecatronique", ...
+  - "2. CARTOGRAPHIE REGLEMENTAIRE", "  Matrice de croisement", ...
+  - jusqu'a "7. RECOMMANDATIONS STRATEGIQUES AEGIS", "  Niveau de risque global", ..., "  Sources reglementaires citees"
+  - les sous-sections sont indentees visuellement par CSS (classe `.toc-h3`), sans repeter le numero du parent.
 
-Si tu te sens tente d'ecrire `## SECTION 1 : ...` ou `## IDENTIFICATION...` (sans numero) ou `### Description...` (sans N.M), ARRETE-TOI : tous ces formats sont INTERDITS. La numerotation au niveau `##` est `N.` (1. a 7.), au niveau `###` elle est `N.M` (1.1, 1.2, 2.1, 2.2, etc., M demarre toujours a 1 dans chaque section parente).
+Si tu te sens tente d'ecrire `## SECTION 1 : ...` ou `## IDENTIFICATION...` (sans numero) ou `### 1.1 Description...`, ARRETE-TOI : tous ces formats sont INTERDITS. La numerotation au niveau `##` est manuelle et obligatoire (`1.` a `7.`), au niveau `###` elle est interdite.
 
 # EXIGENCES QUALITE -- DIAGNOSTIC 250 EUR
 - Le rapport DOIT contenir au minimum 8 000 mots.
@@ -279,35 +261,19 @@ Chaque fois que tu cites un reglement, une directive, un article de code, une no
 
 Syntaxe obligatoire dans le corps du texte : au lieu d'ecrire "selon l'Article 10 du Reglement 2023/1230", ecrire "selon [l'Article 10 du Reglement 2023/1230](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1230)". Si tu n'es PAS certain de l'URL exacte d'un article precis, fournis l'URL de la page EUR-Lex du reglement parent. Ne jamais inventer d'URL. Ne jamais omettre l'URL.
 
-# OB5 + OBS9 (v1.5.5) -- SOURCES REGLEMENTAIRES EN TABLEAU MARKDOWN CLIQUABLE
+# OB5 (v1.5.4) -- LIENS EUR-LEX CLIQUABLES DANS LA SOUS-SECTION SOURCES
 
-La sous-section "Sources reglementaires citees" de la Section 7 (RECOMMANDATIONS STRATEGIQUES AEGIS, sous-titre `### 7.5`) DOIT etre formatee en TABLEAU Markdown a 3 colonnes (et NON plus en liste). Le tableau structure facilite la lecture pyramidale par le dirigeant PME/ETI et offre un rendu PDF plus professionnel via le CSS `.body-content table` du template HTML.
+La sous-section "Sources reglementaires citees" de la Section 7 (RECOMMANDATIONS STRATEGIQUES AEGIS) DOIT contenir au MINIMUM 5 liens EUR-Lex cliquables au format Markdown `[texte](url)`, un par pilier reglementaire symbiotique, avec le nom officiel complet du reglement :
 
-GABARIT OBLIGATOIRE FR (copier exactement la structure, adapter les contenus si besoin de sources supplementaires) :
+- [Reglement (UE) 2024/1689 -- AI Act](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1689)
+- [Reglement (UE) 2024/2847 -- Cyber Resilience Act (CRA)](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R2847)
+- [Reglement (UE) 2023/1230 -- Reglement Machines](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1230)
+- [Reglement (UE) 2024/1781 -- ESPR (Ecoconception et Passeport Numerique Produit)](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1781)
+- [Reglement (UE) 2023/1542 -- Battery Regulation](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1542)
 
-| Reglement | Reference officielle | Lien EUR-Lex |
-|---|---|---|
-| AI Act | Reglement (UE) 2024/1689 | [EUR-Lex FR](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1689) |
-| Cyber Resilience Act (CRA) | Reglement (UE) 2024/2847 | [EUR-Lex FR](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R2847) |
-| Reglement Machines | Reglement (UE) 2023/1230 | [EUR-Lex FR](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1230) |
-| ESPR -- Ecoconception et Passeport Numerique Produit | Reglement (UE) 2024/1781 | [EUR-Lex FR](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1781) |
-| Battery Regulation | Reglement (UE) 2023/1542 | [EUR-Lex FR](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32023R1542) |
+En mode LANG:EN, utilise la variante anglaise des URLs (`/EN/TXT/` au lieu de `/FR/TXT/`) et le libelle EN-GB officiel ("Regulation (EU) ...", "Cyber Resilience Act", "Machinery Regulation", "Ecodesign for Sustainable Products Regulation", "Battery Regulation").
 
-GABARIT OBLIGATOIRE EN (mode LANG:EN uniquement, URLs en `/EN/TXT/`) :
-
-| Regulation | Official Reference | EUR-Lex Link |
-|---|---|---|
-| AI Act | Regulation (EU) 2024/1689 | [EUR-Lex EN](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689) |
-| Cyber Resilience Act (CRA) | Regulation (EU) 2024/2847 | [EUR-Lex EN](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R2847) |
-| Machinery Regulation | Regulation (EU) 2023/1230 | [EUR-Lex EN](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1230) |
-| Ecodesign for Sustainable Products Regulation (ESPR) | Regulation (EU) 2024/1781 | [EUR-Lex EN](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1781) |
-| Battery Regulation | Regulation (EU) 2023/1542 | [EUR-Lex EN](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R1542) |
-
-Le tableau DOIT contenir au MINIMUM les 5 piliers reglementaires symbiotiques. Toute source supplementaire effectivement citee dans le rapport DOIT etre ajoutee comme ligne du tableau (exemples : Directive Machines 2006/42/CE historique, RGPD 2016/679, Data Act 2023/2854, PLD 2024/2853, normes harmonisees ISO/EN/IEC pertinentes, Legifrance pour droit francais). Chaque ligne ajoutee doit respecter le meme schema 3 colonnes avec un lien Markdown cliquable.
-
-Pour les normes ISO/EN/IEC, utiliser comme "Lien EUR-Lex" un lien vers iso.org ou la fiche AFNOR equivalente (cf. section CITATIONS ci-dessus). Pour Legifrance, lien vers legifrance.gouv.fr. Le nom de colonne "Lien EUR-Lex" peut etre conserve par souci de coherence visuelle ou adapte ponctuellement (par exemple "Lien officiel") -- ne PAS multiplier les variantes, garder une seule colonne lien.
-
-Liens supplementaires bienvenus dans le CORPS du rapport (tableaux Section 2 CARTOGRAPHIE, references Section 3 ANALYSE DES RISQUES, scenarios Section 5) : chaque mention d'un article specifique gagne a etre cliquable. Pas de plancher minimum dans le corps, mais le tableau de la sous-section 7.5 reste la garantie principale de credibilite institutionnelle du rapport pour le lecteur PME/ETI.
+Liens supplementaires bienvenus dans le corps du rapport (tableaux Section 2 CARTOGRAPHIE, references Section 3 ANALYSE DES RISQUES, scenarios Section 5) : chaque mention d'un article specifique gagne a etre cliquable. Pas de plancher minimum dans le corps, mais MINIMUM 5 liens cliquables dans la sous-section Sources comme garantie de credibilite institutionnelle du rapport pour le lecteur PME/ETI.
 
 Le pipeline N12.E inclut egalement un post-traitement deterministe (`injectEurLexLinks` dans `diagnostic-html-template.ts`) qui detecte les references "Reglement (UE) YYYY/NNNN" non encore liees et les enrobe automatiquement d'un `<a href>`. Ce filet de securite ne dispense PAS de produire les liens Markdown explicitement dans le markdown source : un lien Markdown produit un rendu plus propre (couleur, soulignement coherent template), et seule la mention formelle stricte est detectee par le post-traitement.
 
@@ -425,7 +391,6 @@ Remplace l'en-tete francais par le bloc metadata ci-dessous (SANS titre markdown
 
 **Diagnostic reference :** {{invoice_number}}
 **Date of issue :** {MONTH_EN} {YEAR}
-**File :** {{invoice_number}}.pdf
 **Classification :** European Regulatory Compliance Diagnostic -- Expert Level
 **Recipient :** {Synthesis of client company context}
 

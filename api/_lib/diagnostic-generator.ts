@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { renderPdfFromHtml } from './pdf-renderer.js';
 import { renderDiagnosticHtml, type DiagnosticHtmlInput } from './diagnostic-html-template.js';
+import { supabase } from './supabase.js';
 
 /**
  * AEGIS Intelligence -- Server-side DIAGNOSTIC Generator (S4 Mission N11 / N12.E migration)
@@ -29,7 +30,7 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const OPUS_MODEL = 'claude-opus-4-6';
 const OPUS_MAX_TOKENS = 32768;
-const SYSTEM_PROMPT_PATH = 'config/diagnostic-system-prompt-v1.5.3.txt';
+const SYSTEM_PROMPT_PATH = 'config/diagnostic-system-prompt-v1.5.5.txt';
 
 // === Types ===
 
@@ -54,6 +55,11 @@ export interface DiagnosticOutput {
     pdfBase64: string;
     pdfFilename: string;
     pdfSize: number;
+    // N12.A DT-02 : hash de PDF1 (signature affichee dans PDF2 = displayed eIDAS value).
+    // Distinct du SHA-256 de PDF2 (stored integrity) recalcule par l'appelant si necessaire.
+    pdfSha256?: string;
+    // N12.A DT-04 : signed URL Supabase Storage (bucket aegis-documents, TTL 7j) ou null si upload echec.
+    pdfUrl?: string | null;
     opusUsage?: {
         input_tokens?: number;
         output_tokens?: number;
@@ -232,21 +238,96 @@ export async function generateDiagnosticReport(data: DiagnosticInput): Promise<D
     // 3. Substitute {{invoice_number}} (Patch A v1.5.2)
     const markdown = rawMarkdown.replace(/\{\{invoice_number\}\}/g, data.invoice_number);
 
-    // 4. Render markdown -> PDF via Puppeteer (N12.E migration)
+    // 4. Render markdown -> HTML canonique (contient le marqueur `{{PDF_SHA256}}` DT-02)
     const htmlInput: DiagnosticHtmlInput = {
         ...data,
         markdown_opus: markdown,
     };
-    const html = renderDiagnosticHtml(htmlInput);
-    const renderResult = await renderPdfFromHtml({
-        html,
+    const html1 = renderDiagnosticHtml(htmlInput);
+
+    // 5. N12.A DT-02 double-passe Puppeteer (+10s vs +8min Opus si re-run complet).
+    //    PDF1 = sans signature SHA-256 reelle (placeholder visible)
+    //    PDF2 = hash de PDF1 substitue dans le bloc digital-signature
+    const pdf1Result = await renderPdfFromHtml({
+        html: html1,
+        invoice_number: data.invoice_number,
+        format: 'A4',
+        printBackground: true,
+    });
+    const displayedSha256 = pdf1Result.sha256;
+    const html2 = html1.replace('{{PDF_SHA256}}', displayedSha256);
+    const pdf2Result = await renderPdfFromHtml({
+        html: html2,
         invoice_number: data.invoice_number,
         format: 'A4',
         printBackground: true,
     });
 
-    // 5. Output
-    const buffer = Buffer.from(renderResult.pdf);
+    // 6. N12.A DT-04 Storage upload non-bloquant vers Supabase aegis-documents.
+    //    Path : diagnostic/{invoice_number}/AEGIS-DIAGNOSTIC-{invoice_number}.pdf
+    //    Si echec : pdfUrl reste null, le pipeline email continue normalement.
+    const storagePath = `diagnostic/${data.invoice_number}/AEGIS-DIAGNOSTIC-${data.invoice_number}.pdf`;
+    let pdfUrl: string | null = null;
+    if (supabase) {
+        try {
+            const { error: uploadErr } = await supabase.storage
+                .from('aegis-documents')
+                .upload(storagePath, pdf2Result.pdf, {
+                    contentType: 'application/pdf',
+                    upsert: true,
+                });
+            if (uploadErr) {
+                console.error(JSON.stringify({
+                    event: 'storage_upload_failed',
+                    context: 'diagnostic-generator',
+                    path: storagePath,
+                    invoice_number: data.invoice_number,
+                    error: uploadErr.message,
+                    severity: 'warning',
+                    timestamp: new Date().toISOString(),
+                }));
+            } else {
+                const { data: signedData, error: signedErr } = await supabase.storage
+                    .from('aegis-documents')
+                    .createSignedUrl(storagePath, 7 * 24 * 3600);
+                if (signedErr) {
+                    console.error(JSON.stringify({
+                        event: 'storage_signed_url_failed',
+                        context: 'diagnostic-generator',
+                        path: storagePath,
+                        invoice_number: data.invoice_number,
+                        error: signedErr.message,
+                        severity: 'warning',
+                        timestamp: new Date().toISOString(),
+                    }));
+                } else {
+                    pdfUrl = signedData?.signedUrl || null;
+                }
+                console.log(JSON.stringify({
+                    event: 'storage_upload_ok',
+                    context: 'diagnostic-generator',
+                    path: storagePath,
+                    invoice_number: data.invoice_number,
+                    pdf_size_bytes: pdf2Result.sizeBytes,
+                    has_signed_url: pdfUrl !== null,
+                    timestamp: new Date().toISOString(),
+                }));
+            }
+        } catch (e: unknown) {
+            console.error(JSON.stringify({
+                event: 'storage_upload_error',
+                context: 'diagnostic-generator',
+                path: storagePath,
+                invoice_number: data.invoice_number,
+                error: (e as { message?: string })?.message || 'unknown',
+                severity: 'warning',
+                timestamp: new Date().toISOString(),
+            }));
+        }
+    }
+
+    // 7. Output (PDF2 final)
+    const buffer = Buffer.from(pdf2Result.pdf);
     const base64 = buffer.toString('base64');
     const filename = `AEGIS-DIAGNOSTIC-${data.invoice_number}.pdf`;
 
@@ -255,7 +336,9 @@ export async function generateDiagnosticReport(data: DiagnosticInput): Promise<D
         pdfBuffer: buffer,
         pdfBase64: base64,
         pdfFilename: filename,
-        pdfSize: renderResult.sizeBytes,
+        pdfSize: pdf2Result.sizeBytes,
+        pdfSha256: displayedSha256,
+        pdfUrl,
         opusUsage: usage,
     };
 }

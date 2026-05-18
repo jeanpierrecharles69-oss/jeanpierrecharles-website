@@ -396,25 +396,94 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             // === S1 Mission N11 : facture PDF serveur-side (P0 legal Art. L441-10) ===
             // Generation jsPDF + INSERT invoices + propagation pdf_base64 vers emailData.
             // Fail-safe : si la generation echoue, l'email part sans PJ (UX degradee, paiement confirme).
+            // N12.A DT-04 : upload facture vers Supabase Storage aegis-documents/invoices/{ref}/.
             let invoicePdfBase64: string | undefined;
             let invoicePdfFilename: string | undefined;
+            let invoicePdfUrl: string | null = null;
             const invoiceNumber = metadata.invoice_number || undefined;
 
             if (invoiceNumber) {
                 try {
+                    // D_T1105_03 : enrichissement Supabase avant generation facture (fix regression 15/05).
+                    // Cause racine : metadata Mollie limite 1KB (cf. commit bca9afc), tronque
+                    // silencieusement quand product_description/regulations/customer_company depassent.
+                    // Source canonique = diagnostic_requests/veille_requests table (deja ecrite par
+                    // diagnostic-request.ts/veille-request.ts avant le checkout). Fallback sur metadata
+                    // si SELECT echoue (preserve robustesse).
+                    let customerName = metadata.customer_name || undefined;
+                    let customerCompany = metadata.customer_company || undefined;
+                    let customerEmail = metadata.email || undefined;
+                    let sectorVal = metadata.sector || undefined;
+                    let regulationsList: string[] | undefined = metadata.regulations
+                        ? (metadata.regulations as string).split(', ').filter((s: string) => s.trim().length > 0)
+                        : undefined;
+                    let contextVal = metadata.context || undefined;
+
+                    if (supabase && metadata.request_id) {
+                        try {
+                            const enrichPromise = supabase
+                                .from(targetTable)
+                                .select('first_name, last_name, company, email, sector, regulations, context')
+                                .eq('request_id', metadata.request_id)
+                                .single();
+                            const enrichTimeout = new Promise<{ data: null; error: { message: string } }>((_, reject) =>
+                                setTimeout(() => reject(new Error('invoice_enrichment_timeout_2s')), 2000)
+                            );
+                            const { data: clientRow } = await Promise.race([enrichPromise, enrichTimeout]) as {
+                                data: {
+                                    first_name?: string | null;
+                                    last_name?: string | null;
+                                    company?: string | null;
+                                    email?: string | null;
+                                    sector?: string | null;
+                                    regulations?: string | string[] | null;
+                                    context?: string | null;
+                                } | null;
+                                error: unknown;
+                            };
+                            if (clientRow) {
+                                const fullName = [clientRow.first_name, clientRow.last_name].filter(Boolean).join(' ').trim();
+                                if (fullName) customerName = fullName;
+                                if (clientRow.company) customerCompany = clientRow.company;
+                                if (clientRow.email) customerEmail = clientRow.email;
+                                if (clientRow.sector) sectorVal = clientRow.sector;
+                                if (clientRow.regulations) {
+                                    regulationsList = Array.isArray(clientRow.regulations)
+                                        ? clientRow.regulations
+                                        : (clientRow.regulations as string).split(',').map(r => r.trim()).filter(Boolean);
+                                }
+                                if (clientRow.context) contextVal = clientRow.context;
+                                console.log(JSON.stringify({
+                                    event: 'invoice_supabase_enrichment_ok',
+                                    payment_id: id,
+                                    request_id: metadata.request_id,
+                                    target_table: targetTable,
+                                    timestamp: new Date().toISOString(),
+                                }));
+                            }
+                        } catch (ee: unknown) {
+                            console.warn(JSON.stringify({
+                                event: 'invoice_supabase_enrichment_failed',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                error: (ee as Error)?.message || 'unknown',
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+                    }
+
                     const invoice = generateInvoicePdf({
                         invoice_number: invoiceNumber,
                         product: isVeille ? 'veille' : 'diagnostic',
                         lang: (metadata.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en',
                         amount: isVeille ? '150.00' : '250.00',
-                        customer_name: metadata.customer_name || undefined,
-                        customer_company: metadata.customer_company || undefined,
-                        customer_email: metadata.email || undefined,
-                        sector: metadata.sector || undefined,
-                        regulations: metadata.regulations
-                            ? (metadata.regulations as string).split(', ').filter((s: string) => s.trim().length > 0)
-                            : undefined,
-                        context: metadata.context || undefined,
+                        customer_name: customerName,
+                        customer_company: customerCompany,
+                        customer_email: customerEmail,
+                        sector: sectorVal,
+                        regulations: regulationsList,
+                        context: contextVal,
                     });
                     invoicePdfBase64 = invoice.base64;
                     invoicePdfFilename = invoice.filename;
@@ -428,6 +497,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         timestamp: new Date().toISOString(),
                     }));
 
+                    // N12.A DT-04 : upload facture vers Storage aegis-documents (non-bloquant).
+                    // Path : invoices/{invoice_number}/Facture_AEGIS_{invoice_number}.pdf
+                    // Echec -> invoicePdfUrl reste null, archive jsPDF (pdf_base64) reste source.
+                    if (supabase) {
+                        const invoiceStoragePath = `invoices/${invoiceNumber}/Facture_AEGIS_${invoiceNumber}.pdf`;
+                        try {
+                            const invoiceBuffer = Buffer.from(invoice.base64, 'base64');
+                            const { error: uploadErr } = await supabase.storage
+                                .from('aegis-documents')
+                                .upload(invoiceStoragePath, invoiceBuffer, {
+                                    contentType: 'application/pdf',
+                                    upsert: true,
+                                });
+                            if (uploadErr) {
+                                console.error(JSON.stringify({
+                                    event: 'invoice_storage_upload_failed',
+                                    payment_id: id,
+                                    invoice_number: invoiceNumber,
+                                    path: invoiceStoragePath,
+                                    error: uploadErr.message,
+                                    severity: 'warning',
+                                    timestamp: new Date().toISOString(),
+                                }));
+                            } else {
+                                const { data: signedData } = await supabase.storage
+                                    .from('aegis-documents')
+                                    .createSignedUrl(invoiceStoragePath, 7 * 24 * 3600);
+                                invoicePdfUrl = signedData?.signedUrl || null;
+                                console.log(JSON.stringify({
+                                    event: 'invoice_storage_upload_ok',
+                                    payment_id: id,
+                                    invoice_number: invoiceNumber,
+                                    path: invoiceStoragePath,
+                                    pdf_size_bytes: invoice.size,
+                                    has_signed_url: invoicePdfUrl !== null,
+                                    timestamp: new Date().toISOString(),
+                                }));
+                            }
+                        } catch (se: unknown) {
+                            console.warn(JSON.stringify({
+                                event: 'invoice_storage_upload_error',
+                                payment_id: id,
+                                invoice_number: invoiceNumber,
+                                path: invoiceStoragePath,
+                                error: (se as { message?: string })?.message || 'unknown',
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+                    }
+
                     // INSERT invoices (idempotent : 23505 unique_violation = deja archive cote client MerciPage)
                     if (supabase) {
                         try {
@@ -439,6 +559,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                                     product: isVeille ? 'veille' : 'diagnostic',
                                     amount: isVeille ? '150.00' : '250.00',
                                     pdf_base64: invoice.base64,
+                                    pdf_url: invoicePdfUrl,
                                     lang: metadata.lang === 'en' ? 'en' : 'fr',
                                 });
                             const archiveTimeout = new Promise<{ error: { message?: string; code?: string } }>((_, reject) =>
