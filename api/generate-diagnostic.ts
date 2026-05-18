@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { timingSafeEqual } from 'node:crypto';
 import { supabase, SUPABASE_ENABLED } from './_lib/supabase.js';
 import { generateDiagnosticReport, type DiagnosticInput } from './_lib/diagnostic-generator.js';
-import { sendDiagnosticDelivery, sendDiagnosticFailureOps } from './_lib/mailer.js';
+import { sendDiagnosticFailureOps, sendQANotificationEmail } from './_lib/mailer.js';
 
 /**
  * AEGIS Intelligence -- Generate Diagnostic Endpoint (S4 Mission N11)
@@ -32,6 +32,17 @@ import { sendDiagnosticDelivery, sendDiagnosticFailureOps } from './_lib/mailer.
 export const config = { maxDuration: 800, memory: 1024 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// G3 QA Gate (D_T0955_G3_01) : base URL pour liens approve/reject email JP.
+// Symetrique a mollie-webhook.ts WEBHOOK_BASE_URL pour preserver preview branch URL.
+const PUBLIC_BASE_URL = (() => {
+    const vEnv = process.env.VERCEL_ENV || 'development';
+    if (vEnv === 'production') return 'https://jeanpierrecharles.com';
+    if (vEnv === 'preview' && process.env.VERCEL_BRANCH_URL) {
+        return `https://${process.env.VERCEL_BRANCH_URL}`;
+    }
+    return 'https://jeanpierrecharles.com';
+})();
 
 function timingSafeStringEqual(a: string, b: string): boolean {
     const bufA = Buffer.from(a);
@@ -167,37 +178,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
     }
 
-    // 4. SELECT invoice (S1) pour PJ facture
-    let invoicePdfBase64: string | undefined;
-    let invoicePdfFilename: string | undefined;
-    {
-        const { data: invRow, error: invErr } = await supabase
-            .from('invoices')
-            .select('pdf_base64, invoice_number')
-            .eq('invoice_number', requestRow.invoice_number)
-            .maybeSingle();
-        if (invErr) {
-            console.warn(JSON.stringify({
-                event: 'generate_diagnostic_invoice_select_failed',
-                request_id: requestId,
-                invoice_number: requestRow.invoice_number,
-                error: invErr.message || 'unknown',
-                severity: 'warning',
-                timestamp: new Date().toISOString(),
-            }));
-        } else if (invRow && invRow.pdf_base64) {
-            invoicePdfBase64 = invRow.pdf_base64;
-            invoicePdfFilename = `Facture_AEGIS_${invRow.invoice_number}.pdf`;
-        } else {
-            console.warn(JSON.stringify({
-                event: 'generate_diagnostic_invoice_missing',
-                request_id: requestId,
-                invoice_number: requestRow.invoice_number,
-                severity: 'warning',
-                timestamp: new Date().toISOString(),
-            }));
-        }
-    }
+    // 4. (G3 QA Gate) SELECT invoice retire ici : la facture est jointe au moment
+    //    de l'approval JP par /api/admin-approve (apres clic APPROUVER), pas avant.
 
     // 5. Build DiagnosticInput depuis Supabase row
     const customerName = [requestRow.first_name, requestRow.last_name].filter(Boolean).join(' ') || 'Client';
@@ -283,38 +265,87 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         timestamp: new Date().toISOString(),
     }));
 
-    // 7. Send delivery email (rapport PJ + facture PJ)
+    // === G3 QA Gate (D_T0955_G3_01) : interception avant livraison client ===
+    // Au lieu d'envoyer directement au client (sendDiagnosticDelivery), on stocke
+    // le PDF en Supabase + notifie JP. JP clique APPROUVER (->admin-approve) qui
+    // declenche le vrai sendDiagnosticDelivery. Garde-fou QA humain avant livraison.
+
+    // 7. Generer qa_token + UPDATE diagnostic_requests (qa_status='pending', stockage PDF)
+    //    N12.A DT-04 : ajout pdf_url (signed URL Storage aegis-documents) si upload OK,
+    //    null sinon (double canal email PJ + Storage backup, garde l'idempotence retry).
+    const qaToken = crypto.randomUUID();
+    {
+        const { error: qaErr } = await supabase
+            .from('diagnostic_requests')
+            .update({
+                qa_status: 'pending',
+                qa_token: qaToken,
+                pdf_base64: report.pdfBase64,
+                pdf_sha256: pdfSha256,
+                pdf_url: report.pdfUrl ?? null,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('request_id', requestId);
+
+        if (qaErr) {
+            console.error(JSON.stringify({
+                event: 'generate_diagnostic_qa_gate_update_failed',
+                request_id: requestId,
+                error: qaErr.message || 'unknown',
+                severity: 'critical',
+                timestamp: new Date().toISOString(),
+            }));
+            // UPDATE QA gate echoue : PDF genere mais pas stocke. JP doit intervenir.
+            await sendDiagnosticFailureOps({
+                payment_id: requestRow.payment_id || 'N/A',
+                request_id: requestRow.request_id,
+                email: requestRow.email,
+                customer_name: customerName,
+                customer_company: requestRow.company || undefined,
+                sector: requestRow.sector || undefined,
+                invoice_number: requestRow.invoice_number,
+                amount: '250.00',
+                failure_reason: `qa_gate_update_failed: ${qaErr.message || 'unknown'}`,
+                lang: input.lang,
+            }).catch(() => { /* swallow */ });
+            return res.status(500).json({ error: 'qa_gate_update_failed' });
+        }
+    }
+
+    // 8. Notifier JP avec rapport en PJ + liens approve/reject
+    const adminKey = process.env.AEGIS_ADMIN_KEY || '';
+    const approveUrl = `${PUBLIC_BASE_URL}/api/admin-approve?token=${qaToken}&action=approve&key=${encodeURIComponent(adminKey)}`;
+    const rejectUrl = `${PUBLIC_BASE_URL}/api/admin-approve?token=${qaToken}&action=reject&key=${encodeURIComponent(adminKey)}`;
+    const opusUsageInfo = report.opusUsage
+        ? `in:${report.opusUsage.input_tokens || 0} out:${report.opusUsage.output_tokens || 0} cache_read:${report.opusUsage.cache_read_input_tokens || 0}`
+        : undefined;
+
     try {
-        await sendDiagnosticDelivery({
-            payment_id: requestRow.payment_id || 'N/A',
-            request_id: requestRow.request_id,
-            email: requestRow.email,
-            customer_name: customerName,
-            customer_company: requestRow.company || undefined,
-            invoice_number: requestRow.invoice_number,
-            amount: '250.00',
+        await sendQANotificationEmail({
+            invoiceNumber: requestRow.invoice_number,
+            requestId: requestRow.request_id,
+            customerName,
+            customerCompany: requestRow.company || undefined,
+            customerEmail: requestRow.email,
             lang: input.lang,
-            report_pdf_base64: report.pdfBase64,
-            report_pdf_filename: report.pdfFilename,
-            pdf_base64: invoicePdfBase64,
-            pdf_filename: invoicePdfFilename,
+            sector: requestRow.sector || undefined,
+            approveUrl,
+            rejectUrl,
+            pdfBase64: report.pdfBase64,
+            pdfFilename: report.pdfFilename,
+            opusUsageInfo,
         });
     } catch (mailErr: unknown) {
         const reason = (mailErr as { message?: string })?.message || 'mail_unknown_error';
         console.error(JSON.stringify({
-            event: 'generate_diagnostic_delivery_mail_failed',
+            event: 'generate_diagnostic_qa_notify_mail_failed',
             request_id: requestId,
             error: reason,
             severity: 'critical',
             timestamp: new Date().toISOString(),
         }));
-        // PDF genere OK mais mail echoue : status reste 'generating' → JP peut relancer manuellement.
-        // PAS de fallback status='failed' ici (PDF est genere, intervention manuelle simple).
-        await supabase
-            .from('diagnostic_requests')
-            .update({ pdf_sha256: pdfSha256, updated_at: new Date().toISOString() })
-            .eq('request_id', requestId);
-
+        // PDF stocke OK mais mail JP echoue : qa_status reste 'pending', JP peut relancer admin-approve manuellement.
+        // PAS de fallback status='failed' (PDF stocke, gate actif).
         await sendDiagnosticFailureOps({
             payment_id: requestRow.payment_id || 'N/A',
             request_id: requestRow.request_id,
@@ -324,48 +355,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             sector: requestRow.sector || undefined,
             invoice_number: requestRow.invoice_number,
             amount: '250.00',
-            failure_reason: `mail_delivery: ${reason}`,
+            failure_reason: `qa_notify_mail: ${reason}`,
             lang: input.lang,
         }).catch(() => { /* swallow */ });
 
-        return res.status(502).json({ error: 'delivery_mail_failed', reason });
+        return res.status(502).json({ error: 'qa_notify_mail_failed', reason });
     }
 
-    // 8. UPDATE status='delivered'
-    {
-        const { error: finalErr } = await supabase
-            .from('diagnostic_requests')
-            .update({
-                status: 'delivered',
-                delivered_at: new Date().toISOString(),
-                pdf_sha256: pdfSha256,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('request_id', requestId);
-        if (finalErr) {
-            console.warn(JSON.stringify({
-                event: 'generate_diagnostic_final_update_failed',
-                request_id: requestId,
-                error: finalErr.message || 'unknown',
-                severity: 'warning',
-                timestamp: new Date().toISOString(),
-            }));
-            // Email OK + PDF genere : ne pas faire echouer la requete pour un bug UPDATE
-        }
-    }
+    // status reste 'generating' jusqu'a approve/reject par JP via /api/admin-approve.
+    // delivered_at est positionne a l'approbation, pas ici.
 
     console.log(JSON.stringify({
-        event: 'generate_diagnostic_delivered',
+        event: 'generate_diagnostic_qa_pending',
         request_id: requestId,
         invoice_number: requestRow.invoice_number,
-        elapsed_ms: Date.now() - startedAt,
+        qa_token_prefix: qaToken.slice(0, 8),
         pdf_sha256_prefix: pdfSha256.slice(0, 8),
+        elapsed_ms: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
     }));
 
     return res.status(200).json({
-        status: 'delivered',
+        status: 'qa_pending',
         request_id: requestId,
+        qa_token_prefix: qaToken.slice(0, 8),
         pdf_size_bytes: report.pdfSize,
         elapsed_ms: Date.now() - startedAt,
     });

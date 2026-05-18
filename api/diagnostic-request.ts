@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sendOpsPreNotify } from './_lib/mailer.js';
 import { supabase, logSupabaseUnavailable } from './_lib/supabase.js';
+import { getCetDateParts } from './_lib/cet-timestamp.js';
 
 /**
  * AEGIS Intelligence -- Diagnostic Request Handler
@@ -102,9 +103,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         // Generate request_id (UUID v4) + invoice_number (FIX-04)
+        // N12.A DT-01 : invoice_number en CET Paris (Vercel Lambda TZ=UTC sinon decalage 1-2h).
         const request_id = crypto.randomUUID();
         const now = new Date();
-        const invoice_number = `AEGIS-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+        const { yyyy, MM, dd, hh, mm } = getCetDateParts(now);
+        const invoice_number = `AEGIS-${yyyy}${MM}${dd}-${hh}${mm}`;
 
         // Log only non-sensitive metadata (RGPD-safe)
         console.log(JSON.stringify({

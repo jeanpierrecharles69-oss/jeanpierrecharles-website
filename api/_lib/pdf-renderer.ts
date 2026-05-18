@@ -141,11 +141,14 @@ export async function renderPdfFromHtml(input: PdfRenderInput): Promise<PdfRende
             footerTemplate: input.footerTemplate ?? buildDefaultFooter(input.invoice_number),
             preferCSSPageSize: false,
             // N12.D F1 (P0) correctif T2125 : signets PDF (bookmarks) navigables Adobe/Edge.
-            // tagged: true active accessibilite PDF/UA. outline: true (Puppeteer >=22.7) genere
-            // les bookmarks panneau lateral depuis la structure headings HTML (h1, h2, h3).
-            // outline requires tagged. Cf. brief 20260513T2110 F1.
+            // tagged: true active accessibilite PDF/UA.
+            // N12.A DT-03 (P2) correctif T1010 18/05 : outline:false (etait true).
+            // Puppeteer outline:true generait des entrees doubles "TextText" pour les titres
+            // avec ancres `<a id="">`. Cause non maitrisable cote Puppeteer (cf. C7 fix T1600).
+            // Le sommaire HTML clickable page 2 remplace la navigation bookmarks Adobe.
+            // Si JP exige les bookmarks Adobe -> roadmap N13 via pdf-lib post-generation.
             tagged: true,
-            outline: true,
+            outline: false,
         });
 
         const pdf = Buffer.from(pdfData);
