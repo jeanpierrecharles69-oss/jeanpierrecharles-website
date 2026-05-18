@@ -319,7 +319,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
     }
 
-    // UPDATE qa_status='approved' + status='delivered' + vider pdf_base64
+    // UPDATE qa_status='approved' + status='delivered' + email_sent_at + vider pdf_base64
+    // P2-PIPE-03 fix (20260518T1625) : email_sent_at pose ici car sendDiagnosticDelivery
+    // a reussi L291-304 (try/catch + early return 502 si echec). Sans cette ligne,
+    // diagnostic-deliver.ts L280-303 (idempotence CE-01 v1.1 triphasique ETAT B) verrait
+    // email_sent_at NULL malgre delivered_at OK et renverrait l'email en double sur retry.
     const nowIso = new Date().toISOString();
     const { error: appErr } = await supabase
         .from('diagnostic_requests')
@@ -328,6 +332,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             qa_approved_at: nowIso,
             status: 'delivered',
             delivered_at: nowIso,
+            email_sent_at: nowIso,
             pdf_base64: null,
             updated_at: nowIso,
         })
