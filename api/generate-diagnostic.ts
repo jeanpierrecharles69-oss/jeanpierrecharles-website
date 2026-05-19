@@ -337,15 +337,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     } catch (mailErr: unknown) {
         const reason = (mailErr as { message?: string })?.message || 'mail_unknown_error';
-        console.error(JSON.stringify({
+        // P1-ARCH-01 fix (T1115) : QA email is notification-only, not pipeline-critical.
+        // Diagnostic is generated + stored (pdf_base64 in DB + Storage signed URL if upload OK).
+        // QA gate row exists with qa_status='pending'. JP can approve via Supabase Studio
+        // or direct /api/admin-approve URL even if this email failed.
+        // Severity downgraded critical -> warning. Fall-through to standard 200 qa_pending response.
+        console.warn(JSON.stringify({
             event: 'generate_diagnostic_qa_notify_mail_failed',
             request_id: requestId,
+            invoice_number: requestRow.invoice_number,
             error: reason,
-            severity: 'critical',
+            severity: 'warning',
+            fallback: 'JP approve via Supabase Studio or direct /api/admin-approve URL',
             timestamp: new Date().toISOString(),
         }));
-        // PDF stocke OK mais mail JP echoue : qa_status reste 'pending', JP peut relancer admin-approve manuellement.
-        // PAS de fallback status='failed' (PDF stocke, gate actif).
         await sendDiagnosticFailureOps({
             payment_id: requestRow.payment_id || 'N/A',
             request_id: requestRow.request_id,
@@ -358,8 +363,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             failure_reason: `qa_notify_mail: ${reason}`,
             lang: input.lang,
         }).catch(() => { /* swallow */ });
-
-        return res.status(502).json({ error: 'qa_notify_mail_failed', reason });
+        // No return — fall-through to qa_pending 200 response below.
     }
 
     // status reste 'generating' jusqu'a approve/reject par JP via /api/admin-approve.
