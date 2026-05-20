@@ -3,7 +3,10 @@ import { timingSafeEqual } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { supabase, SUPABASE_ENABLED } from './_lib/supabase.js';
-import { renderVeilleReport } from './_lib/veille-report-template.js';
+// DIVA-02 (N13 20260520) : rendu Puppeteer HTML->PDF (remplace jsPDF veille-report-template.ts).
+// L'ancien renderer jsPDF est conserve dans le repo comme fallback historique (non importe).
+import { renderVeilleHTML } from './_lib/veille-html-template.js';
+import { renderPdfFromHtml } from './_lib/pdf-renderer.js';
 
 /**
  * AEGIS Intelligence -- Generate VEILLE Monthly Report (S5 Mission N11)
@@ -240,14 +243,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const markdown = opusResult.text.replace(/\{\{edition\}\}/g, edition);
 
-    let report;
+    let report: { pdfBase64: string; pdfSize: number; pdfFilename: string };
     try {
-        report = renderVeilleReport({
-            edition,
-            lang,
-            markdown,
-            month_label: monthLabel,
+        // DIVA-02 : markdown Opus -> HTML AEGIS brande -> PDF via Puppeteer (Chromium serverless).
+        const html = renderVeilleHTML({ edition, lang, markdown, month_label: monthLabel });
+        const editionSafe = edition.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60);
+        const veilleFooter = `<div style="font-family:'DM Sans',Arial,sans-serif;font-size:8pt;color:#94a3b8;width:100%;padding:0 16mm;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><span>AEGIS Intelligence &mdash; jeanpierrecharles.com</span><span>${editionSafe.replace(/_/g, ' ')}</span><span>p. <span class="pageNumber"></span>/<span class="totalPages"></span></span></div>`;
+        const rendered = await renderPdfFromHtml({
+            html,
+            invoice_number: edition,
+            format: 'A4',
+            printBackground: true,
+            waitForFonts: true,
+            useCssPageSize: true, // cover full-bleed (@page cover{margin:0}) + corps margine via CSS @page
+            footerTemplate: veilleFooter,
         });
+        report = {
+            pdfBase64: rendered.pdf.toString('base64'),
+            pdfSize: rendered.sizeBytes,
+            pdfFilename: `AEGIS-VEILLE-${editionSafe}-${lang}.pdf`,
+        };
+        console.log(JSON.stringify({
+            event: 'generate_veille_report_render_ok',
+            edition, lang,
+            renderer: 'puppeteer-html',
+            pdf_size_bytes: rendered.sizeBytes,
+            page_count: rendered.pageCount,
+            render_ms: rendered.durationMs,
+            sha256: rendered.sha256,
+            timestamp: new Date().toISOString(),
+        }));
     } catch (e: unknown) {
         const reason = (e as { message?: string })?.message || 'pdf_render_unknown_error';
         console.error(JSON.stringify({

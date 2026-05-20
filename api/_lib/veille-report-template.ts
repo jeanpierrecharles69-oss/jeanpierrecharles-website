@@ -125,6 +125,9 @@ function newPage(state: RenderState) {
     state.doc.addPage();
     state.pageNum += 1;
     state.y = MT;
+    // Fix : drawFooter laisse la couleur texte en slate400 -> reset pour eviter
+    // le texte gris fantome en haut de page apres un saut de page mid-contenu.
+    setText(state.doc, COLOR.text);
 }
 
 function ensureSpace(state: RenderState, needed: number) {
@@ -215,6 +218,8 @@ function renderInlineLine(state: RenderState, chunks: InlineChunk[], opts: { fon
             continue;
         }
         chunkFontSet(doc, w);
+        doc.setFontSize(fontSize);
+        setText(doc, opts.color || COLOR.text);
         const txt = w.text + (w.spaceAfter ? ' ' : '');
         const width = doc.getTextWidth(txt);
         if (xCursor + width > RIGHT && xCursor !== startX) {
@@ -223,6 +228,12 @@ function renderInlineLine(state: RenderState, chunks: InlineChunk[], opts: { fon
             ensureSpace(state, lineHeight);
         }
         ensureSpace(state, lineHeight);
+        // Fix : re-asserter font+taille+couleur JUSTE avant le draw. ensureSpace a pu
+        // declencher newPage->drawFooter (size=7, slate400) entre-temps ; sans ce reset
+        // le 1er mot en haut de page se dessine en 7pt grise (texte fantome).
+        chunkFontSet(doc, w);
+        doc.setFontSize(fontSize);
+        setText(doc, opts.color || COLOR.text);
         doc.text(txt, xCursor, state.y);
         xCursor += width;
     }
@@ -236,9 +247,11 @@ function renderHeading(state: RenderState, depth: number, chunks: InlineChunk[])
 
     if (depth === 1 || depth === 2) {
         // H1/H2 : page break si pas en debut de page + bandeau navy
+        // Fix densite : ne forcer un saut de page que s'il reste peu d'espace en
+        // bas de page (eviter un titre orphelin) ; sinon enchainer pour densifier.
         if (state.pageNum >= 2 && state.y > MT + 5) {
-            // garder sur la meme page si tres haut, sinon page break
-            if (state.y > 60) newPage(state);
+            const remaining = PAGE_H - MB - state.y;
+            if (remaining < 48) newPage(state);
         }
         ensureSpace(state, 22);
         // Barre verticale gold
@@ -309,6 +322,8 @@ function renderListItem(state: RenderState, chunks: InlineChunk[], ordered: bool
     let xCursor = startX;
     for (const w of words) {
         chunkFontSet(doc, w);
+        doc.setFontSize(10);
+        setText(doc, COLOR.text);
         const txt = w.text + (w.spaceAfter ? ' ' : '');
         const width = doc.getTextWidth(txt);
         if (xCursor + width > RIGHT && xCursor !== startX) {
@@ -317,49 +332,138 @@ function renderListItem(state: RenderState, chunks: InlineChunk[], ordered: bool
             ensureSpace(state, lineHeight);
         }
         ensureSpace(state, lineHeight);
+        // Fix : re-asserter font+taille+couleur juste avant le draw (anti texte gris post-saut).
+        chunkFontSet(doc, w);
+        doc.setFontSize(10);
+        setText(doc, COLOR.text);
         doc.text(txt, xCursor, state.y);
         xCursor += width;
     }
     state.y += lineHeight;
 }
 
-function renderTable(state: RenderState, header: string[], rows: string[][]) {
+// === Status emoji -> pastille couleur (jsPDF/Helvetica ne rend pas les glyphes emoji) ===
+const STATUS_DOT: Record<string, string> = {
+    '\u{1F7E2}': '#0a7b4f', // vert
+    '\u{1F7E1}': '#d4a843', // jaune
+    '\u{1F7E0}': '#d97706', // orange
+    '\u{1F534}': '#dc2626', // rouge
+    '\u{26AA}': '#94a3b8',  // blanc/gris
+    '\u{26AB}': '#0f172a',  // noir
+};
+const STATUS_EMOJI_RE = /(\u{1F7E2}|\u{1F7E1}|\u{1F7E0}|\u{1F534}|\u{26AA}|\u{26AB})/gu;
+const TABLE_DOT_W = 4; // mm reserves pour une pastille + espace
+
+interface CellWord { text: string; bold: boolean; dot?: string; spaceAfter: boolean }
+
+// Convertit des chunks inline (issus de flattenInline) en mots rendables cellule :
+// le gras est preserve, les liens sont deja delinearises par flattenInline (label seul),
+// les emoji statut deviennent des pastilles couleur (dot).
+function chunksToCellWords(chunks: InlineChunk[]): CellWord[] {
+    const words: CellWord[] = [];
+    for (const c of chunks) {
+        const segments = c.text.split(STATUS_EMOJI_RE);
+        for (const seg of segments) {
+            if (!seg) continue;
+            if (STATUS_DOT[seg]) {
+                words.push({ text: '', bold: c.bold, dot: STATUS_DOT[seg], spaceAfter: true });
+                continue;
+            }
+            const parts = seg.split(/(\s+)/);
+            for (const part of parts) {
+                if (!part) continue;
+                if (/^\s+$/.test(part)) {
+                    if (words.length > 0) words[words.length - 1].spaceAfter = true;
+                    continue;
+                }
+                words.push({ text: part, bold: c.bold, spaceAfter: false });
+            }
+        }
+    }
+    return words;
+}
+
+// Calcule le wrapping d'une cellule (retourne les lignes de mots) pour mesurer la hauteur.
+function layoutCell(doc: jsPDF, words: CellWord[], maxW: number, fontSize: number, forceBold: boolean): CellWord[][] {
+    const lines: CellWord[][] = [];
+    let line: CellWord[] = [];
+    let w = 0;
+    for (const word of words) {
+        let ww: number;
+        if (word.dot) {
+            ww = TABLE_DOT_W;
+        } else {
+            doc.setFont('helvetica', (forceBold || word.bold) ? 'bold' : 'normal');
+            doc.setFontSize(fontSize);
+            ww = doc.getTextWidth(word.text + (word.spaceAfter ? ' ' : ''));
+        }
+        if (w + ww > maxW && line.length > 0) {
+            lines.push(line);
+            line = [];
+            w = 0;
+        }
+        line.push(word);
+        w += ww;
+    }
+    if (line.length > 0) lines.push(line);
+    if (lines.length === 0) lines.push([]);
+    return lines;
+}
+
+function renderTable(state: RenderState, header: InlineChunk[][], rows: InlineChunk[][][]) {
     const { doc } = state;
     const colCount = Math.max(header.length, ...rows.map(r => r.length));
     if (colCount === 0) return;
     const colW = CW / colCount;
     const cellPad = 1.8;
     const lineH = 4.6;
+    const fontSize = 8.5;
 
-    const renderRow = (cells: string[], isHeader: boolean) => {
-        const lines = cells.map((cell) => doc.splitTextToSize(cell || '', colW - 2 * cellPad) as string[]);
-        const rowH = Math.max(...lines.map(l => l.length)) * lineH + cellPad * 2;
+    const renderRow = (cells: InlineChunk[][], isHeader: boolean) => {
+        // Layout chaque cellule (mots + wrapping) pour calculer la hauteur de ligne.
+        const cellLines: CellWord[][][] = [];
+        for (let i = 0; i < colCount; i++) {
+            const words = chunksToCellWords(cells[i] || []);
+            cellLines.push(layoutCell(doc, words, colW - 2 * cellPad, fontSize, isHeader));
+        }
+        const rowH = Math.max(1, ...cellLines.map((l) => l.length)) * lineH + cellPad * 2;
         ensureSpace(state, rowH);
 
+        const top = state.y - lineH + 1;
         if (isHeader) {
             setFill(doc, COLOR.navy);
-            doc.rect(ML, state.y - lineH + 1, CW, rowH, 'F');
-        } else {
-            setFill(doc, COLOR.slate50);
-            // Alternance subtile : pas necessaire ici
+            doc.rect(ML, top, CW, rowH, 'F');
         }
         setDraw(doc, COLOR.slate200);
         doc.setLineWidth(0.2);
         for (let i = 0; i <= colCount; i++) {
             const x = ML + i * colW;
-            doc.line(x, state.y - lineH + 1, x, state.y + rowH - lineH + 1);
+            doc.line(x, top, x, top + rowH);
         }
-        doc.line(ML, state.y - lineH + 1, ML + colCount * colW, state.y - lineH + 1);
-        doc.line(ML, state.y + rowH - lineH + 1, ML + colCount * colW, state.y + rowH - lineH + 1);
+        doc.line(ML, top, ML + colCount * colW, top);
+        doc.line(ML, top + rowH, ML + colCount * colW, top + rowH);
 
-        doc.setFont('helvetica', isHeader ? 'bold' : 'normal');
-        doc.setFontSize(8.5);
-        setText(doc, isHeader ? '#ffffff' : COLOR.slate600);
-
+        const textColor = isHeader ? '#ffffff' : COLOR.slate600;
         for (let i = 0; i < colCount; i++) {
-            const cellLines = lines[i] || [''];
-            for (let j = 0; j < cellLines.length; j++) {
-                doc.text(cellLines[j], ML + i * colW + cellPad, state.y + j * lineH);
+            const lines = cellLines[i];
+            const cellX = ML + i * colW + cellPad;
+            for (let j = 0; j < lines.length; j++) {
+                let x = cellX;
+                const baseY = state.y + j * lineH;
+                for (const word of lines[j]) {
+                    if (word.dot) {
+                        setFill(doc, word.dot);
+                        doc.circle(x + 1.3, baseY - 1.2, 1.3, 'F');
+                        x += TABLE_DOT_W;
+                    } else {
+                        doc.setFont('helvetica', (isHeader || word.bold) ? 'bold' : 'normal');
+                        doc.setFontSize(fontSize);
+                        setText(doc, textColor);
+                        const txt = word.text + (word.spaceAfter ? ' ' : '');
+                        doc.text(txt, x, baseY);
+                        x += doc.getTextWidth(txt);
+                    }
+                }
             }
         }
         state.y += rowH;
@@ -456,8 +560,11 @@ function renderTokens(state: RenderState, tokens: Token[], listDepth = 0) {
             state.y += 2;
         } else if (tok.type === 'table') {
             const t = tok as Tokens.Table;
-            const header = t.header.map((h) => h.text);
-            const rows = t.rows.map((r) => r.map((cell) => cell.text));
+            // Fix : passer les tokens inline (gras/liens) au lieu du texte brut, pour
+            // rendre le gras, delineariser les liens [..](..) -> label, et convertir
+            // les emoji statut en pastilles couleur (via chunksToCellWords).
+            const header = t.header.map((h) => flattenInline(h.tokens));
+            const rows = t.rows.map((r) => r.map((cell) => flattenInline(cell.tokens)));
             renderTable(state, header, rows);
         } else if (tok.type === 'blockquote') {
             renderBlockquote(state, (tok as Tokens.Blockquote).tokens);

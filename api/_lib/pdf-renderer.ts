@@ -26,6 +26,12 @@ export interface PdfRenderInput {
     printBackground?: boolean;
     headerTemplate?: string;
     footerTemplate?: string;
+    // VEILLE DIVA-02 : attendre le chargement des Google Fonts (@import) avant rendu.
+    // Additif, defaut false -> comportement DIAGNOSTIC inchange.
+    waitForFonts?: boolean;
+    // VEILLE DIVA-02 : laisser le CSS @page piloter taille + marges (named pages,
+    // cover full-bleed via @page cover{margin:0}). Additif, defaut false -> DIAGNOSTIC inchange.
+    useCssPageSize?: boolean;
 }
 
 export interface PdfRenderResult {
@@ -127,19 +133,27 @@ export async function renderPdfFromHtml(input: PdfRenderInput): Promise<PdfRende
     try {
         const page = await browser.newPage();
         await page.setContent(input.html, {
-            waitUntil: ['load', 'domcontentloaded'],
+            waitUntil: input.waitForFonts ? ['load', 'networkidle0'] : ['load', 'domcontentloaded'],
             timeout: 60_000,
         });
+        if (input.waitForFonts) {
+            // Attendre que les Google Fonts (@import) soient pretes pour un rendu fidele.
+            try {
+                await page.evaluate(() => (document as { fonts?: { ready?: Promise<unknown> } }).fonts?.ready);
+            } catch { /* best effort : fallback fontes systeme */ }
+        }
         await page.emulateMediaType('print');
 
         const pdfData = await page.pdf({
             format: input.format ?? 'A4',
             printBackground: input.printBackground ?? true,
-            margin: input.margin ?? { top: '18mm', bottom: '20mm', left: '18mm', right: '18mm' },
+            // useCssPageSize : ne pas forcer de marge -> Puppeteer applique les marges CSS @page
+            // (incl. @page cover{margin:0} pour le full-bleed). Sinon marge uniforme classique.
+            margin: input.useCssPageSize ? undefined : (input.margin ?? { top: '18mm', bottom: '20mm', left: '18mm', right: '18mm' }),
             displayHeaderFooter: true,
             headerTemplate: input.headerTemplate ?? '<div></div>',
             footerTemplate: input.footerTemplate ?? buildDefaultFooter(input.invoice_number),
-            preferCSSPageSize: false,
+            preferCSSPageSize: input.useCssPageSize ?? false,
             // N12.D F1 (P0) correctif T2125 : signets PDF (bookmarks) navigables Adobe/Edge.
             // tagged: true active accessibilite PDF/UA.
             // N12.A DT-03 (P2) correctif T1010 18/05 : outline:false (etait true).
