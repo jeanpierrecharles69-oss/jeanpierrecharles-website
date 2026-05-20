@@ -44,7 +44,8 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const OPUS_MODEL = 'claude-opus-4-6';
 const OPUS_MAX_TOKENS = 32768;
-const SYSTEM_PROMPT_PATH = 'config/veille-system-prompt-v1.0.0.txt';
+// N13 (20260520) : bump v1.0.0 -> v1.1.0 (calibrage structure N°0 FR FINAL + corrections C1-C6)
+const SYSTEM_PROMPT_PATH = 'config/veille-system-prompt-v1.1.0.txt';
 
 const PILLAR_LABELS: Record<string, { fr: string; en: string }> = {
     ai_act:    { fr: 'AI Act',                         en: 'AI Act' },
