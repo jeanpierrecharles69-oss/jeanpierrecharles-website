@@ -133,13 +133,17 @@ export async function renderPdfFromHtml(input: PdfRenderInput): Promise<PdfRende
     try {
         const page = await browser.newPage();
         await page.setContent(input.html, {
-            waitUntil: input.waitForFonts ? ['load', 'networkidle0'] : ['load', 'domcontentloaded'],
+            waitUntil: ['load', 'domcontentloaded'],
             timeout: 60_000,
         });
         if (input.waitForFonts) {
-            // Attendre que les Google Fonts (@import) soient pretes pour un rendu fidele.
+            // Attendre que les Google Fonts (@import, resolues au 'load') soient pretes.
+            // NB : 'networkidle0' n'est PAS un waitUntil valide pour setContent (goto-only) -> TS2322.
+            // On s'appuie sur document.fonts.ready (resolu une fois les woff2 telecharges).
             try {
-                await page.evaluate(() => (document as { fonts?: { ready?: Promise<unknown> } }).fonts?.ready);
+                await page.evaluate(async () => {
+                    await (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready;
+                });
             } catch { /* best effort : fallback fontes systeme */ }
         }
         await page.emulateMediaType('print');
