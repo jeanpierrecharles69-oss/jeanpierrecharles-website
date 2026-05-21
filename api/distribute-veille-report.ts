@@ -26,6 +26,7 @@ import { sendVeilleMonthlyReport } from './_lib/mailer.js';
  * Re-execution : safe via UNIQUE INDEX uniq_veille_distributions_report_subscriber.
  * Si une distribution etait failed, on re-tente (UPDATE). Si etait sent, on skip.
  *
+ * Version : 1.2.0 -- 20260521 -- P0 fix 554 spam Gandi : PJ systematique (report_pdf_base64 toujours envoye) + lien en complement. Revert du lien-seul (amplificateur du rejet sortant).
  * Version : 1.1.0 -- 20260521 -- N14 Phase 2 : URL signee Storage fraiche 30j (download_url) + livraison par lien (report_pdf_base64 en fallback si Storage KO)
  * Version : 1.0.0 -- 20260508 -- creation S5
  */
@@ -190,7 +191,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (e: unknown) {
         console.warn(JSON.stringify({ event: 'distribute_veille_signed_url_exception', report_id: reportId, error: (e as { message?: string })?.message || 'unknown', severity: 'warning', timestamp: new Date().toISOString() }));
     }
-    console.log(JSON.stringify({ event: 'distribute_veille_delivery_mode', report_id: reportId, mode: downloadUrl ? 'storage_link' : 'attachment_fallback', timestamp: new Date().toISOString() }));
+    console.log(JSON.stringify({ event: 'distribute_veille_delivery_mode', report_id: reportId, mode: downloadUrl ? 'attachment_plus_link' : 'attachment_only', timestamp: new Date().toISOString() }));
 
     // 3. Distribution sequentielle (1/sub, simple, robuste, max ~5min total < 300s budget)
     let okCount = 0;
@@ -273,7 +274,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     edition: report.edition,
                     month_label: monthLabel,
                     download_url: downloadUrl || undefined,
-                    report_pdf_base64: downloadUrl ? undefined : report.pdf_base64,
+                    report_pdf_base64: report.pdf_base64, // P0 fix 554 : PJ TOUJOURS jointe (legitimite anti-spam Gandi, cf. N13 qui passait avec PJ) + lien en complement
                     report_pdf_filename: filename,
                 });
 

@@ -7,6 +7,7 @@ import type { MailerPaymentData } from './mailer';
  *
  * SELLER constants = memes valeurs que MerciPage.tsx (DRY cross-module).
  *
+ * Version : 1.4.0 -- 20260521 -- P0 fix 554 : wording PJ systematique + lien en complement (coherence avec revert distribute v1.2.0)
  * Version : 1.3.0 -- 20260521 -- N14 Phase 2 : veilleMonthlyReportHtml bouton lien Storage (download_url, sinon PJ) + C2 fix page-count "~10 pages" -> "15-20 pages" (FR/EN)
  * Version : 1.2.0 -- 20260427T1452 CET -- FIX L_T1355_01 email client utilise invoice_number canonique (vs REQ-{uuid8})
  * Version : 1.1.0 -- 20260418 -- NIGHT-N5 DETTE18 (bloc piece jointe vs bouton lien)
@@ -386,9 +387,9 @@ export function veilleMonthlyReportHtml(data: MailerPaymentData, lang: 'fr' | 'e
     <p style="font-size:14px">${isFr ? 'Bonjour,' : 'Hello,'}</p>
     <p style="font-size:14px">${isFr
         ? 'Votre <strong>rapport mensuel de veille reglementaire AEGIS</strong> (edition <strong>'
-          + escapeHtml(edition) + '</strong>) ' + (hasLink ? 'est disponible en telechargement ci-dessous' : 'est joint a cet email') + ', au format PDF, 15-20 pages couvrant les 5 piliers AEGIS.'
+          + escapeHtml(edition) + '</strong>) est joint a cet email, au format PDF, 15-20 pages couvrant les 5 piliers AEGIS.' + (hasLink ? ' Il est egalement telechargeable via le bouton ci-dessous.' : '')
         : 'Your <strong>AEGIS monthly regulatory watch report</strong> (edition <strong>'
-          + escapeHtml(edition) + '</strong>) ' + (hasLink ? 'is available for download below' : 'is attached to this email') + ', in PDF format, 15-20 pages covering the 5 AEGIS pillars.'}</p>
+          + escapeHtml(edition) + '</strong>) is attached to this email, in PDF format, 15-20 pages covering the 5 AEGIS pillars.' + (hasLink ? ' It is also available via the download button below.' : '')}</p>
     ${hasLink ? `<div style="text-align:center;margin:22px 0">
         <a href="${escapeHtml(data.download_url || '')}" style="display:inline-block;background:${navy};color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 30px;border-radius:8px">${isFr ? 'Telecharger le rapport PDF' : 'Download the PDF report'}</a>
         <div style="font-size:11px;color:${BRAND.textLight};margin-top:8px">${isFr ? 'Lien securise valable 30 jours' : 'Secure link valid for 30 days'}</div>
@@ -406,7 +407,7 @@ export function veilleMonthlyReportHtml(data: MailerPaymentData, lang: 'fr' | 'e
     <div style="background:${BRAND.bgAlt};border:1px solid ${BRAND.border};border-radius:10px;padding:14px;font-size:12px;line-height:1.7">
         <strong>${isFr ? 'Reference edition' : 'Edition reference'} :</strong> ${escapeHtml(edition)}<br>
         <strong>Date :</strong> ${new Date().toLocaleDateString(isFr ? 'fr-FR' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}<br>
-        <strong>${isFr ? 'Format' : 'Format'} :</strong> PDF (${hasLink ? (isFr ? 'lien de telechargement' : 'download link') : (isFr ? 'piece jointe' : 'attached')})
+        <strong>${isFr ? 'Format' : 'Format'} :</strong> PDF (${isFr ? 'piece jointe' : 'attached'}${hasLink ? (isFr ? ' + lien' : ' + link') : ''})
     </div>
 
     <p style="font-size:13px;color:${BRAND.textMuted};margin-top:24px">${isFr
