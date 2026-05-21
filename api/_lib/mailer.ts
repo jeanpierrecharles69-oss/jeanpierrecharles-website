@@ -580,8 +580,8 @@ export async function sendVeilleActivationConfirmation(data: MailerPaymentData):
 <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:14px;margin:18px 0;font-size:13px;line-height:1.7">
 <strong>${isFr ? 'Ce qui se passe maintenant' : 'What happens now'}</strong><br>
 ${isFr
-    ? '1. Votre périmètre de veille (secteurs + règlements) est configuré sous 24h.<br>2. 1ère alerte personnalisée sous 48h.<br>3. Rapport mensuel synthétique livré chaque début de mois.<br>4. Prélèvement automatique de ' + amount + ' EUR le ' + (new Date().getDate()) + ' de chaque mois.'
-    : '1. Your watch perimeter (sectors + regulations) is set up within 24h.<br>2. 1st personalised alert within 48h.<br>3. Monthly synthesis report delivered at the start of each month.<br>4. Automatic debit of EUR ' + amount + ' on day ' + (new Date().getDate()) + ' of each month.'}
+    ? '1. Votre périmètre de veille (secteurs + règlements) est configuré sous 24h.<br>2. 1ère alerte personnalisée sous 48h.<br>3. Rapport mensuel structuré livré chaque début de mois.<br>4. Prélèvement automatique de ' + amount + ' EUR le ' + (new Date().getDate()) + ' de chaque mois.'
+    : '1. Your watch perimeter (sectors + regulations) is set up within 24h.<br>2. 1st personalised alert within 48h.<br>3. Monthly structured report delivered at the start of each month.<br>4. Automatic debit of EUR ' + amount + ' on day ' + (new Date().getDate()) + ' of each month.'}
 </div>
 
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:12px;line-height:1.7">

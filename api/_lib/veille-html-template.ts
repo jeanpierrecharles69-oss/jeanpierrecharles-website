@@ -11,7 +11,10 @@ import { marked } from 'marked';
  *
  * Robustesse prod : les emoji feux (vert/jaune/orange/rouge) sont convertis en PASTILLES CSS
  * car @sparticuz/chromium serverless n'embarque pas de police emoji couleur (tofu sinon).
+ * Idem fleches (U+2190-21FF) : absentes des sous-ensembles latin Google Fonts + zero police
+ * systeme fallback serverless -> sanitizeArrows() les convertit en ASCII (-> / <- / <->).
  *
+ * Version : 1.0.1 -- 20260521 -- N14 B1.3 : sanitizeArrows (fix tofu fleche U+2192, finding #6)
  * Version : 1.0.0 -- 20260520 -- creation DIVA-02
  */
 
@@ -91,6 +94,27 @@ function norm(s: string): string {
 }
 function mdToHtml(src: string): string {
     return marked.parse(src, { async: false, gfm: true, breaks: false }) as string;
+}
+
+// Fleches Unicode -> ASCII (robustesse serverless : sous-ensembles latin Google Fonts
+// sans bloc fleches U+2190-21FF + zero police systeme @sparticuz/chromium = tofu sinon).
+// Applique sur le markdown brut (pre-marked) : -> rendu garanti dans toutes les polices.
+function sanitizeArrows(s: string): string {
+    // Bloc fleches (U+2190-21FF, U+2794.., U+2B00..) absent des sous-ensembles latin
+    // Google Fonts + zero police systeme serverless -> ASCII. Codepoints (D48 source ASCII).
+    const RIGHT = new Set([0x2192, 0x2794, 0x2799, 0x279c, 0x279e, 0x27a1, 0x27a4, 0x2b95, 0x21d2, 0x21e8, 0x21fe]);
+    const LEFT = new Set([0x2190, 0x2b05, 0x21d0, 0x21e6, 0x21fd]);
+    const BIDI = new Set([0x2194, 0x21d4, 0x21ff]);
+    let out = '';
+    for (const ch of s) {
+        const cp = ch.codePointAt(0) ?? 0;
+        if (RIGHT.has(cp)) out += '->';
+        else if (LEFT.has(cp)) out += '<-';
+        else if (BIDI.has(cp)) out += '<->';
+        else if (cp >= 0x2190 && cp <= 0x21ff) out += '->'; // reste du bloc Arrows (100% fleches) -> defaut droite
+        else out += ch;
+    }
+    return out;
 }
 
 // Emoji feux -> pastilles CSS (robustesse serverless : pas de police emoji couleur)
@@ -191,7 +215,7 @@ function renderCover(edition: string, monthLabel: string, lang: 'fr' | 'en'): st
 export function renderVeilleHTML(input: VeilleHtmlInput): string {
     const lang: 'fr' | 'en' = input.lang === 'en' ? 'en' : 'fr';
     const monthLabel = input.month_label || input.edition;
-    const md = input.markdown.replace(/\r\n/g, '\n');
+    const md = sanitizeArrows(input.markdown.replace(/\r\n/g, '\n'));
 
     // Decoupe : preambule (avant 1er "## ") + sections H2
     const parts = md.split(/\n(?=## )/);
