@@ -23,6 +23,7 @@ import {
  *  - Set<string> in-memory par instance warm
  *  - DETTE7 : Vercel KV pour persistance cross-instance (v3.4.6)
  *
+ * Version : 1.4.0 -- 20260521 -- N14 : List-Unsubscribe (RFC 2369) sur sendVeilleMonthlyReport + bouton lien Storage DIAG (sendDiagnosticDelivery, parite C1) + C2 sendVeilleActivationConfirmation "synthetique" -> "structure"
  * Version : 1.3.0 -- 20260424 -- Mission N8 D_T2010_10 patches B + C :
  *   - Patch B (anti-spam subject) : retrait crochets [AEGIS] des subjects CLIENT
  *     (sendDeliveryConfirmation, sendClientDiagnostic). Subjects ops inchanges.
@@ -686,6 +687,11 @@ export async function sendDiagnosticDelivery(data: MailerPaymentData): Promise<v
 <strong>${isFr ? '🧾 Facture' : '🧾 Invoice'}</strong> — ${escapeBasicHtml(invoiceNum)} (${isFr ? 'conservation 10 ans Art. 293 B CGI' : 'kept 10 years per Art. 293 B CGI'})
 </div>
 
+${data.download_url ? `<div style="text-align:center;margin:18px 0">
+<a href="${escapeBasicHtml(data.download_url)}" style="display:inline-block;background:#0f172a;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:13px 28px;border-radius:8px">${isFr ? 'Telecharger le rapport (lien securise)' : 'Download the report (secure link)'}</a>
+<div style="font-size:11px;color:#94a3b8;margin-top:6px">${isFr ? 'Egalement disponible en piece jointe' : 'Also available as an attachment'}</div>
+</div>` : ''}
+
 <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:12px;line-height:1.7">
 <strong>${isFr ? 'Référence' : 'Reference'} :</strong> ${escapeBasicHtml(invoiceNum)}<br>
 ${data.customer_name ? `<strong>${isFr ? 'Client' : 'Customer'} :</strong> ${escapeBasicHtml(data.customer_name)}<br>` : ''}
@@ -1027,6 +1033,11 @@ export async function sendVeilleMonthlyReport(data: MailerPaymentData): Promise<
         html,
         text: htmlToPlainText(html),
         attachments,
+        // N14 B2.3 : signal de desabonnement (RFC 2369). Forme mailto = zero dependance schema/endpoint.
+        // Migration N14+ : ajouter la forme https one-click (List-Unsubscribe-Post) via api/veille-unsubscribe.
+        headers: {
+            'List-Unsubscribe': `<mailto:${OPS_NOTIFY_EMAIL}?subject=unsubscribe%20VEILLE>`,
+        },
     });
 
     logMailer({

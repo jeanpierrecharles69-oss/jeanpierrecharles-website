@@ -22,6 +22,7 @@ import { sendDiagnosticDelivery } from './_lib/mailer.js';
  * Edge case crawler email : Outlook safe-links pourrait pre-fetch GET et
  * declencher approval involontaire. Risque accepte pour MVP G3 (boite JP perso).
  *
+ * Version : 1.1.0 -- 20260521 -- N14 Phase 2 C1 : parite livraison DIAG -- SELECT pdf_url + pass download_url a sendDiagnosticDelivery (lien Storage en complement de la PJ)
  * Version : 1.0.0 -- 20260515 -- Mission G3 QA Gate Approbation
  */
 
@@ -156,7 +157,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 3. SELECT diagnostic_requests WHERE qa_token=token AND qa_status='pending'
     const { data: row, error: selErr } = await supabase
         .from('diagnostic_requests')
-        .select('request_id, invoice_number, status, qa_status, qa_token, email, first_name, last_name, company, lang, payment_id, pdf_base64')
+        .select('request_id, invoice_number, status, qa_status, qa_token, email, first_name, last_name, company, lang, payment_id, pdf_base64, pdf_url')
         .eq('qa_token', token)
         .maybeSingle();
 
@@ -195,6 +196,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         lang: string;
         payment_id: string | null;
         pdf_base64: string | null;
+        pdf_url: string | null;
     };
     const requestRow = row as Row;
 
@@ -301,6 +303,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             report_pdf_filename: `AEGIS-DIAGNOSTIC-${requestRow.invoice_number}.pdf`,
             pdf_base64: invoicePdfBase64,
             pdf_filename: invoicePdfFilename,
+            download_url: requestRow.pdf_url || undefined, // N14 C1 : lien Storage en complement de la PJ (parite VEILLE)
         });
     } catch (mailErr: unknown) {
         const reason = (mailErr as { message?: string })?.message || 'mail_unknown_error';

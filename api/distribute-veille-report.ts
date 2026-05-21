@@ -26,6 +26,7 @@ import { sendVeilleMonthlyReport } from './_lib/mailer.js';
  * Re-execution : safe via UNIQUE INDEX uniq_veille_distributions_report_subscriber.
  * Si une distribution etait failed, on re-tente (UPDATE). Si etait sent, on skip.
  *
+ * Version : 1.1.0 -- 20260521 -- N14 Phase 2 : URL signee Storage fraiche 30j (download_url) + livraison par lien (report_pdf_base64 en fallback si Storage KO)
  * Version : 1.0.0 -- 20260508 -- creation S5
  */
 
@@ -173,6 +174,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     }
 
+    // N14 B2 : URL signee fraiche (30j) depuis Storage. Path reconstruit a l'identique de generate.
+    //   Si dispo -> livraison par lien (pas de PJ). Sinon -> fallback PJ (pdf_base64). editionSafe deja calcule.
+    let downloadUrl: string | null = null;
+    try {
+        const storagePath = `veille-reports/${editionSafe}-${report.lang}.pdf`;
+        const { data: signed, error: signErr } = await supabase.storage
+            .from('aegis-documents')
+            .createSignedUrl(storagePath, 30 * 24 * 3600);
+        if (signErr) {
+            console.warn(JSON.stringify({ event: 'distribute_veille_signed_url_failed', report_id: reportId, path: storagePath, error: signErr.message, severity: 'warning', timestamp: new Date().toISOString() }));
+        } else {
+            downloadUrl = signed?.signedUrl || null;
+        }
+    } catch (e: unknown) {
+        console.warn(JSON.stringify({ event: 'distribute_veille_signed_url_exception', report_id: reportId, error: (e as { message?: string })?.message || 'unknown', severity: 'warning', timestamp: new Date().toISOString() }));
+    }
+    console.log(JSON.stringify({ event: 'distribute_veille_delivery_mode', report_id: reportId, mode: downloadUrl ? 'storage_link' : 'attachment_fallback', timestamp: new Date().toISOString() }));
+
     // 3. Distribution sequentielle (1/sub, simple, robuste, max ~5min total < 300s budget)
     let okCount = 0;
     let failCount = 0;
@@ -253,7 +272,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     lang: report.lang,
                     edition: report.edition,
                     month_label: monthLabel,
-                    report_pdf_base64: report.pdf_base64,
+                    download_url: downloadUrl || undefined,
+                    report_pdf_base64: downloadUrl ? undefined : report.pdf_base64,
                     report_pdf_filename: filename,
                 });
 

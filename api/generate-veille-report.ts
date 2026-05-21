@@ -38,6 +38,7 @@ import { renderPdfFromHtml } from './_lib/pdf-renderer.js';
  *
  * Vercel : maxDuration 300s, memory 1024MB (vercel.json).
  *
+ * Version : 1.1.0 -- 20260521 -- N14 Phase 2 : upload PDF Supabase Storage (aegis-documents/veille-reports/) + pdf_url signe 30j dans UPSERT (non-bloquant, fallback PJ)
  * Version : 1.0.0 -- 20260508 -- creation S5
  */
 
@@ -285,6 +286,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: 'pdf_render_failed', reason });
     }
 
+    // N14 B2 : upload PDF vers Supabase Storage (aegis-documents/veille-reports/) + signed URL 30j.
+    //   Path deterministe reconstruit a l'identique par distribute-veille-report. Non-bloquant :
+    //   si echec, pdf_url reste null et la livraison retombe sur la PJ (pdf_base64).
+    const veilleEditionSafe = edition.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60);
+    const veilleStoragePath = `veille-reports/${veilleEditionSafe}-${lang}.pdf`;
+    let veillePdfUrl: string | null = null;
+    try {
+        const pdfBuffer = Buffer.from(report.pdfBase64, 'base64');
+        const { error: upErr } = await supabase.storage
+            .from('aegis-documents')
+            .upload(veilleStoragePath, pdfBuffer, { contentType: 'application/pdf', upsert: true });
+        if (upErr) {
+            console.warn(JSON.stringify({ event: 'veille_storage_upload_failed', path: veilleStoragePath, error: upErr.message, severity: 'warning', timestamp: new Date().toISOString() }));
+        } else {
+            const { data: signed, error: signErr } = await supabase.storage
+                .from('aegis-documents')
+                .createSignedUrl(veilleStoragePath, 30 * 24 * 3600);
+            if (signErr) {
+                console.warn(JSON.stringify({ event: 'veille_storage_signed_url_failed', path: veilleStoragePath, error: signErr.message, severity: 'warning', timestamp: new Date().toISOString() }));
+            } else {
+                veillePdfUrl = signed?.signedUrl || null;
+            }
+            console.log(JSON.stringify({ event: 'veille_storage_upload_ok', path: veilleStoragePath, has_signed_url: veillePdfUrl !== null, timestamp: new Date().toISOString() }));
+        }
+    } catch (e: unknown) {
+        console.warn(JSON.stringify({ event: 'veille_storage_exception', path: veilleStoragePath, error: (e as { message?: string })?.message || 'unknown', severity: 'warning', timestamp: new Date().toISOString() }));
+    }
+
     // UPSERT veille_reports : SELECT existing draft for (edition, lang), UPDATE if exists, else INSERT
     let reportId: string | null = null;
     try {
@@ -316,6 +345,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 .from('veille_reports')
                 .update({
                     pdf_base64: report.pdfBase64,
+                    pdf_url: veillePdfUrl,
                     status: 'draft',
                     validated_at: null, // reset si on regenere
                 })
@@ -331,6 +361,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     edition,
                     lang,
                     pdf_base64: report.pdfBase64,
+                    pdf_url: veillePdfUrl,
                     status: 'draft',
                 })
                 .select('id')
