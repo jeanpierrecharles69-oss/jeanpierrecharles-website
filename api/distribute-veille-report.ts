@@ -26,6 +26,7 @@ import { sendVeilleMonthlyReport } from './_lib/mailer.js';
  * Re-execution : safe via UNIQUE INDEX uniq_veille_distributions_report_subscriber.
  * Si une distribution etait failed, on re-tente (UPDATE). Si etait sent, on skip.
  *
+ * Version : 1.3.0 -- 20260521 -- N15-B1 : exclure les desabonnes du SELECT abonnes (filtre unsubscribed_at IS NULL)
  * Version : 1.2.0 -- 20260521 -- P0 fix 554 spam Gandi : PJ systematique (report_pdf_base64 toujours envoye) + lien en complement. Revert du lien-seul (amplificateur du rejet sortant).
  * Version : 1.1.0 -- 20260521 -- N14 Phase 2 : URL signee Storage fraiche 30j (download_url) + livraison par lien (report_pdf_base64 en fallback si Storage KO)
  * Version : 1.0.0 -- 20260508 -- creation S5
@@ -142,7 +143,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .from('veille_requests')
         .select('request_id, email, first_name, last_name, company, lang')
         .eq('status', 'active')
-        .eq('lang', report.lang);
+        .eq('lang', report.lang)
+        .is('unsubscribed_at', null); // N15-B1 : exclure les desabonnes (DEC-2 : colonne dediee, status inchange)
 
     if (subsErr) {
         console.error(JSON.stringify({

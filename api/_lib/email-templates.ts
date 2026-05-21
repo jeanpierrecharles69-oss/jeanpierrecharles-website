@@ -1,4 +1,5 @@
 import type { MailerPaymentData } from './mailer';
+import { unsubscribeUrl } from './veille-unsubscribe-token.js';
 
 /**
  * AEGIS Intelligence -- Email HTML Templates (FR/EN)
@@ -7,6 +8,7 @@ import type { MailerPaymentData } from './mailer';
  *
  * SELLER constants = memes valeurs que MerciPage.tsx (DRY cross-module).
  *
+ * Version : 1.5.0 -- 20260521 -- N15-B1 : lien "Se desabonner" footer (unsubscribeUrl) sur veilleMonthlyReportHtml
  * Version : 1.4.0 -- 20260521 -- P0 fix 554 : wording PJ systematique + lien en complement (coherence avec revert distribute v1.2.0)
  * Version : 1.3.0 -- 20260521 -- N14 Phase 2 : veilleMonthlyReportHtml bouton lien Storage (download_url, sinon PJ) + C2 fix page-count "~10 pages" -> "15-20 pages" (FR/EN)
  * Version : 1.2.0 -- 20260427T1452 CET -- FIX L_T1355_01 email client utilise invoice_number canonique (vs REQ-{uuid8})
@@ -415,8 +417,10 @@ export function veilleMonthlyReportHtml(data: MailerPaymentData, lang: 'fr' | 'e
         : 'For any question, signal suggestion to cover, or in-depth analysis request on a specific topic : '}<a href="mailto:${SELLER.email}" style="color:${navy};font-weight:600">${SELLER.email}</a></p>
 
     <p style="font-size:11px;color:${BRAND.textLight};margin-top:18px">${isFr
-        ? 'Vous recevez ce rapport au titre de votre abonnement actif VEILLE AEGIS Intelligence (150 EUR/mois). Pour resilier, repondez a cet email.'
-        : 'You receive this report as part of your active AEGIS Intelligence WATCH subscription (EUR 150/month). To cancel, reply to this email.'}</p>
+        ? 'Vous recevez ce rapport au titre de votre abonnement actif VEILLE AEGIS Intelligence (150 EUR/mois).'
+        : 'You receive this report as part of your active AEGIS Intelligence WATCH subscription (EUR 150/month).'}${data.request_id
+        ? ` <a href="${unsubscribeUrl(data.request_id)}" style="color:${BRAND.textLight};text-decoration:underline">${isFr ? 'Se desabonner' : 'Unsubscribe'}</a>.`
+        : (isFr ? ' Pour resilier, repondez a cet email.' : ' To cancel, reply to this email.')}</p>
 </div>
 <div class="footer">
     AEGIS Intelligence | ${SELLER.web} | SIRET ${SELLER.siret}<br>

@@ -7,6 +7,7 @@ import {
     deliveryConfirmationHtml,
     veilleMonthlyReportHtml,
 } from './email-templates.js';
+import { unsubscribeHeaders } from './veille-unsubscribe-token.js';
 
 /**
  * AEGIS Intelligence -- Shared Mailer Module
@@ -23,6 +24,7 @@ import {
  *  - Set<string> in-memory par instance warm
  *  - DETTE7 : Vercel KV pour persistance cross-instance (v3.4.6)
  *
+ * Version : 1.5.0 -- 20260521 -- N15-B1 : List-Unsubscribe one-click RFC 8058 (https + Post) via unsubscribeHeaders (remplace le mailto-seul N14)
  * Version : 1.4.0 -- 20260521 -- N14 : List-Unsubscribe (RFC 2369) sur sendVeilleMonthlyReport + bouton lien Storage DIAG (sendDiagnosticDelivery, parite C1) + C2 sendVeilleActivationConfirmation "synthetique" -> "structure"
  * Version : 1.3.0 -- 20260424 -- Mission N8 D_T2010_10 patches B + C :
  *   - Patch B (anti-spam subject) : retrait crochets [AEGIS] des subjects CLIENT
@@ -1033,11 +1035,8 @@ export async function sendVeilleMonthlyReport(data: MailerPaymentData): Promise<
         html,
         text: htmlToPlainText(html),
         attachments,
-        // N14 B2.3 : signal de desabonnement (RFC 2369). Forme mailto = zero dependance schema/endpoint.
-        // Migration N14+ : ajouter la forme https one-click (List-Unsubscribe-Post) via api/veille-unsubscribe.
-        headers: {
-            'List-Unsubscribe': `<mailto:${OPS_NOTIFY_EMAIL}?subject=unsubscribe%20VEILLE>`,
-        },
+        // N15-B1 : desabonnement one-click RFC 8058 (https + List-Unsubscribe-Post) + fallback mailto RFC 2369.
+        headers: unsubscribeHeaders(data.request_id, OPS_NOTIFY_EMAIL),
     });
 
     logMailer({
