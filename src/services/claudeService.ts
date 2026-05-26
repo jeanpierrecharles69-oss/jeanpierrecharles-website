@@ -9,8 +9,8 @@
  *   - Anthropic : event: content_block_delta / data: {"type":"content_block_delta",...}
  *   - Gemini : data: {"candidates":[{"content":{"parts":[{"text":"..."}]}}]}
  *
- * Version : 2.0.0 -- 20260406T1030 CET
- * Signature : identique a geminiService.ts pour compatibilite import
+ * Version : 2.0.1 -- 20260526T1725 CET
+ * Signature : compatible avec l'ancien geminiService.ts (supprime D_T1640_01)
  */
 
 const PROXY_URL = '/api/claude-proxy';
@@ -43,7 +43,7 @@ function parseStreamChunk(jsonStr: string): string {
 
 /**
  * Brain streaming (Gemini Flash) -- parse SSE multi-provider format
- * Signature identique a geminiService.runQueryStream pour compatibilite import
+ * Signature compatible avec l'ancien geminiService.runQueryStream (supprime D_T1640_01)
  */
 export const runQueryStream = async function* (
     prompt: string,
@@ -175,7 +175,7 @@ export const runDiagnosticQuery = async (
 };
 
 /**
- * Requete simple (non-streaming) -- backward compatible avec geminiService.runQuery
+ * Requete simple (non-streaming) -- backward compatible avec geminiService.runQuery (supprime D_T1640_01)
  */
 export const runQuery = async (
     prompt: string,
@@ -190,7 +190,7 @@ export const runQuery = async (
 };
 
 /**
- * Requete specialisee conformite -- backward compatible avec geminiService
+ * Requete specialisee conformite -- backward compatible avec geminiService (supprime D_T1640_01)
  */
 export const runComplianceQuery = async (prompt: string): Promise<string> => {
     const systemInstruction = `Tu es un expert en conformité européenne (RGPD, AI Act, ESPR).

@@ -21,7 +21,7 @@ import { SparklesIcon } from '../icons/SparklesIcon';
  * i18n : useLang() Context (pas de prop lang)
  * Design : tokens C.* (Light/Glass, pas Tailwind)
  * 
- * Migration : Gemini 2.0 Flash → Claude Haiku 4.5 (31/03/2026)
+ * Provider : Gemini 2.5 Flash via claude-proxy v2.1.0 (20260409)
  */
 
 interface AegisChatProps {

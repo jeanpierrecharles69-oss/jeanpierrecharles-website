@@ -7,7 +7,7 @@
  * Utilise runQuery (non-streaming) pour obtenir un rapport structuré,
  * puis parse les sections pour le rendu UI + export PDF.
  *
- * Migration : Gemini 2.0 Flash → Claude Haiku 4.5 (31/03/2026)
+ * Provider : Gemini 2.5 Flash via claude-proxy v2.1.0 (20260409)
  */
 
 import { runQuery } from './claudeService';
