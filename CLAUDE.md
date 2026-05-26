@@ -1,6 +1,6 @@
 # AEGIS Intelligence — Claude Code Execution Context
 # Contexte auto-charge par ACDC Code a l'ouverture du projet
-# MAJ : 20260512T0600 CET
+# MAJ : 20260526T1940 CET
 
 ## GOUVERNANCE AEGIS — ENFORCEMENT OBLIGATOIRE
 
@@ -30,7 +30,7 @@ Verifier `AEGIS_STATE.md` pour l'etat operationnel courant (HEAD, chantiers, bug
 - Backend : Supabase EU Frankfurt
 - Paiements : Mollie LIVE Amsterdam (SEPA + CB 3DS, dual-key LIVE/TEST via VERCEL_ENV)
 - DNS/SMTP : Gandi France port 465 (SPF/DKIM/DMARC)
-- Brain + PULSE : Claude Haiku 4.5 via api/claude-proxy.ts mode brain/pulse
+- Brain + PULSE : Gemini 2.5 Flash via api/claude-proxy.ts mode brain/pulse (MAJ 26/05)
 - DIAGNOSTIC : Claude Opus 4.6 API 1P (prompt caching ephemeral)
 - PDF : migration N12 Puppeteer + Chromium serverless (decision D_T2035_01)
 
@@ -67,8 +67,8 @@ Ne jamais modifier depuis ACDC Code. Reference uniquement.
 
 ## IDs DEFINITIFS ACTUELS
 
-D418 / L337 / R156 (LIFECYCLE v2.11.1 — 25/04/2026)
-Source : 20260425T0815_LIFECYCLE_MASTER.md
+D453 / L373 / R168 (LIFECYCLE v2.12.0 — 18/05/2026)
+Source : 20260518T1900_LIFECYCLE_MASTER.md
 
 ## NOMMAGE
 
