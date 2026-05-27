@@ -19,7 +19,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Night N7 Option β : apres UPDATE paid, INSERT pending_generations pour dashboard JP.
  * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
  *
- * Version : 2.3.0 -- 20260422T2130 -- Night N7 : INSERT pending_generations + idempotence Supabase-level (L_T2130_N7_01)
+ * Version : 2.4.0 -- 20260527T2030 -- FIX P0 D_T2030_01 startDate subscription Mollie
  */
 
 import {
@@ -695,6 +695,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (isVeille && metadata.customer_id && MOLLIE_API_KEY) {
                 try {
                     const subPromise = (async () => {
+                        // FIX P0 #1 (D_T2030_01) : startDate = 1er du mois suivant pour eviter double prelevement.
+                        // Sans startDate, Mollie schedule le 1er recurrent pour aujourd'hui = double facturation immediate.
+                        // Confirmation empirique 27/05/2026 : cobaye preleve 2x 150 EUR en 3min23s.
+                        // Reference brief : 20260527T1530_BRIEF_CC-VEILLE-PIPELINE-FIX-CONSOLIDE.md PARTIE A
+                        const now = new Date();
+                        const startOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+                        const startDateStr = startOfNextMonth.toISOString().split('T')[0]; // YYYY-MM-DD
                         const subRes = await fetch(`https://api.mollie.com/v2/customers/${metadata.customer_id}/subscriptions`, {
                             method: 'POST',
                             headers: {
@@ -704,6 +711,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             body: JSON.stringify({
                                 amount: { currency: 'EUR', value: '150.00' },
                                 interval: '1 month',
+                                startDate: startDateStr, // FIX P0 #1 D_T2030_01
                                 description: metadata.lang === 'en'
                                     ? 'AEGIS Intelligence — EU Regulatory Watch (monthly)'
                                     : 'AEGIS Intelligence — Veille reglementaire EU (mensuel)',
