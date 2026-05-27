@@ -16,7 +16,7 @@ import { verifyUnsubscribe } from './_lib/veille-unsubscribe-token.js';
  * possible (risque MVP accepte, re-abonnement possible ; cf. admin-approve). Durcissement futur :
  * page de confirmation + bouton POST.
  *
- * Version : 1.0.0 -- 20260521 -- N15-B1 desabo one-click
+ * Version : 1.1.0 -- 20260527T2030 -- FIX P0 D_T2030_02 cascade Mollie cancel + FIX P2 bump updated_at
  */
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -63,16 +63,77 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const { data, error } = await supabase
             .from('veille_requests')
-            .update({ unsubscribed_at: new Date().toISOString() })
+            .update({
+                unsubscribed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()  // FIX P2 D_T2030_02 : bump updated_at pour coherence forensique
+            })
             .eq('request_id', rid)
             .is('unsubscribed_at', null)
-            .select('email')
+            .select('email, subscription_id, customer_id')  // ajouter subscription_id + customer_id pour cascade Mollie
             .maybeSingle();
         if (error) {
             console.error(JSON.stringify({ event: 'veille_unsubscribe_update_error', request_id_prefix: rid.slice(0, 8), error: error.message || 'unknown', timestamp: new Date().toISOString() }));
             return fail(500, 'update_failed', 'Erreur', 'Une erreur est survenue. Ecrivez a contact@jeanpierrecharles.com', '#dc2626');
         }
         email = data?.email ?? null; // null = deja desabonne ou rid inconnu (idempotent)
+
+        // FIX P0 #2 (D_T2030_02) : cascade annulation subscription Mollie cote serveur.
+        // Sans ce DELETE, Mollie continue de facturer mensuellement malgre le desabo client.
+        // Best-effort : echec non bloquant (le desabo Supabase est deja effectif).
+        // Idempotent : 404/410 Mollie OK (subscription deja annulee ou customer purge).
+        const subscriptionId = data?.subscription_id;
+        const customerId = data?.customer_id;
+        const VERCEL_ENV = process.env.VERCEL_ENV || 'development';
+        const MOLLIE_API_KEY = VERCEL_ENV === 'production'
+            ? process.env.MOLLIE_API_KEY_LIVE
+            : process.env.MOLLIE_API_KEY_TEST;
+
+        if (subscriptionId && customerId && MOLLIE_API_KEY) {
+            try {
+                const cancelRes = await fetch(
+                    `https://api.mollie.com/v2/customers/${customerId}/subscriptions/${subscriptionId}`,
+                    {
+                        method: 'DELETE',
+                        headers: { Authorization: `Bearer ${MOLLIE_API_KEY}` },
+                    }
+                );
+                if (cancelRes.ok || cancelRes.status === 404 || cancelRes.status === 410) {
+                    console.log(JSON.stringify({
+                        event: 'mollie_subscription_canceled_on_unsubscribe',
+                        request_id_prefix: rid.slice(0, 8),
+                        subscription_id_prefix: subscriptionId.slice(0, 8),
+                        status: cancelRes.status,
+                        timestamp: new Date().toISOString(),
+                    }));
+                } else {
+                    const errText = await cancelRes.text();
+                    console.warn(JSON.stringify({
+                        event: 'mollie_cancel_failed_on_unsubscribe',
+                        request_id_prefix: rid.slice(0, 8),
+                        subscription_id_prefix: subscriptionId.slice(0, 8),
+                        status: cancelRes.status,
+                        error: errText.slice(0, 200),
+                        severity: 'critical',
+                        timestamp: new Date().toISOString(),
+                    }));
+                }
+            } catch (e: unknown) {
+                console.warn(JSON.stringify({
+                    event: 'mollie_cancel_exception_on_unsubscribe',
+                    request_id_prefix: rid.slice(0, 8),
+                    error: (e as Error)?.message || 'unknown',
+                    severity: 'critical',
+                    timestamp: new Date().toISOString(),
+                }));
+            }
+        } else if (subscriptionId && !MOLLIE_API_KEY) {
+            console.warn(JSON.stringify({
+                event: 'mollie_cancel_skipped_no_api_key',
+                request_id_prefix: rid.slice(0, 8),
+                severity: 'critical',
+                timestamp: new Date().toISOString(),
+            }));
+        }
     } catch (e: unknown) {
         console.error(JSON.stringify({ event: 'veille_unsubscribe_exception', request_id_prefix: rid.slice(0, 8), error: (e as { message?: string })?.message || 'unknown', timestamp: new Date().toISOString() }));
         return fail(500, 'exception', 'Erreur', 'Une erreur est survenue.', '#dc2626');
