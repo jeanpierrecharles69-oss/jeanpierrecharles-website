@@ -182,26 +182,10 @@ export const i18n = {
                 cta: "Commander un diagnostic",
             },
             {
-                name: "VEILLE", price: "150\u20ac", period: "/mois", badge: "COMPLIANCE CONTINUE", annual: "", color: C.gold,
-                tagline: "Votre vigilance réglementaire en continu",
-                features: [
-                    "Alertes réglementaires personnalisées par email",
-                    "Monitoring expert 5+ règlements EU",
-                    "Rapport mensuel d'intelligence réglementaire",
-                    "Rapport PDF premium 15-20 pages",
-                    "Analyse causale des mutations réglementaires détectées",
-                    "Session Q&A trimestrielle incluse (30 min)",
-                ],
-                notIncluded: [
-                    "Interventions sur site",
-                ],
-                cta: "S'abonner à la veille",
-            },
-            {
                 name: "EXPERTISE TERRAIN", price: "350\u20ac", period: "/heure", badge: "INGÉNIEUR R&D", annual: "2 500\u20ac/mois", color: C.rose,
                 tagline: "L\u2019ingénieur qui a conçu, pas le consultant qui conseille",
                 features: [
-                    "Tout DIAGNOSTIC + VEILLE inclus",
+                    "Tout DIAGNOSTIC inclus",
                     "Accompagnement ingénieur R&D sénior dédié",
                     "Conf-calls et interventions sur site",
                     "Audit conformité mécatronique personnalisé",
@@ -572,26 +556,10 @@ export const i18n = {
                 cta: "Order a diagnostic",
             },
             {
-                name: "WATCH", price: "\u20ac150", period: "/month", badge: "CONTINUOUS COMPLIANCE", annual: "", color: C.gold,
-                tagline: "Your continuous regulatory vigilance",
-                features: [
-                    "Personalised regulatory alerts by email",
-                    "Expert monitoring of 5+ EU regulations",
-                    "Monthly regulatory intelligence report",
-                    "Premium PDF report 15-20 pages",
-                    "Causal analysis of detected regulatory changes",
-                    "Quarterly Q&A session included (30 min)",
-                ],
-                notIncluded: [
-                    "On-site interventions",
-                ],
-                cta: "Subscribe to watch",
-            },
-            {
                 name: "EXPERTISE TERRAIN", price: "\u20ac350", period: "/hr", badge: "R&D ENGINEER", annual: "\u20ac2,500/mo", color: C.rose,
                 tagline: "The engineer who designed it, not the consultant who advises",
                 features: [
-                    "Everything in DIAGNOSTIC + WATCH",
+                    "Everything in DIAGNOSTIC",
                     "Dedicated senior R&D engineer support",
                     "Conf-calls and on-site interventions",
                     "Custom mechatronic compliance audit",
