@@ -160,7 +160,6 @@ function renderCGVContent_FR() {
             <ul style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
                 <li><strong>PULSE</strong> : pr&eacute;-diagnostic IA gratuit</li>
                 <li><strong>DIAGNOSTIC</strong> : rapport PDF premium d'analyse causale r&eacute;glementaire (250,00 EUR par rapport)</li>
-                <li><strong>VEILLE</strong> : abonnement mensuel d'intelligence r&eacute;glementaire continue (150,00 EUR/mois — non disponible &agrave; la date d'effet)</li>
                 <li><strong>EXPERTISE TERRAIN</strong> : interventions sur mesure (350,00 EUR/h ou 2 500,00 EUR/mois)</li>
             </ul>
 

@@ -1,6 +1,6 @@
 # AEGIS Intelligence — Claude Code Execution Context
 # Contexte auto-charge par ACDC Code a l'ouverture du projet
-# MAJ : 20260526T1940 CET
+# MAJ : 20260601T2200 CET
 
 ## GOUVERNANCE AEGIS — ENFORCEMENT OBLIGATOIRE
 
@@ -37,18 +37,16 @@ Verifier `AEGIS_STATE.md` pour l'etat operationnel courant (HEAD, chantiers, bug
 ## ARCHITECTURE API (Vercel Functions)
 
 Proxy unifie : api/claude-proxy.ts (3 modes : brain/pulse/diagnostic)
-Paiement : api/mollie-checkout.ts (DIAGNOSTIC 250 EUR) + api/mollie-subscription.ts (VEILLE 150 EUR/mois)
+Paiement : api/mollie-checkout.ts (DIAGNOSTIC 250 EUR)
 Webhook : api/mollie-webhook.ts (paid/failed)
 Livraison : api/send-delivery.ts + api/diagnostic-pdf.ts
 Facturation : api/invoice-archive.ts (Art. 293 B CGI)
-Admin : api/admin/ (generation-queue, trigger-generation, pending-list, pending-complete, veille-queue)
-VEILLE : api/veille-request.ts
+Admin : api/admin/ (generation-queue, trigger-generation, pending-list, pending-complete)
 
-## PRICING 4 TIERS
+## PRICING 3 TIERS
 
 - PULSE : 0 EUR, Haiku via claude-proxy mode pulse
 - DIAGNOSTIC : 250 EUR/rapport, Opus via pipeline serverless fire-and-forget
-- VEILLE : 150 EUR/mois, abonnement Mollie, rapport mensuel
 - EXPERTISE TERRAIN : 350 EUR/h ou 2 500 EUR/mois, JP en personne
 
 ## GARDE-FOUS MISSION

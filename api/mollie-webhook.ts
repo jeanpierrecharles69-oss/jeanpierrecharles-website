@@ -19,16 +19,12 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Night N7 Option β : apres UPDATE paid, INSERT pending_generations pour dashboard JP.
  * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
  *
- * Version : 2.4.0 -- 20260527T2030 -- FIX P0 D_T2030_01 startDate subscription Mollie
+ * Version : 3.0.0 -- 20260601T2200 -- D_T1740_01 : VEILLE removal (handler DIAGNOSTIC seul)
  */
 
 import {
     sendClientConfirmation,
     sendOpsNewOrder,
-    sendVeilleClientConfirmation,
-    sendVeilleActivationConfirmation,
-    sendVeilleOpsNewOrder,
-    sendVeilleRecurringOps,
     isAlreadyProcessed,
     markProcessed,
 } from './_lib/mailer.js';
@@ -41,8 +37,6 @@ const MOLLIE_API_KEY =
         ? process.env.MOLLIE_API_KEY_LIVE
         : process.env.MOLLIE_API_KEY_TEST;
 
-// S3 Mission N11 : webhook URL pour subscription Mollie auto-creee.
-// Symetrique a mollie-checkout.ts / mollie-subscription.ts (preserve preview branch URL).
 const WEBHOOK_BASE_URL = (() => {
     if (VERCEL_ENV === 'production') return 'https://jeanpierrecharles.com';
     if (VERCEL_ENV === 'preview' && process.env.VERCEL_BRANCH_URL) {
@@ -101,112 +95,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             timestamp: new Date().toISOString(),
         }));
 
-        // V360 — branch dispatch product (veille vs diagnostic)
-        const isVeille = metadata.product === 'veille';
-        const targetTable = isVeille ? 'veille_requests' : 'diagnostic_requests';
-
-        // S3 Mission N11 : VEILLE recurring branch (sequenceType='recurring')
-        // Mollie re-declenche le webhook a chaque prelevement mensuel. On log + ops mail.
-        // PAS de re-creation subscription, PAS d'invoice serveur (la facture mensuelle est generee
-        // par S5 distribute-veille-report ou via flow simplifie ulterieur).
-        const sequenceType = (payment.sequenceType as string | undefined) || undefined;
-        const subscriptionIdFromPayment = (payment.subscriptionId as string | undefined) || undefined;
-        const isVeilleRecurring = isVeille && sequenceType === 'recurring';
-
-        if (status === 'paid' && isVeilleRecurring) {
-            if (!isAlreadyProcessed(id)) {
-                markProcessed(id);
-
-                const subId = subscriptionIdFromPayment || metadata.subscription_id || null;
-                const recurringAmount = payment.amount?.value || '150.00';
-                const period = new Date().toISOString().slice(0, 7); // YYYY-MM
-
-                // INSERT veille_payments (idempotent : payment_id UNIQUE)
-                if (supabase) {
-                    try {
-                        const insertPromise = supabase
-                            .from('veille_payments')
-                            .insert({
-                                subscription_id: subId,
-                                payment_id: id,
-                                amount: recurringAmount,
-                                status: 'paid',
-                                period,
-                            });
-                        const insertTimeout = new Promise<{ error: { message?: string; code?: string } }>((_, reject) =>
-                            setTimeout(() => reject(new Error('veille_payments_insert_timeout_3s')), 3000)
-                        );
-                        const ipsResult = await Promise.race([insertPromise, insertTimeout]) as {
-                            error: { message?: string; code?: string } | null
-                        };
-                        if (ipsResult.error) {
-                            if (ipsResult.error.code === '23505') {
-                                console.log(JSON.stringify({
-                                    event: 'veille_payments_already_exists',
-                                    payment_id: id,
-                                    timestamp: new Date().toISOString(),
-                                }));
-                            } else {
-                                console.warn(JSON.stringify({
-                                    event: 'veille_payments_insert_failed',
-                                    payment_id: id,
-                                    error: ipsResult.error.message || 'unknown',
-                                    code: ipsResult.error.code || 'none',
-                                    severity: 'warning',
-                                    timestamp: new Date().toISOString(),
-                                }));
-                            }
-                        } else {
-                            console.log(JSON.stringify({
-                                event: 'veille_payments_logged',
-                                payment_id: id,
-                                subscription_id: subId,
-                                amount: recurringAmount,
-                                period,
-                                timestamp: new Date().toISOString(),
-                            }));
-                        }
-                    } catch (re: unknown) {
-                        const rmsg = (re as { message?: string })?.message || 'unknown';
-                        console.warn(JSON.stringify({
-                            event: 'veille_payments_insert_timeout',
-                            payment_id: id,
-                            error: rmsg,
-                            severity: 'warning',
-                            timestamp: new Date().toISOString(),
-                        }));
-                    }
-                }
-
-                // Email ops simple (best-effort, 5s safety)
-                await Promise.race([
-                    sendVeilleRecurringOps({
-                        payment_id: id,
-                        subscription_id: subId || undefined,
-                        amount: recurringAmount,
-                        period,
-                        mode: metadata.mode || undefined,
-                    }).catch((e) => {
-                        console.error(JSON.stringify({
-                            event: 'veille_recurring_ops_mail_failed',
-                            payment_id: id,
-                            error: (e as Error)?.message || 'unknown',
-                            severity: 'warning',
-                            timestamp: new Date().toISOString(),
-                        }));
-                    }),
-                    new Promise<void>(resolve => setTimeout(resolve, 5000)),
-                ]);
-            } else {
-                console.log(JSON.stringify({
-                    event: 'veille_recurring_skipped_idempotent',
-                    payment_id: id,
-                    timestamp: new Date().toISOString(),
-                }));
-            }
-            return res.status(200).json({ received: true, status, sequence: 'recurring' });
-        }
-
         // Phase 2 ACTIVE : email pipeline on paid (C3-bis pattern)
         if (status === 'paid' && !isAlreadyProcessed(id)) {
             markProcessed(id);
@@ -218,7 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (supabase && metadata.request_id) {
                 try {
                     const selectPromise = supabase
-                        .from(targetTable)
+                        .from('diagnostic_requests')
                         .select('status')
                         .eq('request_id', metadata.request_id)
                         .single();
@@ -238,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             event: 'webhook_idempotent_db_check',
                             payment_id: id,
                             request_id: metadata.request_id,
-                            product: metadata.product || 'diagnostic',
+                            product: 'diagnostic',
                             existing_status: existing.status,
                             timestamp: new Date().toISOString(),
                         }));
@@ -266,7 +154,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             if (supabase && metadata.request_id) {
                 try {
                     const updatePromise = supabase
-                        .from(targetTable)
+                        .from('diagnostic_requests')
                         .update({
                             status: 'paid',
                             paid_at: new Date().toISOString(),
@@ -289,7 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             context: 'mollie-webhook',
                             payment_id: id,
                             request_id: metadata.request_id,
-                            target_table: targetTable,
+                            target_table: 'diagnostic_requests',
                             error: msg,
                             severity: 'warning',
                             timestamp: new Date().toISOString(),
@@ -300,32 +188,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             context: 'mollie-webhook',
                             payment_id: id,
                             request_id: metadata.request_id,
-                            target_table: targetTable,
+                            target_table: 'diagnostic_requests',
                             new_status: 'paid',
                             timestamp: new Date().toISOString(),
                         }));
 
                         // Phase C auto-queue : signal post-UPDATE pour PS1 watchdog / n8n W4
-                        if (isVeille) {
-                            console.log(JSON.stringify({
-                                event: 'veille_ready_for_activation',
-                                request_id: metadata.request_id,
-                                invoice_number: metadata.invoice_number || null,
-                                timestamp: new Date().toISOString(),
-                            }));
-                        } else {
-                            console.log(JSON.stringify({
-                                event: 'diagnostic_ready_for_generation',
-                                request_id: metadata.request_id,
-                                invoice_number: metadata.invoice_number || null,
-                                lang: metadata.lang || 'fr',
-                                timestamp: new Date().toISOString(),
-                            }));
-                        }
+                        console.log(JSON.stringify({
+                            event: 'diagnostic_ready_for_generation',
+                            request_id: metadata.request_id,
+                            invoice_number: metadata.invoice_number || null,
+                            lang: metadata.lang || 'fr',
+                            timestamp: new Date().toISOString(),
+                        }));
 
-                        // Night N7 Option β : INSERT pending_generations (DIAGNOSTIC uniquement — pipeline PS1 Opus rapport)
-                        // V360 : VEILLE pas de pending_generations (Phase 1 = JP crée subscription Mollie manuellement)
-                        if (!isVeille) try {
+                        // Night N7 Option β : INSERT pending_generations (DIAGNOSTIC pipeline PS1 Opus rapport)
+                        try {
                             const insertPromise = supabase
                                 .from('pending_generations')
                                 .insert({
@@ -407,9 +285,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     // D_T1105_03 : enrichissement Supabase avant generation facture (fix regression 15/05).
                     // Cause racine : metadata Mollie limite 1KB (cf. commit bca9afc), tronque
                     // silencieusement quand product_description/regulations/customer_company depassent.
-                    // Source canonique = diagnostic_requests/veille_requests table (deja ecrite par
-                    // diagnostic-request.ts/veille-request.ts avant le checkout). Fallback sur metadata
-                    // si SELECT echoue (preserve robustesse).
+                    // Source canonique = diagnostic_requests table (deja ecrite par diagnostic-request.ts
+                    // avant le checkout). Fallback sur metadata si SELECT echoue (preserve robustesse).
                     let customerName = metadata.customer_name || undefined;
                     let customerCompany = metadata.customer_company || undefined;
                     let customerEmail = metadata.email || undefined;
@@ -422,7 +299,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     if (supabase && metadata.request_id) {
                         try {
                             const enrichPromise = supabase
-                                .from(targetTable)
+                                .from('diagnostic_requests')
                                 .select('first_name, last_name, company, email, sector, regulations, context')
                                 .eq('request_id', metadata.request_id)
                                 .single();
@@ -457,7 +334,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                                     event: 'invoice_supabase_enrichment_ok',
                                     payment_id: id,
                                     request_id: metadata.request_id,
-                                    target_table: targetTable,
+                                    target_table: 'diagnostic_requests',
                                     timestamp: new Date().toISOString(),
                                 }));
                             }
@@ -475,9 +352,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                     const invoice = generateInvoicePdf({
                         invoice_number: invoiceNumber,
-                        product: isVeille ? 'veille' : 'diagnostic',
+                        product: 'diagnostic',
                         lang: (metadata.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en',
-                        amount: isVeille ? '150.00' : '250.00',
+                        amount: '250.00',
                         customer_name: customerName,
                         customer_company: customerCompany,
                         customer_email: customerEmail,
@@ -492,7 +369,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         event: 'invoice_generated',
                         payment_id: id,
                         invoice_number: invoiceNumber,
-                        product: isVeille ? 'veille' : 'diagnostic',
+                        product: 'diagnostic',
                         pdf_size_bytes: invoice.size,
                         timestamp: new Date().toISOString(),
                     }));
@@ -556,8 +433,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                                 .insert({
                                     invoice_number: invoiceNumber,
                                     request_id: metadata.request_id || null,
-                                    product: isVeille ? 'veille' : 'diagnostic',
-                                    amount: isVeille ? '150.00' : '250.00',
+                                    product: 'diagnostic',
+                                    amount: '250.00',
                                     pdf_base64: invoice.base64,
                                     pdf_url: invoicePdfUrl,
                                     lang: metadata.lang === 'en' ? 'en' : 'fr',
@@ -637,7 +514,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             // Pattern fire-and-forget : on attend max 1.5s pour que la requete arrive a la lambda
             // generate-diagnostic, puis on continue (la lambda continue independamment).
             // PS1 coexiste : pending_generations INSERT plus haut reste pour fallback manuel JP (rule #4 brief).
-            if (!isVeille && metadata.request_id && process.env.AEGIS_ADMIN_KEY) {
+            if (metadata.request_id && process.env.AEGIS_ADMIN_KEY) {
                 const triggerUrl = `${WEBHOOK_BASE_URL}/api/generate-diagnostic`;
                 try {
                     const ac = new AbortController();
@@ -677,137 +554,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         timestamp: new Date().toISOString(),
                     }));
                 }
-            } else if (!isVeille && metadata.request_id && !process.env.AEGIS_ADMIN_KEY) {
+            } else if (metadata.request_id && !process.env.AEGIS_ADMIN_KEY) {
                 console.warn(JSON.stringify({
                     event: 'diagnostic_generation_trigger_skipped_no_admin_key',
                     payment_id: id,
                     request_id: metadata.request_id,
-                    severity: 'warning',
-                    timestamp: new Date().toISOString(),
-                }));
-            }
-
-            // === S3 Mission N11 : VEILLE auto-subscription creation (sequenceType='first') ===
-            // Mollie API : POST /v2/customers/{cid}/subscriptions cree le mandate recurrent.
-            // Echec gracieux : si la creation echoue, status reste 'paid', ops alerte JP pour intervention manuelle.
-            let veilleSubscriptionId: string | undefined;
-            let veilleActivationOk = false;
-            if (isVeille && metadata.customer_id && MOLLIE_API_KEY) {
-                try {
-                    const subPromise = (async () => {
-                        // FIX P0 #1 (D_T2030_01) : startDate = 1er du mois suivant pour eviter double prelevement.
-                        // Sans startDate, Mollie schedule le 1er recurrent pour aujourd'hui = double facturation immediate.
-                        // Confirmation empirique 27/05/2026 : cobaye preleve 2x 150 EUR en 3min23s.
-                        // Reference brief : 20260527T1530_BRIEF_CC-VEILLE-PIPELINE-FIX-CONSOLIDE.md PARTIE A
-                        const now = new Date();
-                        const startOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
-                        const startDateStr = startOfNextMonth.toISOString().split('T')[0]; // YYYY-MM-DD
-                        const subRes = await fetch(`https://api.mollie.com/v2/customers/${metadata.customer_id}/subscriptions`, {
-                            method: 'POST',
-                            headers: {
-                                Authorization: `Bearer ${MOLLIE_API_KEY}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                amount: { currency: 'EUR', value: '150.00' },
-                                interval: '1 month',
-                                startDate: startDateStr, // FIX P0 #1 D_T2030_01
-                                description: metadata.lang === 'en'
-                                    ? 'AEGIS Intelligence — EU Regulatory Watch (monthly)'
-                                    : 'AEGIS Intelligence — Veille reglementaire EU (mensuel)',
-                                webhookUrl: `${WEBHOOK_BASE_URL}/api/mollie-webhook`,
-                                metadata: {
-                                    product: 'veille',
-                                    request_id: metadata.request_id || null,
-                                    customer_id: metadata.customer_id,
-                                    lang: metadata.lang || 'fr',
-                                },
-                            }),
-                        });
-                        if (!subRes.ok) {
-                            const errText = await subRes.text();
-                            throw new Error(`mollie_sub_${subRes.status}: ${errText.slice(0, 200)}`);
-                        }
-                        return subRes.json();
-                    })();
-                    const subTimeout = new Promise<never>((_, reject) =>
-                        setTimeout(() => reject(new Error('mollie_sub_create_timeout_5s')), 5000)
-                    );
-                    const subData = await Promise.race([subPromise, subTimeout]) as { id?: string };
-                    veilleSubscriptionId = subData.id;
-                    veilleActivationOk = Boolean(veilleSubscriptionId);
-
-                    console.log(JSON.stringify({
-                        event: 'veille_subscription_created',
-                        payment_id: id,
-                        request_id: metadata.request_id || null,
-                        customer_id: metadata.customer_id,
-                        subscription_id: veilleSubscriptionId,
-                        timestamp: new Date().toISOString(),
-                    }));
-
-                    // UPDATE veille_requests : status='active' + subscription_id + customer_id
-                    if (supabase && veilleSubscriptionId && metadata.request_id) {
-                        try {
-                            const upPromise = supabase
-                                .from('veille_requests')
-                                .update({
-                                    status: 'active',
-                                    subscription_id: veilleSubscriptionId,
-                                    customer_id: metadata.customer_id,
-                                    updated_at: new Date().toISOString(),
-                                })
-                                .eq('request_id', metadata.request_id);
-                            const upTimeout = new Promise<{ error: { message: string } }>((_, reject) =>
-                                setTimeout(() => reject(new Error('veille_active_update_timeout_3s')), 3000)
-                            );
-                            const upResult = await Promise.race([upPromise, upTimeout]) as { error: unknown };
-                            if ((upResult as { error: { message?: string } }).error) {
-                                console.warn(JSON.stringify({
-                                    event: 'veille_active_update_failed',
-                                    payment_id: id,
-                                    request_id: metadata.request_id,
-                                    error: ((upResult as { error: { message?: string } }).error.message) || 'unknown',
-                                    severity: 'warning',
-                                    timestamp: new Date().toISOString(),
-                                }));
-                            } else {
-                                console.log(JSON.stringify({
-                                    event: 'veille_active_update_ok',
-                                    payment_id: id,
-                                    request_id: metadata.request_id,
-                                    subscription_id: veilleSubscriptionId,
-                                    timestamp: new Date().toISOString(),
-                                }));
-                            }
-                        } catch (ue: unknown) {
-                            console.warn(JSON.stringify({
-                                event: 'veille_active_update_timeout',
-                                payment_id: id,
-                                error: (ue as Error)?.message || 'unknown',
-                                severity: 'warning',
-                                timestamp: new Date().toISOString(),
-                            }));
-                        }
-                    }
-                } catch (se: unknown) {
-                    const smsg = (se as { message?: string })?.message || 'unknown';
-                    console.error(JSON.stringify({
-                        event: 'veille_subscription_creation_failed',
-                        payment_id: id,
-                        request_id: metadata.request_id || null,
-                        customer_id: metadata.customer_id || null,
-                        error: smsg,
-                        severity: 'critical',
-                        timestamp: new Date().toISOString(),
-                    }));
-                    // Fallback : status reste 'paid', ops mail flag manuel pour creation subscription.
-                }
-            } else if (isVeille && !metadata.customer_id) {
-                console.warn(JSON.stringify({
-                    event: 'veille_subscription_skipped_no_customer_id',
-                    payment_id: id,
-                    request_id: metadata.request_id || null,
                     severity: 'warning',
                     timestamp: new Date().toISOString(),
                 }));
@@ -822,7 +573,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 product: metadata.product_description || metadata.product || undefined,
                 lang: metadata.lang || undefined,
                 mode: metadata.mode || undefined,
-                amount: isVeille ? '150.00' : '250.00',
+                amount: '250.00',
                 sector: metadata.sector || undefined,
                 regulations: metadata.regulations
                     ? metadata.regulations.split(', ') : undefined,
@@ -830,22 +581,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 invoice_number: metadata.invoice_number || undefined,
                 pdf_base64: invoicePdfBase64,
                 pdf_filename: invoicePdfFilename,
-                subscription_id: veilleSubscriptionId,
             };
-
-            // V360 + S3 : dispatch mailers par produit
-            //  - VEILLE activation OK -> sendVeilleActivationConfirmation (subscription cree auto)
-            //  - VEILLE activation FAIL -> sendVeilleClientConfirmation (fallback Phase 1, JP gere manuellement)
-            const clientMailer = isVeille
-                ? (veilleActivationOk ? sendVeilleActivationConfirmation : sendVeilleClientConfirmation)
-                : sendClientConfirmation;
-            const opsMailer = isVeille ? sendVeilleOpsNewOrder : sendOpsNewOrder;
 
             // Await with safety timeout 7s (Vercel function limit 10s)
             await Promise.race([
                 Promise.allSettled([
-                    clientMailer(emailData),
-                    opsMailer(emailData),
+                    sendClientConfirmation(emailData),
+                    sendOpsNewOrder(emailData),
                 ]).then(results => {
                     results.forEach((r, i) => {
                         const type = i === 0 ? 'client' : 'ops';
@@ -854,7 +596,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                                 event: 'mailer_failed',
                                 payment_id: id,
                                 request_id: metadata.request_id || null,
-                                product: metadata.product || 'diagnostic',
+                                product: 'diagnostic',
                                 recipient_type: type,
                                 error: (r.reason as Error)?.message || 'unknown',
                                 severity: 'critical',

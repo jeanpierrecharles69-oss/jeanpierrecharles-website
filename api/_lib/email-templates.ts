@@ -1,5 +1,4 @@
 import type { MailerPaymentData } from './mailer';
-import { unsubscribeUrl } from './veille-unsubscribe-token.js';
 
 /**
  * AEGIS Intelligence -- Email HTML Templates (FR/EN)
@@ -8,6 +7,7 @@ import { unsubscribeUrl } from './veille-unsubscribe-token.js';
  *
  * SELLER constants = memes valeurs que MerciPage.tsx (DRY cross-module).
  *
+ * Version : 2.0.0 -- 20260601T2200 -- D_T1740_03 : VEILLE removal (veilleMonthlyReportHtml + import unsubscribeUrl retires)
  * Version : 1.5.0 -- 20260521 -- N15-B1 : lien "Se desabonner" footer (unsubscribeUrl) sur veilleMonthlyReportHtml
  * Version : 1.4.0 -- 20260521 -- P0 fix 554 : wording PJ systematique + lien en complement (coherence avec revert distribute v1.2.0)
  * Version : 1.3.0 -- 20260521 -- N14 Phase 2 : veilleMonthlyReportHtml bouton lien Storage (download_url, sinon PJ) + C2 fix page-count "~10 pages" -> "15-20 pages" (FR/EN)
@@ -359,68 +359,6 @@ ${deliveryBlock}
             <a href="mailto:${SELLER.email}" style="color:${BRAND.blue};font-weight:600">${SELLER.email}</a>
         </p>
     </div>
-</div>
-<div class="footer">
-    AEGIS Intelligence | ${SELLER.web} | SIRET ${SELLER.siret}<br>
-    ${SELLER.forme} | ${SELLER.tva}
-</div>`;
-
-    return emailWrapper(content);
-}
-
-// --- VEILLE monthly report email (S5 Mission N11) ---
-// Email mensuel a chaque abonne actif. PJ PDF gere par mailer.ts (sendVeilleMonthlyReport).
-export function veilleMonthlyReportHtml(data: MailerPaymentData, lang: 'fr' | 'en'): string {
-    const isFr = lang === 'fr';
-    const edition = data.edition || 'N/A';
-    const monthLabel = data.month_label || edition;
-
-    const navy = '#1e3a5f';
-    const gold = '#c9a84c';
-    const hasLink = Boolean(data.download_url); // N14 B2 : livraison par lien Storage (sinon PJ fallback)
-
-    const content = `
-<div class="header" style="background:linear-gradient(135deg,${navy},${navy});padding:32px 24px;text-align:center;color:#fff">
-    <div style="display:inline-block;width:44px;height:44px;background:${gold};border-radius:6px;line-height:44px;color:${navy};font-weight:800;font-size:18px">AE</div>
-    <h1 style="margin:14px 0 4px;color:#fff;font-size:22px;font-weight:800">${isFr ? 'Veille Reglementaire EU' : 'EU Regulatory Watch'}</h1>
-    <p style="margin:0;color:${gold};font-size:13px;font-weight:600">${escapeHtml(monthLabel)}</p>
-</div>
-<div class="body">
-    <p style="font-size:14px">${isFr ? 'Bonjour,' : 'Hello,'}</p>
-    <p style="font-size:14px">${isFr
-        ? 'Votre <strong>rapport mensuel de veille reglementaire AEGIS</strong> (edition <strong>'
-          + escapeHtml(edition) + '</strong>) est joint a cet email, au format PDF, 15-20 pages couvrant les 5 piliers AEGIS.' + (hasLink ? ' Il est egalement telechargeable via le bouton ci-dessous.' : '')
-        : 'Your <strong>AEGIS monthly regulatory watch report</strong> (edition <strong>'
-          + escapeHtml(edition) + '</strong>) is attached to this email, in PDF format, 15-20 pages covering the 5 AEGIS pillars.' + (hasLink ? ' It is also available via the download button below.' : '')}</p>
-    ${hasLink ? `<div style="text-align:center;margin:22px 0">
-        <a href="${escapeHtml(data.download_url || '')}" style="display:inline-block;background:${navy};color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:14px 30px;border-radius:8px">${isFr ? 'Telecharger le rapport PDF' : 'Download the PDF report'}</a>
-        <div style="font-size:11px;color:${BRAND.textLight};margin-top:8px">${isFr ? 'Lien securise valable 30 jours' : 'Secure link valid for 30 days'}</div>
-    </div>` : ''}
-
-    <div style="background:#f8fafc;border-left:4px solid ${gold};border-radius:6px;padding:14px 18px;margin:20px 0;font-size:13px;line-height:1.7;color:${BRAND.text}">
-        <strong style="color:${navy}">${isFr ? 'Au sommaire' : 'In this issue'} :</strong><br>
-        1. ${isFr ? 'Executive summary' : 'Executive summary'}<br>
-        2. ${isFr ? 'Tableau de bord -- feux tricolores 5 piliers' : 'Dashboard -- 5-pillar traffic lights'}<br>
-        3. ${isFr ? 'Analyse par pilier (AI Act, CRA, Machines, ESPR/DPP, Battery)' : 'Per-pillar analysis (AI Act, CRA, Machinery, ESPR/DPP, Battery)'}<br>
-        4. ${isFr ? 'Calendrier des echeances 6 mois' : '6-month deadline calendar'}<br>
-        5. ${isFr ? 'Sources EUR-Lex / ENISA / AI Office / JRC' : 'Sources EUR-Lex / ENISA / AI Office / JRC'}
-    </div>
-
-    <div style="background:${BRAND.bgAlt};border:1px solid ${BRAND.border};border-radius:10px;padding:14px;font-size:12px;line-height:1.7">
-        <strong>${isFr ? 'Reference edition' : 'Edition reference'} :</strong> ${escapeHtml(edition)}<br>
-        <strong>Date :</strong> ${new Date().toLocaleDateString(isFr ? 'fr-FR' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}<br>
-        <strong>${isFr ? 'Format' : 'Format'} :</strong> PDF (${isFr ? 'piece jointe' : 'attached'}${hasLink ? (isFr ? ' + lien' : ' + link') : ''})
-    </div>
-
-    <p style="font-size:13px;color:${BRAND.textMuted};margin-top:24px">${isFr
-        ? 'Pour toute question, suggestion de signal a couvrir, ou demande d\'analyse approfondie sur un sujet specifique : '
-        : 'For any question, signal suggestion to cover, or in-depth analysis request on a specific topic : '}<a href="mailto:${SELLER.email}" style="color:${navy};font-weight:600">${SELLER.email}</a></p>
-
-    <p style="font-size:11px;color:${BRAND.textLight};margin-top:18px">${isFr
-        ? 'Vous recevez ce rapport au titre de votre abonnement actif VEILLE AEGIS Intelligence (150 EUR/mois).'
-        : 'You receive this report as part of your active AEGIS Intelligence WATCH subscription (EUR 150/month).'}${data.request_id
-        ? ` <a href="${unsubscribeUrl(data.request_id)}" style="color:${BRAND.textLight};text-decoration:underline">${isFr ? 'Se desabonner' : 'Unsubscribe'}</a>.`
-        : (isFr ? ' Pour resilier, repondez a cet email.' : ' To cancel, reply to this email.')}</p>
 </div>
 <div class="footer">
     AEGIS Intelligence | ${SELLER.web} | SIRET ${SELLER.siret}<br>

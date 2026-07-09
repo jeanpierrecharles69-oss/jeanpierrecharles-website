@@ -71,7 +71,6 @@ Concept original AEGIS (01/04/2026).
 |---|---|---|---|
 | PULSE | Gratuit | C0 | Question maeeutique — point d'entree funnel |
 | DIAGNOSTIC | 250 EUR/rapport | C0+C1 | Maeeutique (4 questions) + Pearl N1-N2, PDF 40+ pages |
-| VEILLE | 150 EUR/mois | C0-C2 | Monitoring reglementaire continu, rapport mensuel |
 | EXPERTISE TERRAIN | 350 EUR/h ou 2 500 EUR/mois | C0-C3 | Pearl N3 + Simon + Damasio, JP en personne |
 
 ## 7. CONVENTIONS OBLIGATOIRES
@@ -107,7 +106,7 @@ Concept original AEGIS (01/04/2026).
 | L3 HITL | JP | Decisions strategiques, git push S6 exclusif, actions irreversibles | Tout |
 | L2 Superviseur | ACDC Chat Opus | Expertise, audit, brief, V&V, coordination | Sessions Chat |
 | L1a Executeur | ACDC Code | Missions autonomes 4-8h, JP V&V fin mission | Boucle fermee |
-| L2b Mobile | Sonnet claude.ai | Veille, bridges simples, mobile | Sessions legeres |
+| L2b Mobile | Sonnet claude.ai | Bridges simples, mobile | Sessions legeres |
 
 ## 10. PROJETS ET ISOLATION
 
