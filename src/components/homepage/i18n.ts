@@ -147,7 +147,7 @@ export const i18n = {
         ],
         // S6 — PRICING
         pricingTitle: "Transparence totale. Pas de devis caché.",
-        pricingSub: "Quatre formules claires. Du diagnostic gratuit à l'expertise terrain.",
+        pricingSub: "Trois formules claires. Du diagnostic gratuit à l'expertise terrain.",
         tiers: [
             {
                 name: "PULSE", price: "Gratuit", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
@@ -521,7 +521,7 @@ export const i18n = {
         ],
         // S6 — PRICING
         pricingTitle: "Full transparency. No hidden quotes.",
-        pricingSub: "Four clear plans. From free diagnostic to field expertise.",
+        pricingSub: "Three clear plans. From free diagnostic to field expertise.",
         tiers: [
             {
                 name: "PULSE", price: "Free", period: "", badge: "LEAD MAGNET", annual: "", color: C.accent,
