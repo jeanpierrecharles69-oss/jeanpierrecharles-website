@@ -397,7 +397,6 @@ function renderCGVContent_EN() {
             <ul style={{ fontSize: 11, color: '#475569', lineHeight: 1.7, paddingLeft: 20, margin: '6px 0' }}>
                 <li><strong>PULSE</strong>: free AI pre-diagnostic</li>
                 <li><strong>DIAGNOSTIC</strong>: premium PDF report with regulatory causal analysis (EUR 250.00 per report)</li>
-                <li><strong>WATCH</strong>: monthly subscription for continuous regulatory intelligence (EUR 150.00/month — not available at the effective date)</li>
                 <li><strong>FIELD EXPERTISE</strong>: tailored interventions (EUR 350.00/hour or EUR 2,500.00/month)</li>
             </ul>
 
