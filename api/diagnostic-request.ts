@@ -13,6 +13,7 @@ import { getCetDateParts } from './_lib/cet-timestamp.js';
  * INVARIANT HA-1 (F-01) : AUCUNE URL de checkout emise sans intake durable confirme.
  * Echec/timeout/client absent Supabase -> 503 { error: 'service_unavailable', retryable: true }.
  *
+ * Version : 3.2.0 -- 20260819 -- HB-6 : injection de panne test-only x-aegis-fault (garde VERCEL_ENV, inoperant en production)
  * Version : 3.1.0 -- 20260819 -- HB-1 F-08 : invoice_number suffixe 4 hex request_id (anti-collision intra-minute)
  * Version : 3.0.0 -- 20260819 -- HA-1 F-01 : fail-visible intake (503 si INSERT non confirme, fin du fail-open 200)
  * Version : 2.2.0 -- 20260420 -- FIX silent fail await Promise.race 3s (kill fire-and-forget Vercel serverless)
@@ -138,7 +139,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // pending_payment sans checkout associe ; une retente client cree une nouvelle ligne
         // (nouveau request_id). Doublon possible et acceptable -- aucune collision d'ID.
         const lang = typeof body.lang === 'string' && body.lang === 'en' ? 'en' : 'fr';
-        if (!supabase) {
+        // HB-6 : point d'injection de panne TEST-ONLY (Preview/dev exclusivement -- le garde
+        // VERCEL_ENV rend le header inoperant en production). Simule "Supabase down" pour la
+        // validation N2 PDSA : do(Supabase down) -> 503, zero checkout.
+        const faultSupabaseDown = process.env.VERCEL_ENV !== 'production'
+            && req.headers['x-aegis-fault'] === 'supabase-down';
+        if (faultSupabaseDown) {
+            console.warn(JSON.stringify({
+                event: 'fault_injection_triggered',
+                context: 'diagnostic-request',
+                fault: 'supabase-down',
+                vercel_env: process.env.VERCEL_ENV || 'development',
+                timestamp: new Date().toISOString(),
+            }));
+        }
+        if (!supabase || faultSupabaseDown) {
             logSupabaseUnavailable('diagnostic-request');
             return res.status(503).json({ error: 'service_unavailable', retryable: true });
         }
