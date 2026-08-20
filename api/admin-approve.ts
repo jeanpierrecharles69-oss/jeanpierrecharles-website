@@ -25,6 +25,7 @@ import { sendDiagnosticDelivery } from './_lib/mailer.js';
  *
  * Securite double : token UUID imprevisible + AEGIS_ADMIN_KEY (query en GET, champ cache en POST).
  *
+ * Version : 2.2.0 -- 20260820 -- HB-2b finding N2 JP : lien PDF signe a la volee sur page confirmation (V&V G3 independante de l'email QA)
  * Version : 2.1.0 -- 20260819 -- HB-2 F-05 : claim 'delivering' avant email, rollback sur echec mail, verite UI sur echec post-envoi, garde TOCTOU reject
  * Version : 2.0.0 -- 20260819 -- HA-2 CE-02 : GET non-mutant (page confirmation), mutation en POST
  * Version : 1.1.0 -- 20260521 -- N14 Phase 2 C1 : parite livraison DIAG -- SELECT pdf_url + pass download_url a sendDiagnosticDelivery (lien Storage en complement de la PJ)
@@ -234,6 +235,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // HA-2 (CE-02) : GET = page de confirmation, ZERO mutation. La mutation exige un
     // POST intentionnel (form submit ci-dessous) -- non prechargeable par un scanner.
     if (!isPost) {
+        // HB-2b (finding N2 JP 20/08) : la V&V du rapport EST la decision G3. L'email QA
+        // peut echouer (554 Gandi constate au N2) -> la page fournit un lien de consultation
+        // du PDF signe a la volee (60 min), independant du canal email. Path constate au
+        // log storage_upload_ok : diagnostic/{invoice}/AEGIS-DIAGNOSTIC-{invoice}.pdf.
+        let reportUrl: string | null = null;
+        try {
+            const reportPath = `diagnostic/${requestRow.invoice_number}/AEGIS-DIAGNOSTIC-${requestRow.invoice_number}.pdf`;
+            const { data: signedData } = await supabase.storage
+                .from('aegis-documents')
+                .createSignedUrl(reportPath, 3600);
+            reportUrl = signedData?.signedUrl || null;
+        } catch { /* fallback ci-dessous */ }
+        if (!reportUrl && requestRow.pdf_url) reportUrl = requestRow.pdf_url;
+        const reportLine = reportUrl
+            ? `<div style="text-align:center;margin:16px 0 4px"><a href="${escape(reportUrl)}" target="_blank" rel="noopener" style="display:inline-block;background:#0f172a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px">&#x1F50D; Consulter le rapport PDF (V&amp;V avant decision)</a></div>`
+            : '<p style="font-size:12px;color:#92400e;margin:12px 0 0"><strong>Rapport non consultable via Storage</strong> -- verifier la PJ de l\'email QA ou Supabase avant d\'approuver.</p>';
         const intentLine = action === 'approve'
             ? '<p style="margin:0 0 12px;font-size:13px"><strong>Action demandee depuis l\'email : APPROUVER.</strong> Confirmez ci-dessous.</p>'
             : action === 'reject'
@@ -253,6 +270,7 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
 <strong>Client</strong> : ${escape(customerName)}${requestRow.company ? ` (${escape(requestRow.company)})` : ''}<br>
 <strong>Email</strong> : ${escape(requestRow.email)}<br>
 <strong>Langue</strong> : ${escape(lang.toUpperCase())} &mdash; <strong>Statut</strong> : <code>${escape(requestRow.status)}</code> / <code>qa_status: ${escape(requestRow.qa_status)}</code><br>
+${reportLine}
 <div style="text-align:center;margin-top:20px">
 <form method="POST" action="/api/admin-approve" style="display:inline-block;margin:6px 8px">${hiddenFields('approve')}
 <button type="submit" style="background:#16a34a;${buttonStyle}">&#x2705; APPROUVER ET LIVRER</button></form>
