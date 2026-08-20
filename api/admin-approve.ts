@@ -25,6 +25,7 @@ import { sendDiagnosticDelivery } from './_lib/mailer.js';
  *
  * Securite double : token UUID imprevisible + AEGIS_ADMIN_KEY (query en GET, champ cache en POST).
  *
+ * Version : 2.1.0 -- 20260819 -- HB-2 F-05 : claim 'delivering' avant email, rollback sur echec mail, verite UI sur echec post-envoi, garde TOCTOU reject
  * Version : 2.0.0 -- 20260819 -- HA-2 CE-02 : GET non-mutant (page confirmation), mutation en POST
  * Version : 1.1.0 -- 20260521 -- N14 Phase 2 C1 : parite livraison DIAG -- SELECT pdf_url + pass download_url a sendDiagnosticDelivery (lien Storage en complement de la PJ)
  * Version : 1.0.0 -- 20260515 -- Mission G3 QA Gate Approbation
@@ -264,7 +265,9 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
 
     // 4a. action=reject
     if (action === 'reject') {
-        const { error: rejErr } = await supabase
+        // HB-2 (F-05) : garde TOCTOU -- WHERE qa_status='pending' + verif ligne mutee
+        // (le pre-SELECT peut etre stale face a un POST concurrent).
+        const { data: rejRows, error: rejErr } = await supabase
             .from('diagnostic_requests')
             .update({
                 qa_status: 'rejected',
@@ -272,7 +275,9 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
                 pdf_base64: null,
                 updated_at: new Date().toISOString(),
             })
-            .eq('request_id', requestRow.request_id);
+            .eq('request_id', requestRow.request_id)
+            .eq('qa_status', 'pending')
+            .select('request_id');
 
         if (rejErr) {
             console.error(JSON.stringify({
@@ -286,6 +291,14 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
                 headline: 'Erreur lors du rejet',
                 body: `Erreur SQL : <code>${escape(rejErr.message || 'unknown')}</code>`,
                 color: 'red',
+            }));
+        }
+        if (!rejRows || rejRows.length === 0) {
+            return sendHtml(res, 409, htmlPage({
+                title: 'Deja traite',
+                headline: 'Demande deja traitee',
+                body: `Cette demande a deja ete traitee par une action concurrente. Aucune action effectuee.<br>Facture : <code>${escape(requestRow.invoice_number)}</code>`,
+                color: 'amber',
             }));
         }
 
@@ -338,6 +351,44 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
         }
     }
 
+    // HB-2 (F-05) : ETAT DURABLE AVANT EMAIL. Claim atomique status -> 'delivering'
+    // (WHERE qa_status='pending' AND status<>'delivering', verif ligne mutee) : un 2e POST
+    // concurrent perd le claim -> 409, zero double envoi. L'email ne part qu'apres claim
+    // persiste ; sur echec d'envoi le claim est rendu (rollback 'generating') pour retente.
+    // Invariant : une seule livraison par dossier, etat DB jamais en retard sur la realite.
+    {
+        const { data: claimRows, error: claimErr } = await supabase
+            .from('diagnostic_requests')
+            .update({ status: 'delivering', updated_at: new Date().toISOString() })
+            .eq('request_id', requestRow.request_id)
+            .eq('qa_status', 'pending')
+            .neq('status', 'delivering')
+            .select('request_id');
+        if (claimErr) {
+            console.error(JSON.stringify({
+                event: 'admin_approve_claim_failed',
+                request_id: requestRow.request_id,
+                error: claimErr.message || 'unknown',
+                severity: 'error',
+                timestamp: new Date().toISOString(),
+            }));
+            return sendHtml(res, 500, htmlPage({
+                title: 'Erreur prise du dossier',
+                headline: 'Erreur lors de la prise du dossier',
+                body: `Erreur SQL : <code>${escape(claimErr.message || 'unknown')}</code><br>Aucun email envoye. Reessayer.`,
+                color: 'red',
+            }));
+        }
+        if (!claimRows || claimRows.length === 0) {
+            return sendHtml(res, 409, htmlPage({
+                title: 'Deja en cours',
+                headline: 'Demande deja traitee ou en cours',
+                body: `Un traitement concurrent est deja passe sur <code>${escape(requestRow.invoice_number)}</code>. Aucun email envoye par cette requete.`,
+                color: 'amber',
+            }));
+        }
+    }
+
     // sendDiagnosticDelivery au client
     try {
         await sendDiagnosticDelivery({
@@ -364,6 +415,27 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
             severity: 'critical',
             timestamp: new Date().toISOString(),
         }));
+        // HB-2 : rendre le claim (rien n'est parti -> etat DB = realite, retente possible).
+        const { error: rbErr } = await supabase
+            .from('diagnostic_requests')
+            .update({ status: 'generating', updated_at: new Date().toISOString() })
+            .eq('request_id', requestRow.request_id)
+            .eq('status', 'delivering');
+        if (rbErr) {
+            console.error(JSON.stringify({
+                event: 'admin_approve_claim_rollback_failed',
+                request_id: requestRow.request_id,
+                error: rbErr.message || 'unknown',
+                severity: 'critical',
+                timestamp: new Date().toISOString(),
+            }));
+            return sendHtml(res, 502, htmlPage({
+                title: 'Echec email + etat bloque',
+                headline: 'Echec envoi email client',
+                body: `Le rapport n'a pas pu etre envoye : <code>${escape(reason)}</code><br><br>De plus, le dossier est reste en statut <strong>delivering</strong> (rollback SQL echoue). Corriger le statut vers <code>generating</code> dans Supabase Studio avant de retenter.`,
+                color: 'red',
+            }));
+        }
         return sendHtml(res, 502, htmlPage({
             title: 'Echec email client',
             headline: 'Echec envoi email client',
@@ -374,11 +446,13 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
 
     // UPDATE qa_status='approved' + status='delivered' + email_sent_at + vider pdf_base64
     // P2-PIPE-03 fix (20260518T1625) : email_sent_at pose ici car sendDiagnosticDelivery
-    // a reussi L291-304 (try/catch + early return 502 si echec). Sans cette ligne,
-    // diagnostic-deliver.ts L280-303 (idempotence CE-01 v1.1 triphasique ETAT B) verrait
+    // a reussi (try/catch + early return 502 si echec). Sans cette ligne,
+    // diagnostic-deliver.ts (idempotence CE-01 v1.1 triphasique ETAT B) verrait
     // email_sent_at NULL malgre delivered_at OK et renverrait l'email en double sur retry.
+    // HB-2 (F-05) : WHERE status='delivering' (le claim) + verif ligne mutee ; sur echec,
+    // severity critical et LA PAGE DIT LA VERITE (fini le 200 "livre" avec DB en retard).
     const nowIso = new Date().toISOString();
-    const { error: appErr } = await supabase
+    const { data: finRows, error: appErr } = await supabase
         .from('diagnostic_requests')
         .update({
             qa_status: 'approved',
@@ -389,17 +463,24 @@ Dossier DIAGNOSTIC en attente de decision QA :<br><br>
             pdf_base64: null,
             updated_at: nowIso,
         })
-        .eq('request_id', requestRow.request_id);
+        .eq('request_id', requestRow.request_id)
+        .eq('status', 'delivering')
+        .select('request_id');
 
-    if (appErr) {
-        console.warn(JSON.stringify({
+    if (appErr || !finRows || finRows.length === 0) {
+        console.error(JSON.stringify({
             event: 'admin_approve_final_update_failed',
             request_id: requestRow.request_id,
-            error: appErr.message || 'unknown',
-            severity: 'warning',
+            error: appErr?.message || 'zero_row_updated',
+            severity: 'critical',
             timestamp: new Date().toISOString(),
         }));
-        // Email envoye OK : ne pas faire echouer l'UI pour un bug UPDATE
+        return sendHtml(res, 500, htmlPage({
+            title: 'Email envoye, etat non confirme',
+            headline: 'Email ENVOYE mais etat non confirme',
+            body: `Le rapport <code>${escape(requestRow.invoice_number)}</code> <strong>a ete envoye au client</strong> (${escape(requestRow.email)}), mais l'ecriture finale de l'etat en base a echoue (<code>${escape(appErr?.message || 'zero_row_updated')}</code>).<br><br><strong>Ne PAS recliquer APPROUVER</strong> (risque de double envoi). Verifier le dossier dans Supabase Studio : attendu <code>delivered / qa_status: approved</code>.`,
+            color: 'red',
+        }));
     }
 
     console.log(JSON.stringify({

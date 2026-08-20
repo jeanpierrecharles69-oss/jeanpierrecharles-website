@@ -15,6 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  *  - JAMAIS utiliser ANON_KEY ici
  *  - JAMAIS exposer la cle dans les logs ou les reponses API
  *
+ * Version : 1.2.0 -- 20260819 -- HB-2 : DiagnosticStatus + 'delivering' / 'failed' (alignement sur les etats reellement ecrits)
  * Version : 1.1.0 -- 20260420 -- ajout log boot supabase_client_init (diagnostic cold start)
  */
 
@@ -51,11 +52,15 @@ export function logSupabaseUnavailable(context: string): void {
     }));
 }
 
+// HB-2 (F-05) : 'delivering' = claim de livraison en cours (admin-approve) ;
+// 'failed' etait deja ecrit en base sans figurer dans l'union (honnetete du type).
 export type DiagnosticStatus =
     | 'pending_payment'
     | 'paid'
     | 'generating'
+    | 'delivering'
     | 'delivered'
+    | 'failed'
     | 'cancelled';
 
 export interface DiagnosticRequestRow {

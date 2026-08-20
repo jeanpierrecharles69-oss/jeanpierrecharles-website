@@ -22,6 +22,7 @@ import { sendClientDiagnostic } from './_lib/mailer.js';
  *   CR-02 emailLogIdentifier() hash SHA-256 tronque 8 chars pour logs
  *   R_T1340_01 : aucun err.message nodemailer dans logs (leak risk)
  *
+ * Version : 1.1.0 -- 20260819 -- HB-2 F-05 : controle des resultats { error } (ETAT D update, ETAT B/D email_sent_at), verite payload
  * Version : 1.0.0 -- 20260422 -- PHASE-C v1.1 arbitree (Devil's Advocate 4/4 A integrees)
  */
 
@@ -306,10 +307,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 sendClientDiagnostic({ to: targetEmail, pdfBuffer, invoiceNumber, lang }),
                 new Promise<never>((_, reject) => setTimeout(() => reject(new Error('email_timeout_7s')), 7000)),
             ]);
-            await supabase
+            // HB-2 (F-05) : controle { error } ; email PARTI -> repondre la verite avec flag
+            // (un 502 inciterait au retry -> double envoi, ETAT B re-entrant).
+            const { error: bUpdErr } = await supabase
                 .from('diagnostic_requests')
                 .update({ email_sent_at: new Date().toISOString() })
                 .eq('request_id', requestId);
+            if (bUpdErr) {
+                console.error(JSON.stringify({
+                    event: 'diagnostic_deliver_email_sent_at_update_fail',
+                    request_id: requestId,
+                    state: 'B_email_recovered',
+                    error: bUpdErr.message || 'unknown',
+                    severity: 'critical',
+                    timestamp: new Date().toISOString(),
+                }));
+                return res.status(200).json({ status: 'email_recovered', email_sent_at_update_failed: true });
+            }
             console.log(JSON.stringify({
                 event: 'diagnostic_deliver_success',
                 request_id: requestId,
@@ -335,6 +349,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // ETAT D : nouvelle livraison complete
     // Etape 7 : UPDATE Supabase delivered_at + pdf_sha256 (EA-02 Promise.race 3s decouplage Obj.1)
+    // HB-2 (F-05) : controle du resultat { error } -- le client supabase-js ne throw pas sur
+    // erreur SQL ; sans ce check, un UPDATE echoue passait silencieusement puis l'email
+    // partait avec un etat DB en retard sur la realite.
     try {
         const updatePromise = supabase
             .from('diagnostic_requests')
@@ -344,10 +361,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 status: 'delivered',
             })
             .eq('request_id', requestId);
-        await Promise.race([
+        const upResult = await Promise.race([
             updatePromise,
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error('supabase_update_timeout_3s')), 3000)),
-        ]);
+        ]) as { error: { message?: string } | null };
+        if (upResult.error) {
+            throw new Error(upResult.error.message || 'supabase_update_error');
+        }
     } catch (err) {
         console.error(JSON.stringify({
             event: 'diagnostic_deliver_update_fail',
@@ -378,10 +398,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Etape 9 : UPDATE email_sent_at (finalisation livraison complete)
-    await supabase
+    // HB-2 (F-05) : controle { error } ; email PARTI -> verite avec flag, severity critical
+    // (echec ici = ETAT B au prochain appel -> un retry renverrait l'email).
+    const { error: finUpdErr } = await supabase
         .from('diagnostic_requests')
         .update({ email_sent_at: new Date().toISOString() })
         .eq('request_id', requestId);
+    if (finUpdErr) {
+        console.error(JSON.stringify({
+            event: 'diagnostic_deliver_email_sent_at_update_fail',
+            request_id: requestId,
+            state: 'D_delivered_complete',
+            error: finUpdErr.message || 'unknown',
+            severity: 'critical',
+            timestamp: new Date().toISOString(),
+        }));
+        return res.status(200).json({ status: 'delivered_complete', email_sent_at_update_failed: true });
+    }
 
     console.log(JSON.stringify({
         event: 'diagnostic_deliver_success',
