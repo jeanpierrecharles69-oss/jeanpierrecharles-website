@@ -26,6 +26,7 @@ import { sendDiagnosticFailureOps, sendQANotificationEmail } from './_lib/mailer
  *
  * Vercel : maxDuration 300s, memory 1024MB (cf. vercel.json override).
  *
+ * Version : 1.1.0 -- 20260819 -- HB-4 CE-01 : claim atomique paid->generating (.select() + verif ligne retournee avant travail long)
  * Version : 1.0.1 -- 20260819 -- HA-2 CE-02 : commentaire liens QA (GET non-mutant, mutation POST cote admin-approve)
  * Version : 1.0.0 -- 20260508 -- creation S4
  */
@@ -161,13 +162,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(409).json({ error: 'invalid_status', current: requestRow.status });
     }
 
-    // 3. UPDATE status='generating' (atomic transition)
+    // 3. UPDATE conditionnel paid|failed -> generating : CLAIM ATOMIQUE (HB-4 / CE-01).
+    // .select() retourne les lignes reellement mutees : 0 ligne = un caller concurrent
+    // a deja pris le claim entre notre SELECT (etape 1, potentiellement stale) et ici
+    // -> repondre "deja en cours" SANS lancer le travail long (~700 s).
+    // Invariant : exactement une generation par dossier, meme en concurrence.
     {
-        const { error: upErr } = await supabase
+        const { data: claimed, error: upErr } = await supabase
             .from('diagnostic_requests')
             .update({ status: 'generating', updated_at: new Date().toISOString() })
             .eq('request_id', requestId)
-            .in('status', ['paid', 'failed']);
+            .in('status', ['paid', 'failed'])
+            .select('request_id');
         if (upErr) {
             console.error(JSON.stringify({
                 event: 'generate_diagnostic_status_generating_failed',
@@ -176,6 +182,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 timestamp: new Date().toISOString(),
             }));
             return res.status(500).json({ error: 'status_update_failed' });
+        }
+        if (!claimed || claimed.length === 0) {
+            console.log(JSON.stringify({
+                event: 'generate_diagnostic_claim_lost',
+                request_id: requestId,
+                reason: 'zero_row_updated_concurrent_claim',
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(202).json({ status: 'already_generating', reason: 'claim_lost' });
         }
     }
 
