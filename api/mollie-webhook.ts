@@ -10,15 +10,26 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Phase 2 ACTIVE : On status === 'paid', send client confirmation + ops notification.
  * Pattern : await Promise.race([allSettled, timeout 7s]) (Vercel serverless safe).
  *
- * Idempotence (Night N7 v2.3.0 renforcee) :
+ * Idempotence (Night N7 v2.3.0 renforcee, HB-3 v3.1.0 corrigee) :
  *   - Set<string> in-memory par instance warm (fast-path <1ms)
+ *   - HB-3 (F-02a) : le Set n'est marque QU'APRES persistance DB confirmee (ligne mutee > 0
+ *     ou etat durable deja constate) -- fini le mark-avant-commit qui perdait un paiement
+ *     sur echec DB en instance chaude.
  *   - + SELECT Supabase status pre-email (survit cold starts Vercel lambda)
  *   - Tout UPDATE cible status IN ('pending_payment', 'pending') uniquement -> idempotent via WHERE
  *   - pending_generations : contrainte UNIQUE request_id -> INSERT duplique echoue gracieusement
  *
- * Night N7 Option β : apres UPDATE paid, INSERT pending_generations pour dashboard JP.
- * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id (NON-BLOQUANT).
+ * Reponses HTTP (HB-3 F-02b) : 500 = echec TRANSITOIRE (cle absente, relecture Mollie
+ * timeout/5xx, DB indisponible/erreur) -> Mollie RETENTE avec backoff (comportement voulu).
+ * 200 = definitif (traite, idempotent, ou paiement invalide CE-03 que retenter ne changera pas).
  *
+ * CE-03 (HB-3c) : amount/currency/product/mode/format request_id revalides ENSEMBLE avant
+ * tout effet (facture, emails, trigger). Relecture Mollie sous AbortController 5 s (HB-3d).
+ *
+ * Night N7 Option β : apres UPDATE paid, INSERT pending_generations pour dashboard JP.
+ * NIGHT-N5 Phase B3 : update Supabase status=paid + paid_at + payment_id.
+ *
+ * Version : 3.1.0 -- 20260819 -- HB-3 F-02+CE-03 : mark apres persistance, 500 retryable, revalidation paiement, timeout relecture 5s
  * Version : 3.0.0 -- 20260601T2200 -- D_T1740_01 : VEILLE removal (handler DIAGNOSTIC seul)
  */
 
@@ -36,6 +47,8 @@ const MOLLIE_API_KEY =
     VERCEL_ENV === 'production'
         ? process.env.MOLLIE_API_KEY_LIVE
         : process.env.MOLLIE_API_KEY_TEST;
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const WEBHOOK_BASE_URL = (() => {
     if (VERCEL_ENV === 'production') return 'https://jeanpierrecharles.com';
@@ -60,24 +73,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         if (!MOLLIE_API_KEY) {
-            console.error('Mollie webhook: API key not configured');
-            // Still return 200 to Mollie to avoid retries
-            return res.status(200).json({ received: true, error: 'key_missing' });
+            // HB-3 (F-02b) : config manquante = echec transitoire (reparable) -> 500,
+            // Mollie retente avec backoff pendant la fenetre de correction.
+            console.error(JSON.stringify({
+                event: 'webhook_key_missing',
+                payment_id: id,
+                severity: 'critical',
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(500).json({ error: 'key_missing', retryable: true });
         }
 
         // Re-query Mollie API for actual payment status (security best practice)
-        const mollieRes = await fetch(`https://api.mollie.com/v2/payments/${id}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${MOLLIE_API_KEY}`,
-            },
-        });
+        // HB-3d (CE-03) : timeout applicatif 5 s -- une lenteur Mollie ne retient plus
+        // la fonction jusqu'a la limite Vercel ; timeout/reseau -> 500 retryable.
+        let mollieRes: Response;
+        {
+            const requeryAc = new AbortController();
+            const requeryTimer = setTimeout(() => requeryAc.abort(), 5000);
+            try {
+                mollieRes = await fetch(`https://api.mollie.com/v2/payments/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${MOLLIE_API_KEY}`,
+                    },
+                    signal: requeryAc.signal,
+                });
+            } catch (reqErr: unknown) {
+                const rmsg = (reqErr as { message?: string })?.message || 'unknown';
+                console.error(JSON.stringify({
+                    event: 'webhook_mollie_requery_failed',
+                    payment_id: id,
+                    error: rmsg,
+                    severity: 'error',
+                    timestamp: new Date().toISOString(),
+                }));
+                return res.status(500).json({ error: 'mollie_requery_failed', retryable: true });
+            } finally {
+                clearTimeout(requeryTimer);
+            }
+        }
 
         if (!mollieRes.ok) {
             const errText = await mollieRes.text();
             console.error(`Mollie webhook: failed to fetch payment ${id}:`, mollieRes.status, errText);
-            // Return 200 to prevent Mollie from retrying indefinitely
-            return res.status(200).json({ received: true, error: 'fetch_failed' });
+            // HB-3 (F-02b) : 404 = paiement inconnu, definitif -> 200 (retenter ne changera
+            // rien) ; tout autre echec (5xx, 429...) = transitoire -> 500, Mollie retente.
+            if (mollieRes.status === 404) {
+                return res.status(200).json({ received: true, error: 'payment_not_found' });
+            }
+            return res.status(500).json({ error: 'mollie_requery_non_2xx', retryable: true });
         }
 
         const payment = await mollieRes.json();
@@ -96,12 +141,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
 
         // Phase 2 ACTIVE : email pipeline on paid (C3-bis pattern)
-        if (status === 'paid' && !isAlreadyProcessed(id)) {
-            markProcessed(id);
+        if (status === 'paid') {
+            // HB-3c (CE-03) : revalidation ENSEMBLE amount/currency/product/mode/request_id
+            // AVANT tout effet (facture, emails, trigger, marquage). Mismatch = anomalie
+            // DEFINITIVE (retenter ne changera pas le paiement) -> log critical + 200, zero effet.
+            const expectedMode = VERCEL_ENV === 'production' ? 'LIVE' : 'TEST';
+            const validationFailures: string[] = [];
+            if (metadata.product !== 'diagnostic') validationFailures.push('product');
+            if (payment.amount?.value !== '250.00' || payment.amount?.currency !== 'EUR') validationFailures.push('amount');
+            if (metadata.mode !== expectedMode) validationFailures.push('mode');
+            if (typeof metadata.request_id !== 'string' || !UUID_REGEX.test(metadata.request_id)) validationFailures.push('request_id');
+            if (validationFailures.length > 0) {
+                console.error(JSON.stringify({
+                    event: 'webhook_payment_validation_failed',
+                    payment_id: id,
+                    failed_fields: validationFailures,
+                    amount_value: payment.amount?.value || null,
+                    amount_currency: payment.amount?.currency || null,
+                    metadata_product: metadata.product || null,
+                    metadata_mode: metadata.mode || null,
+                    severity: 'critical',
+                    timestamp: new Date().toISOString(),
+                }));
+                return res.status(200).json({ received: true, status, rejected: 'validation_failed' });
+            }
+
+            // Fast-path warm : deja traite par CETTE instance (marque apres persistance, HB-3a).
+            if (isAlreadyProcessed(id)) {
+                console.log(JSON.stringify({
+                    event: 'mailer_skipped_idempotent',
+                    payment_id: id,
+                    timestamp: new Date().toISOString(),
+                }));
+                return res.status(200).json({ received: true, status, idempotent: 'memory' });
+            }
 
             // Night N7 v2.3.0 : Supabase-level idempotence pre-check (survit cold starts).
             // Si le row est deja status='paid' ou 'delivered', on evite emails & INSERT pending dupliques.
-            // Ce check survient APRES markProcessed pour preserver fast-path warm instance.
+            // HB-3a : markProcessed retire d'ici -- il n'est pose qu'apres persistance confirmee.
             let dbAlreadyPaid = false;
             if (supabase && metadata.request_id) {
                 try {
@@ -145,13 +222,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             if (dbAlreadyPaid) {
-                // Reponse 200 immediate sans effets de bord
+                // Etat durable deja constate -> armer le fast-path warm (HB-3a) puis 200.
+                markProcessed(id);
                 return res.status(200).json({ received: true, status, idempotent: 'db' });
             }
 
             // NIGHT-N5 Phase B3 + v2.2.0 FIX : update Supabase status=paid (AWAIT Promise.race 3s)
             // v2.3.0 Night N7 : WHERE status IN ('pending_payment','pending') pour atomicite cross-cold-start.
-            if (supabase && metadata.request_id) {
+            // HB-3 (F-02) : la persistance est OBLIGATOIRE avant tout effet -- client absent,
+            // erreur ou timeout DB -> 500 retryable (Mollie retente), AUCUN effet emis.
+            if (!supabase) {
+                console.error(JSON.stringify({
+                    event: 'webhook_supabase_unavailable',
+                    payment_id: id,
+                    request_id: metadata.request_id,
+                    severity: 'critical',
+                    timestamp: new Date().toISOString(),
+                }));
+                return res.status(500).json({ error: 'persistence_unavailable', retryable: true });
+            }
+            {
+                let updatedRows: Array<{ request_id: string }> | null = null;
                 try {
                     const updatePromise = supabase
                         .from('diagnostic_requests')
@@ -162,101 +253,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             updated_at: new Date().toISOString(),
                         })
                         .eq('request_id', metadata.request_id)
-                        .in('status', ['pending_payment', 'pending']);
+                        .in('status', ['pending_payment', 'pending'])
+                        .select('request_id');
 
-                    const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
+                    const timeoutPromise = new Promise<never>((_, reject) =>
                         setTimeout(() => reject(new Error('supabase_update_timeout_3s')), 3000)
                     );
 
-                    const result = await Promise.race([updatePromise, timeoutPromise]) as { error: unknown };
+                    const result = await Promise.race([updatePromise, timeoutPromise]) as {
+                        data: Array<{ request_id: string }> | null;
+                        error: { message?: string } | null;
+                    };
 
                     if (result.error) {
-                        const msg = (result.error as { message?: string })?.message || 'unknown';
                         console.error(JSON.stringify({
                             event: 'supabase_update_failed',
                             context: 'mollie-webhook',
                             payment_id: id,
                             request_id: metadata.request_id,
                             target_table: 'diagnostic_requests',
-                            error: msg,
-                            severity: 'warning',
+                            error: result.error.message || 'unknown',
+                            severity: 'error',
                             timestamp: new Date().toISOString(),
                         }));
-                    } else {
-                        console.log(JSON.stringify({
-                            event: 'supabase_update_ok',
-                            context: 'mollie-webhook',
-                            payment_id: id,
-                            request_id: metadata.request_id,
-                            target_table: 'diagnostic_requests',
-                            new_status: 'paid',
-                            timestamp: new Date().toISOString(),
-                        }));
-
-                        // Phase C auto-queue : signal post-UPDATE pour PS1 watchdog / n8n W4
-                        console.log(JSON.stringify({
-                            event: 'diagnostic_ready_for_generation',
-                            request_id: metadata.request_id,
-                            invoice_number: metadata.invoice_number || null,
-                            lang: metadata.lang || 'fr',
-                            timestamp: new Date().toISOString(),
-                        }));
-
-                        // Night N7 Option β : INSERT pending_generations (DIAGNOSTIC pipeline PS1 Opus rapport)
-                        try {
-                            const insertPromise = supabase
-                                .from('pending_generations')
-                                .insert({
-                                    request_id: metadata.request_id,
-                                    status: 'pending',
-                                });
-
-                            const insertTimeout = new Promise<{ error: { message: string; code?: string } }>((_, reject) =>
-                                setTimeout(() => reject(new Error('supabase_insert_pending_timeout_2s')), 2000)
-                            );
-
-                            const insResult = await Promise.race([insertPromise, insertTimeout]) as { error: { message?: string; code?: string } | null };
-
-                            if (insResult.error) {
-                                // Code 23505 = unique_violation (row deja presente, idempotent OK)
-                                if (insResult.error.code === '23505') {
-                                    console.log(JSON.stringify({
-                                        event: 'pending_generations_already_exists',
-                                        payment_id: id,
-                                        request_id: metadata.request_id,
-                                        timestamp: new Date().toISOString(),
-                                    }));
-                                } else {
-                                    console.error(JSON.stringify({
-                                        event: 'pending_generations_insert_failed',
-                                        payment_id: id,
-                                        request_id: metadata.request_id,
-                                        error: insResult.error.message || 'unknown',
-                                        code: insResult.error.code || null,
-                                        severity: 'warning',
-                                        timestamp: new Date().toISOString(),
-                                    }));
-                                }
-                            } else {
-                                console.log(JSON.stringify({
-                                    event: 'pending_generations_insert_ok',
-                                    payment_id: id,
-                                    request_id: metadata.request_id,
-                                    timestamp: new Date().toISOString(),
-                                }));
-                            }
-                        } catch (pe: unknown) {
-                            const pmsg = (pe as { message?: string })?.message || 'unknown';
-                            console.warn(JSON.stringify({
-                                event: 'pending_generations_insert_timeout',
-                                payment_id: id,
-                                request_id: metadata.request_id,
-                                error: pmsg,
-                                severity: 'warning',
-                                timestamp: new Date().toISOString(),
-                            }));
-                        }
+                        return res.status(500).json({ error: 'persistence_failed', retryable: true });
                     }
+                    updatedRows = result.data;
                 } catch (e: unknown) {
                     const msg = (e as { message?: string })?.message || 'unknown';
                     console.error(JSON.stringify({
@@ -265,6 +287,126 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         payment_id: id,
                         request_id: metadata.request_id,
                         error: msg,
+                        severity: 'error',
+                        timestamp: new Date().toISOString(),
+                    }));
+                    return res.status(500).json({ error: 'persistence_timeout', retryable: true });
+                }
+
+                if (!updatedRows || updatedRows.length === 0) {
+                    // 0 ligne mutee : classifier -- row dans un autre statut (course concurrente,
+                    // idempotent) OU row ABSENTE (paiement paye sans intake canonique : la perte
+                    // silencieuse F-01/F-02 -- critical + 500 ; si l'insert intake tardif atterrit,
+                    // un retry Mollie RECUPERE le dossier).
+                    const { data: chkRow, error: chkErr } = await supabase
+                        .from('diagnostic_requests')
+                        .select('status')
+                        .eq('request_id', metadata.request_id)
+                        .maybeSingle();
+                    if (chkErr) {
+                        console.error(JSON.stringify({
+                            event: 'webhook_zero_row_classify_failed',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            error: chkErr.message || 'unknown',
+                            severity: 'error',
+                            timestamp: new Date().toISOString(),
+                        }));
+                        return res.status(500).json({ error: 'persistence_unverified', retryable: true });
+                    }
+                    if (!chkRow) {
+                        console.error(JSON.stringify({
+                            event: 'webhook_paid_without_intake',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            severity: 'critical',
+                            timestamp: new Date().toISOString(),
+                        }));
+                        return res.status(500).json({ error: 'paid_without_intake', retryable: true });
+                    }
+                    console.log(JSON.stringify({
+                        event: 'webhook_idempotent_concurrent',
+                        payment_id: id,
+                        request_id: metadata.request_id,
+                        existing_status: chkRow.status,
+                        timestamp: new Date().toISOString(),
+                    }));
+                    markProcessed(id);
+                    return res.status(200).json({ received: true, status, idempotent: 'db_concurrent' });
+                }
+
+                // Persistance confirmee (1 ligne mutee) -> marquage warm (HB-3a) + suite du pipeline.
+                markProcessed(id);
+                console.log(JSON.stringify({
+                    event: 'supabase_update_ok',
+                    context: 'mollie-webhook',
+                    payment_id: id,
+                    request_id: metadata.request_id,
+                    target_table: 'diagnostic_requests',
+                    new_status: 'paid',
+                    timestamp: new Date().toISOString(),
+                }));
+
+                // Phase C auto-queue : signal post-UPDATE pour PS1 watchdog / n8n W4
+                console.log(JSON.stringify({
+                    event: 'diagnostic_ready_for_generation',
+                    request_id: metadata.request_id,
+                    invoice_number: metadata.invoice_number || null,
+                    lang: metadata.lang || 'fr',
+                    timestamp: new Date().toISOString(),
+                }));
+
+                // Night N7 Option β : INSERT pending_generations (DIAGNOSTIC pipeline PS1 Opus rapport)
+                // Best-effort : echec/timeout = warning, le trigger serverless + fallback JP couvrent.
+                try {
+                    const insertPromise = supabase
+                        .from('pending_generations')
+                        .insert({
+                            request_id: metadata.request_id,
+                            status: 'pending',
+                        });
+
+                    const insertTimeout = new Promise<{ error: { message: string; code?: string } }>((_, reject) =>
+                        setTimeout(() => reject(new Error('supabase_insert_pending_timeout_2s')), 2000)
+                    );
+
+                    const insResult = await Promise.race([insertPromise, insertTimeout]) as { error: { message?: string; code?: string } | null };
+
+                    if (insResult.error) {
+                        // Code 23505 = unique_violation (row deja presente, idempotent OK)
+                        if (insResult.error.code === '23505') {
+                            console.log(JSON.stringify({
+                                event: 'pending_generations_already_exists',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                timestamp: new Date().toISOString(),
+                            }));
+                        } else {
+                            console.error(JSON.stringify({
+                                event: 'pending_generations_insert_failed',
+                                payment_id: id,
+                                request_id: metadata.request_id,
+                                error: insResult.error.message || 'unknown',
+                                code: insResult.error.code || null,
+                                severity: 'warning',
+                                timestamp: new Date().toISOString(),
+                            }));
+                        }
+                    } else {
+                        console.log(JSON.stringify({
+                            event: 'pending_generations_insert_ok',
+                            payment_id: id,
+                            request_id: metadata.request_id,
+                            timestamp: new Date().toISOString(),
+                        }));
+                    }
+                } catch (pe: unknown) {
+                    const pmsg = (pe as { message?: string })?.message || 'unknown';
+                    console.warn(JSON.stringify({
+                        event: 'pending_generations_insert_timeout',
+                        payment_id: id,
+                        request_id: metadata.request_id,
+                        error: pmsg,
                         severity: 'warning',
                         timestamp: new Date().toISOString(),
                     }));
@@ -614,20 +756,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     resolve();
                 }, 7000)),
             ]);
-        } else if (status === 'paid') {
-            console.log(JSON.stringify({
-                event: 'mailer_skipped_idempotent',
-                payment_id: id,
-                timestamp: new Date().toISOString(),
-            }));
         }
 
-        // Always return 200 to Mollie (C4 : email failure != webhook failure)
+        // 200 : persistance confirmee en amont (HB-3a) ; un echec email ne justifie pas un
+        // retry Mollie (C4 : email failure != webhook failure, ETAT B recuperable).
         return res.status(200).json({ received: true, status });
 
     } catch (error: any) {
         console.error('Mollie webhook error:', error.message);
-        // Return 200 even on error to prevent Mollie retry storms
-        return res.status(200).json({ received: true, error: 'internal' });
+        // HB-3 (F-02b) : exception inattendue = transitoire par defaut -> 500, Mollie retente.
+        // Idempotence garantie : markProcessed n'est pose qu'apres persistance confirmee,
+        // et un retry post-persistance sort en 200 idempotent (memory ou db) sans double effet.
+        return res.status(500).json({ error: 'internal', retryable: true });
     }
 }
