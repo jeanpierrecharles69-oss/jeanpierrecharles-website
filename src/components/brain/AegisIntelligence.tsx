@@ -515,7 +515,9 @@ const AegisIntelligence: React.FC<AegisIntelligenceProps> = ({
         setPulseSubmitting(true);
         setPulseError(null);
         try {
-            const lastUserMessage = messages.filter(m => m.role === 'user').slice(-1)[0]?.content || '';
+            // HB-5 fix : ChatMessage n'a pas de champ 'content' (src/types.ts = { role, text }).
+            // L'ancien '.content' valait toujours undefined -> query_context partait vide.
+            const lastUserMessage = messages.filter(m => m.role === 'user').slice(-1)[0]?.text || '';
             const res = await fetch('/api/pulse-lead', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
