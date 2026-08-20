@@ -32,6 +32,14 @@ export default function PricingSection() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...data, lang }),
             });
+            // HA-1 (F-01) : 503 intake = service indisponible -> message propre, PAS de
+            // redirection Mollie, formulaire garde ouvert pour retente (donnees conservees).
+            if (reqRes.status === 503) {
+                alert(lang === 'fr'
+                    ? 'Service momentanément indisponible — réessayez dans quelques minutes.'
+                    : 'Service temporarily unavailable — please try again in a few minutes.');
+                return;
+            }
             if (!reqRes.ok) {
                 const err = await reqRes.json().catch(() => ({}));
                 throw new Error(err.error || `Request HTTP ${reqRes.status}`);

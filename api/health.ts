@@ -1,10 +1,21 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { connect as netConnect } from 'node:net';
+import { supabase } from './_lib/supabase.js';
 
 /**
  * AEGIS Intelligence -- Health check endpoint multi-provider
  * Usage :
- *   GET /api/health       -> check rapide (presence cles), ~50 ms
- *   GET /api/health?deep=1 -> check approfondi (ping providers), 500-2000 ms, ~0.001 USD/invocation Anthropic
+ *   GET /api/health          -> check rapide (presence cles), ~50 ms, toujours HTTP 200 (compat historique)
+ *   GET /api/health?deep=1   -> check approfondi (ping providers + composants critiques),
+ *                               500-2000 ms, ~0.001 USD/invocation Anthropic, toujours HTTP 200
+ *   GET /api/health?strict=1 -> probe composants critiques (Supabase SELECT head 3 s,
+ *                               SMTP socket Gandi 465 3 s, sans envoi) ; HTTP 503 si un
+ *                               composant critique est down, 200 sinon. Cible moniteur
+ *                               externe 5 min (HA-4) -- le trafic DB regulier previent
+ *                               aussi la re-pause auto Supabase plan gratuit.
+ *
+ * HA-3 (F-06 partiel) : le JSON liste chaque composant up/down/latence.
+ * Version : 2.0.0 -- 20260819 -- HA-3 : probes Supabase + SMTP, param strict=1 -> 503 fail-visible
  * Version : 1.0.0 -- 20260409T1445 CET
  */
 
@@ -16,6 +27,69 @@ interface ProviderStatus {
     reachable?: boolean;
     latency_ms?: number;
     error?: string;
+}
+
+interface ComponentStatus {
+    configured: boolean;
+    up?: boolean;
+    latency_ms?: number;
+    error?: string;
+}
+
+// Probe Supabase : requete HEAD count sur diagnostic_requests (0 ligne transferee, 0 PII).
+// Note : PostgREST n'expose pas les tables systeme -> equivalent minimal du "SELECT 1"
+// du brief HA-3. Timeout 3 s via Promise.race (le client supabase-js ne prend pas de
+// signal d'abort sur cette forme de requete).
+async function checkSupabase(): Promise<ComponentStatus> {
+    if (!supabase) return { configured: false };
+    const start = Date.now();
+    try {
+        const probePromise = supabase
+            .from('diagnostic_requests')
+            .select('request_id', { count: 'exact', head: true })
+            .limit(1);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), TIMEOUT_MS)
+        );
+        const result = await Promise.race([probePromise, timeoutPromise]) as { error: { message?: string } | null };
+        if (result.error) {
+            return {
+                configured: true,
+                up: false,
+                latency_ms: Date.now() - start,
+                error: result.error.message || 'query_error',
+            };
+        }
+        return { configured: true, up: true, latency_ms: Date.now() - start };
+    } catch (e: any) {
+        return {
+            configured: true,
+            up: false,
+            latency_ms: Date.now() - start,
+            error: e?.message === 'timeout' ? 'timeout' : (e?.message || 'unknown'),
+        };
+    }
+}
+
+// Probe SMTP : connexion socket TCP vers Gandi (defaut mail.gandi.net:465), timeout 3 s,
+// AUCUN envoi (socket detruite des la connexion etablie).
+function checkSmtp(): Promise<ComponentStatus> {
+    const host = process.env.SMTP_HOST || 'mail.gandi.net';
+    const port = parseInt(process.env.SMTP_PORT || '465', 10);
+    const start = Date.now();
+    return new Promise<ComponentStatus>((resolve) => {
+        let settled = false;
+        const done = (status: ComponentStatus) => {
+            if (settled) return;
+            settled = true;
+            socket.destroy();
+            resolve(status);
+        };
+        const socket = netConnect({ host, port, timeout: TIMEOUT_MS });
+        socket.once('connect', () => done({ configured: true, up: true, latency_ms: Date.now() - start }));
+        socket.once('timeout', () => done({ configured: true, up: false, latency_ms: Date.now() - start, error: 'timeout' }));
+        socket.once('error', (e: Error) => done({ configured: true, up: false, latency_ms: Date.now() - start, error: e.message }));
+    });
 }
 
 async function checkAnthropic(deep: boolean): Promise<ProviderStatus> {
@@ -138,12 +212,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const deep = req.query.deep === '1';
-    const mode = deep ? 'deep' : 'light';
+    const strict = req.query.strict === '1';
+    const mode = deep ? (strict ? 'deep+strict' : 'deep') : (strict ? 'strict' : 'light');
 
-    const [anthropic, gemini, mollie] = await Promise.all([
+    // HA-3 : composants critiques (Supabase, SMTP) probes en strict et en deep.
+    // Sans param : comportement historique conserve (light, pas de probe critique).
+    const probeCritical = strict || deep;
+    const [anthropic, gemini, mollie, supabaseStatus, smtpStatus] = await Promise.all([
         checkAnthropic(deep),
         checkGemini(deep),
         checkMollie(deep),
+        probeCritical ? checkSupabase() : Promise.resolve(null),
+        probeCritical ? checkSmtp() : Promise.resolve(null),
     ]);
 
     const providers = { anthropic, gemini, mollie };
@@ -164,12 +244,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         status = 'down';
     }
 
-    // Always HTTP 200 (monitoring uptime should not trigger on degraded provider)
-    return res.status(200).json({
+    // Composant critique non configure ou injoignable = pipeline DIAGNOSTIC mort -> down.
+    const criticalDown = probeCritical && [supabaseStatus, smtpStatus].some(
+        c => c !== null && (!c.configured || c.up === false)
+    );
+    if (criticalDown) status = 'down';
+
+    // strict=1 : fail-visible HTTP 503 si un composant critique est down.
+    // Sans strict : toujours HTTP 200 (compat historique, moniteurs legacy).
+    const httpStatus = strict && criticalDown ? 503 : 200;
+
+    return res.status(httpStatus).json({
         status,
         version: AEGIS_VERSION,
         timestamp: new Date().toISOString(),
         providers,
+        ...(probeCritical && {
+            components: {
+                supabase: supabaseStatus,
+                smtp: smtpStatus,
+            },
+        }),
         mode,
     });
 }
