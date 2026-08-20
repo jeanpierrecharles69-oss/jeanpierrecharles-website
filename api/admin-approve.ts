@@ -6,10 +6,16 @@ import { sendDiagnosticDelivery } from './_lib/mailer.js';
 /**
  * AEGIS Intelligence -- G3 QA Gate Admin Approve (D_T0955_G3_01).
  *
- * Endpoint GET cliquable depuis email JP de notification QA :
- *   GET /api/admin-approve?token=<UUID>&action=approve|reject&key=<AEGIS_ADMIN_KEY>
+ * HA-2 (CE-02) -- INVARIANT : aucune approbation sans action humaine non prechargeable.
+ *   GET  /api/admin-approve?token=<UUID>&action=approve|reject&key=<KEY>
+ *        -> NE MUTE RIEN. Rend une page de confirmation (recap dossier + 2 boutons
+ *           APPROUVER / REJETER en form POST). Un prefetch de lien email (Outlook
+ *           safe-links, scanners) ne peut donc plus approuver/rejeter (ex-edge case
+ *           accepte MVP G3, ferme ici).
+ *   POST /api/admin-approve (form-urlencoded : token, action, key)
+ *        -> execute la mutation. Idempotent : 2e POST -> page "deja traite" (409).
  *
- * Pipeline :
+ * Pipeline POST :
  *   1. Valider key (timingSafeEqual vs AEGIS_ADMIN_KEY) + action (approve|reject) + token (UUID)
  *   2. SELECT diagnostic_requests WHERE qa_token=token AND qa_status='pending'
  *   3. approve : SELECT facture, sendDiagnosticDelivery client, UPDATE qa_status='approved'
@@ -17,11 +23,9 @@ import { sendDiagnosticDelivery } from './_lib/mailer.js';
  *   4. reject  : UPDATE qa_status='rejected' + status='failed' + vider pdf_base64
  *   5. Page HTML responsive (succes / erreur / deja traite)
  *
- * Securite double : token UUID imprevisible + AEGIS_ADMIN_KEY query param.
+ * Securite double : token UUID imprevisible + AEGIS_ADMIN_KEY (query en GET, champ cache en POST).
  *
- * Edge case crawler email : Outlook safe-links pourrait pre-fetch GET et
- * declencher approval involontaire. Risque accepte pour MVP G3 (boite JP perso).
- *
+ * Version : 2.0.0 -- 20260819 -- HA-2 CE-02 : GET non-mutant (page confirmation), mutation en POST
  * Version : 1.1.0 -- 20260521 -- N14 Phase 2 C1 : parite livraison DIAG -- SELECT pdf_url + pass download_url a sendDiagnosticDelivery (lien Storage en complement de la PJ)
  * Version : 1.0.0 -- 20260515 -- Mission G3 QA Gate Approbation
  */
@@ -83,14 +87,20 @@ function sendHtml(res: VercelResponse, status: number, html: string): void {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'GET') {
+    if (req.method !== 'GET' && req.method !== 'POST') {
         return sendHtml(res, 405, htmlPage({
             title: 'Methode non autorisee',
             headline: 'Methode HTTP non autorisee',
-            body: 'Seul GET est accepte sur cet endpoint.',
+            body: 'Seuls GET (page de confirmation) et POST (execution) sont acceptes.',
             color: 'red',
         }));
     }
+    const isPost = req.method === 'POST';
+    // POST : parametres via form-urlencoded (parse automatique @vercel/node dans req.body).
+    const formBody: Record<string, unknown> =
+        isPost && typeof req.body === 'object' && req.body !== null
+            ? (req.body as Record<string, unknown>)
+            : {};
 
     // 1. Valider AEGIS_ADMIN_KEY
     const expectedKey = process.env.AEGIS_ADMIN_KEY;
@@ -109,7 +119,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
     }
 
-    const providedKey = typeof req.query.key === 'string' ? req.query.key : '';
+    const providedKey = isPost
+        ? (typeof formBody.key === 'string' ? formBody.key : '')
+        : (typeof req.query.key === 'string' ? req.query.key : '');
     if (!providedKey || !timingSafeStringEqual(providedKey, expectedKey)) {
         console.warn(JSON.stringify({
             event: 'admin_approve_forbidden',
@@ -126,9 +138,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2. Valider action + token
-    const action = typeof req.query.action === 'string' ? req.query.action : '';
-    const token = typeof req.query.token === 'string' ? req.query.token : '';
-    if (action !== 'approve' && action !== 'reject') {
+    // GET : action facultative (indication visuelle seulement, aucune mutation quelle
+    // que soit sa valeur). POST : action obligatoire approve|reject.
+    const action = isPost
+        ? (typeof formBody.action === 'string' ? formBody.action : '')
+        : (typeof req.query.action === 'string' ? req.query.action : '');
+    const token = isPost
+        ? (typeof formBody.token === 'string' ? formBody.token : '')
+        : (typeof req.query.token === 'string' ? req.query.token : '');
+    if (isPost && action !== 'approve' && action !== 'reject') {
         return sendHtml(res, 400, htmlPage({
             title: 'Action invalide',
             headline: 'Action invalide',
@@ -211,6 +229,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const customerName = [requestRow.first_name, requestRow.last_name].filter(Boolean).join(' ') || 'Client';
     const lang = (requestRow.lang === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+
+    // HA-2 (CE-02) : GET = page de confirmation, ZERO mutation. La mutation exige un
+    // POST intentionnel (form submit ci-dessous) -- non prechargeable par un scanner.
+    if (!isPost) {
+        const intentLine = action === 'approve'
+            ? '<p style="margin:0 0 12px;font-size:13px"><strong>Action demandee depuis l\'email : APPROUVER.</strong> Confirmez ci-dessous.</p>'
+            : action === 'reject'
+                ? '<p style="margin:0 0 12px;font-size:13px"><strong>Action demandee depuis l\'email : REJETER.</strong> Confirmez ci-dessous.</p>'
+                : '';
+        const hiddenFields = (act: 'approve' | 'reject') =>
+            `<input type="hidden" name="token" value="${escape(token)}">` +
+            `<input type="hidden" name="action" value="${act}">` +
+            `<input type="hidden" name="key" value="${escape(providedKey)}">`;
+        const buttonStyle = 'color:#fff;padding:14px 28px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer';
+        return sendHtml(res, 200, htmlPage({
+            title: 'Confirmation requise',
+            headline: 'Confirmation requise',
+            body: `${intentLine}
+Dossier DIAGNOSTIC en attente de decision QA :<br><br>
+<strong>Facture</strong> : <code>${escape(requestRow.invoice_number)}</code><br>
+<strong>Client</strong> : ${escape(customerName)}${requestRow.company ? ` (${escape(requestRow.company)})` : ''}<br>
+<strong>Email</strong> : ${escape(requestRow.email)}<br>
+<strong>Langue</strong> : ${escape(lang.toUpperCase())} &mdash; <strong>Statut</strong> : <code>${escape(requestRow.status)}</code> / <code>qa_status: ${escape(requestRow.qa_status)}</code><br>
+<div style="text-align:center;margin-top:20px">
+<form method="POST" action="/api/admin-approve" style="display:inline-block;margin:6px 8px">${hiddenFields('approve')}
+<button type="submit" style="background:#16a34a;${buttonStyle}">&#x2705; APPROUVER ET LIVRER</button></form>
+<form method="POST" action="/api/admin-approve" style="display:inline-block;margin:6px 8px">${hiddenFields('reject')}
+<button type="submit" style="background:#dc2626;${buttonStyle}">&#x274C; REJETER</button></form>
+</div>`,
+            color: 'amber',
+        }));
+    }
 
     // 4a. action=reject
     if (action === 'reject') {

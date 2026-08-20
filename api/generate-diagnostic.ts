@@ -26,6 +26,7 @@ import { sendDiagnosticFailureOps, sendQANotificationEmail } from './_lib/mailer
  *
  * Vercel : maxDuration 300s, memory 1024MB (cf. vercel.json override).
  *
+ * Version : 1.0.1 -- 20260819 -- HA-2 CE-02 : commentaire liens QA (GET non-mutant, mutation POST cote admin-approve)
  * Version : 1.0.0 -- 20260508 -- creation S4
  */
 
@@ -313,6 +314,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 8. Notifier JP avec rapport en PJ + liens approve/reject
+    // HA-2 (CE-02) : ces liens GET n'executent PLUS la mutation -- ils ouvrent la page
+    // de confirmation admin-approve (recap + boutons POST). Un prefetch email est inoffensif.
     const adminKey = process.env.AEGIS_ADMIN_KEY || '';
     const approveUrl = `${PUBLIC_BASE_URL}/api/admin-approve?token=${qaToken}&action=approve&key=${encodeURIComponent(adminKey)}`;
     const rejectUrl = `${PUBLIC_BASE_URL}/api/admin-approve?token=${qaToken}&action=reject&key=${encodeURIComponent(adminKey)}`;
