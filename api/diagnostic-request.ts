@@ -9,8 +9,11 @@ import { getCetDateParts } from './_lib/cet-timestamp.js';
  *
  * SECURITE : No sensitive data in logs. Only request_id + timestamp.
  * EMAIL Phase 2 ACTIVE : sendOpsPreNotify best-effort (kill switch OPS_PRENOTIFY_ENABLED).
- * NIGHT-N5 FAI-FIX Phase B2 : persistance Supabase EU Frankfurt non-bloquante.
  *
+ * INVARIANT HA-1 (F-01) : AUCUNE URL de checkout emise sans intake durable confirme.
+ * Echec/timeout/client absent Supabase -> 503 { error: 'service_unavailable', retryable: true }.
+ *
+ * Version : 3.0.0 -- 20260819 -- HA-1 F-01 : fail-visible intake (503 si INSERT non confirme, fin du fail-open 200)
  * Version : 2.2.0 -- 20260420 -- FIX silent fail await Promise.race 3s (kill fire-and-forget Vercel serverless)
  */
 
@@ -122,72 +125,77 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
 
         // NIGHT-N5 Phase B2 + v2.2.0 FIX : persistance Supabase EU Frankfurt (AWAIT Promise.race 3s)
-        // v2.1.0 fire-and-forget .then() etait tue par Vercel serverless apres return res.
-        // v2.2.0 : await Promise.race(insert, timeout3s) garantit execution avant response HTTP.
-        // Impact latence : +200-500ms (RTT cdg1 <-> fra1 + SQL), invisible UX (redirection Mollie suit).
+        // v3.0.0 HA-1 (F-01) : fail-visible. L'intake DOIT etre durable avant d'autoriser le
+        // checkout Mollie (le frontend n'appelle mollie-checkout que sur 2xx ici). Tout echec
+        // transitoire (client absent, erreur INSERT, timeout 3s) -> 503 retryable, PAS de 200.
+        // NUANCE (contre-expertise T1740) : un timeout Promise.race n'annule PAS l'insert
+        // sous-jacent. Si l'INSERT aboutit apres le timeout, la ligne orpheline reste en
+        // pending_payment sans checkout associe ; une retente client cree une nouvelle ligne
+        // (nouveau request_id). Doublon possible et acceptable -- aucune collision d'ID.
         const lang = typeof body.lang === 'string' && body.lang === 'en' ? 'en' : 'fr';
-        if (supabase) {
-            try {
-                const insertPromise = supabase
-                    .from('diagnostic_requests')
-                    .insert({
-                        request_id,
-                        invoice_number,
-                        status: 'pending_payment',
-                        email,
-                        first_name: firstName,
-                        last_name: lastName,
-                        company,
-                        country,
-                        city,
-                        sector,
-                        product,
-                        context,
-                        regulations,
-                        lang,
-                        created_at: new Date().toISOString(),
-                    });
+        if (!supabase) {
+            logSupabaseUnavailable('diagnostic-request');
+            return res.status(503).json({ error: 'service_unavailable', retryable: true });
+        }
+        try {
+            const insertPromise = supabase
+                .from('diagnostic_requests')
+                .insert({
+                    request_id,
+                    invoice_number,
+                    status: 'pending_payment',
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    company,
+                    country,
+                    city,
+                    sector,
+                    product,
+                    context,
+                    regulations,
+                    lang,
+                    created_at: new Date().toISOString(),
+                });
 
-                const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
-                    setTimeout(() => reject(new Error('supabase_insert_timeout_3s')), 3000)
-                );
+            const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
+                setTimeout(() => reject(new Error('supabase_insert_timeout_3s')), 3000)
+            );
 
-                const result = await Promise.race([insertPromise, timeoutPromise]) as { error: unknown };
+            const result = await Promise.race([insertPromise, timeoutPromise]) as { error: unknown };
 
-                if (result.error) {
-                    const msg = (result.error as { message?: string })?.message || 'unknown';
-                    console.error(JSON.stringify({
-                        event: 'supabase_insert_failed',
-                        context: 'diagnostic-request',
-                        request_id,
-                        invoice_number,
-                        error: msg,
-                        severity: 'warning',
-                        timestamp: new Date().toISOString(),
-                    }));
-                } else {
-                    console.log(JSON.stringify({
-                        event: 'supabase_insert_ok',
-                        context: 'diagnostic-request',
-                        request_id,
-                        invoice_number,
-                        timestamp: new Date().toISOString(),
-                    }));
-                }
-            } catch (e: unknown) {
-                const msg = (e as { message?: string })?.message || 'unknown';
+            if (result.error) {
+                const msg = (result.error as { message?: string })?.message || 'unknown';
                 console.error(JSON.stringify({
-                    event: 'supabase_insert_timeout',
+                    event: 'supabase_insert_failed',
                     context: 'diagnostic-request',
                     request_id,
                     invoice_number,
                     error: msg,
-                    severity: 'warning',
+                    severity: 'error',
                     timestamp: new Date().toISOString(),
                 }));
+                return res.status(503).json({ error: 'service_unavailable', retryable: true });
             }
-        } else {
-            logSupabaseUnavailable('diagnostic-request');
+            console.log(JSON.stringify({
+                event: 'supabase_insert_ok',
+                context: 'diagnostic-request',
+                request_id,
+                invoice_number,
+                timestamp: new Date().toISOString(),
+            }));
+        } catch (e: unknown) {
+            const msg = (e as { message?: string })?.message || 'unknown';
+            console.error(JSON.stringify({
+                event: 'supabase_insert_timeout',
+                context: 'diagnostic-request',
+                request_id,
+                invoice_number,
+                error: msg,
+                severity: 'error',
+                timestamp: new Date().toISOString(),
+            }));
+            return res.status(503).json({ error: 'service_unavailable', retryable: true });
         }
 
         // Phase 2 ACTIVE : ops pre-notify (best-effort, kill switch M2)
