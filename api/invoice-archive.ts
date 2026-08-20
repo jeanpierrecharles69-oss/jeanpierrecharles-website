@@ -18,6 +18,7 @@ import { supabase, logSupabaseUnavailable } from './_lib/supabase.js';
  *  - Si request_id fourni mais FK invalide (diagnostic_requests vide en preview),
  *    retry INSERT avec request_id=NULL pour preserver l'archive comptable.
  *
+ * Version : 1.1.0 -- 20260819 -- HB-1 F-08 : regex accepte suffixe 4 hex optionnel
  * Version : 1.0.0 -- 20260430 -- creation V352 INVOICE-ARCHIVE-FISCAL
  */
 
@@ -44,8 +45,10 @@ function isRateLimited(ip: string): boolean {
     return entry.count > RATE_LIMIT;
 }
 
-// Format invoice_number : AEGIS-YYYYMMDD-HHMM (cf. diagnostic-request.ts L107)
-const INVOICE_NUMBER_REGEX = /^AEGIS-\d{8}-\d{4}$/;
+// Format invoice_number : AEGIS-YYYYMMDD-HHMM[-xxxx] (cf. diagnostic-request.ts).
+// HB-1 (F-08) : suffixe 4 hex optionnel (anti-collision intra-minute) ; sans le -i et le
+// groupe optionnel, l'archivage MerciPage des nouveaux numeros serait rejete en 400.
+const INVOICE_NUMBER_REGEX = /^AEGIS-\d{8}-\d{4}(-[0-9a-f]{4})?$/i;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_PDF_BASE64_BYTES = 500 * 1024; // 500KB cap (brief §4)
 
@@ -72,7 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Validation invoice_number (format strict AEGIS-YYYYMMDD-HHMM)
         if (typeof invoice_number !== 'string' || !INVOICE_NUMBER_REGEX.test(invoice_number)) {
-            return res.status(400).json({ error: 'invoice_number invalide (format AEGIS-YYYYMMDD-HHMM attendu)' });
+            return res.status(400).json({ error: 'invoice_number invalide (format AEGIS-YYYYMMDD-HHMM[-xxxx] attendu)' });
         }
 
         // Validation pdf_base64 (presence + size cap)

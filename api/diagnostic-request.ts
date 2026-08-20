@@ -13,6 +13,7 @@ import { getCetDateParts } from './_lib/cet-timestamp.js';
  * INVARIANT HA-1 (F-01) : AUCUNE URL de checkout emise sans intake durable confirme.
  * Echec/timeout/client absent Supabase -> 503 { error: 'service_unavailable', retryable: true }.
  *
+ * Version : 3.1.0 -- 20260819 -- HB-1 F-08 : invoice_number suffixe 4 hex request_id (anti-collision intra-minute)
  * Version : 3.0.0 -- 20260819 -- HA-1 F-01 : fail-visible intake (503 si INSERT non confirme, fin du fail-open 200)
  * Version : 2.2.0 -- 20260420 -- FIX silent fail await Promise.race 3s (kill fire-and-forget Vercel serverless)
  */
@@ -107,10 +108,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Generate request_id (UUID v4) + invoice_number (FIX-04)
         // N12.A DT-01 : invoice_number en CET Paris (Vercel Lambda TZ=UTC sinon decalage 1-2h).
+        // HB-1 (F-08) : suffixe 4 hex derive du request_id -> plus de collision intra-minute
+        // (2 commandes la meme minute recevaient le meme numero -> ecrasement Storage possible,
+        // rapprochement facture/dossier errone). Format : AEGIS-YYYYMMDD-HHMM-a1b2.
+        // Contrainte UNIQUE migration 20260430 conservee ; anciens numeros sans suffixe restent valides.
         const request_id = crypto.randomUUID();
         const now = new Date();
         const { yyyy, MM, dd, hh, mm } = getCetDateParts(now);
-        const invoice_number = `AEGIS-${yyyy}${MM}${dd}-${hh}${mm}`;
+        const invoice_number = `AEGIS-${yyyy}${MM}${dd}-${hh}${mm}-${request_id.replace(/-/g, '').slice(0, 4)}`;
 
         // Log only non-sensitive metadata (RGPD-safe)
         console.log(JSON.stringify({

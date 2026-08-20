@@ -10,6 +10,7 @@
  * Brief : 20260518T1000_BRIEF_ACDC-CODE-N12A-SPRINT-FINAL-CHROME-VV.md sec A1
  * Cause racine forensique : 20260516T0855_BRIDGE_FORENSIQUE-ALIGNEMENT-DETTES-TECHNIQUES.
  *
+ * Version : 1.0.1 -- 20260819 -- HB-1 : doc format invoice_number (suffixe 4 hex cote appelant)
  * Version : 1.0.0 -- 20260518T1010 -- N12.A creation DT-01
  */
 
@@ -39,7 +40,7 @@ export function getCetHHMM(now: Date = new Date()): { hh: string; mm: string } {
 
 /**
  * Returns the YYYY/MM/DD/HH/MM components of `now` in Europe/Paris timezone.
- * Used to build invoice_number = AEGIS-YYYYMMDD-HHMM (CET).
+ * Used to build invoice_number = AEGIS-YYYYMMDD-HHMM-xxxx (CET, suffixe HB-1 cote appelant).
  */
 export function getCetDateParts(now: Date = new Date()): {
     yyyy: string; MM: string; dd: string; hh: string; mm: string;

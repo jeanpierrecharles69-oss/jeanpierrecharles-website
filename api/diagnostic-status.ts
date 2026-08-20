@@ -4,7 +4,7 @@ import { supabase, SUPABASE_ENABLED } from './_lib/supabase.js';
 /**
  * AEGIS Intelligence -- Diagnostic Status Endpoint
  * GET /api/diagnostic-status?request_id=<uuid>
- *   or  /api/diagnostic-status?invoice_number=AEGIS-YYYYMMDD-HHMM
+ *   or  /api/diagnostic-status?invoice_number=AEGIS-YYYYMMDD-HHMM[-xxxx]
  *
  * Protected by AEGIS_OPS_TOKEN (Bearer auth, meme pattern que send-delivery).
  * Consomme par C:\Projects\aegis-ops\scripts\aegis-deliver-diagnostic.ps1 (Phase C).
@@ -14,12 +14,15 @@ import { supabase, SUPABASE_ENABLED } from './_lib/supabase.js';
  *  - JP operator only (pas exposure client)
  *  - Log masque de l'email dans les sorties
  *
+ * Version : 1.1.0 -- 20260819 -- HB-1 F-08 : INVOICE_REGEX accepte suffixe 4 hex optionnel
  * Version : 1.0.0 -- 20260418 -- NIGHT-N5 FAI-FIX Phase B4
  */
 
 const OPS_TOKEN = process.env.AEGIS_OPS_TOKEN || '';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const INVOICE_REGEX = /^AEGIS-\d{8}-\d{4}$/;
+// HB-1 (F-08) : suffixe 4 hex optionnel (nouveaux numeros AEGIS-YYYYMMDD-HHMM-a1b2 ;
+// anciens numeros sans suffixe toujours acceptes).
+const INVOICE_REGEX = /^AEGIS-\d{8}-\d{4}(-[0-9a-f]{4})?$/i;
 
 function maskEmail(email: string): string {
     const [local, domain] = email.split('@');
@@ -60,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Invalid request_id (UUID expected)' });
     }
     if (invoiceNumber && !INVOICE_REGEX.test(invoiceNumber)) {
-        return res.status(400).json({ error: 'Invalid invoice_number (format AEGIS-YYYYMMDD-HHMM)' });
+        return res.status(400).json({ error: 'Invalid invoice_number (format AEGIS-YYYYMMDD-HHMM[-xxxx])' });
     }
 
     try {
