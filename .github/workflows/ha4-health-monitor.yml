@@ -1,0 +1,41 @@
+# HA-4 -- Moniteur externe du health strict
+# Source : brief 20260819T2200 s.HA-4 ; decision D_T2159_00 (plan Free + garde-fou ping 5 min).
+# Voie de repli sans compte tiers (UptimeRobot reste la voie nominale du brief) :
+# depot public => minutes GitHub Actions gratuites, aucun secret requis.
+# Double effet : detection de panne (job en echec => notification GitHub a l'acteur
+# du workflow) + trafic regulier vers Supabase (previent la re-pause du plan Free).
+# Limites GitHub connues : intervalle minimal 5 min ; retards possibles en charge ;
+# desactivation automatique apres 60 jours sans activite du depot ; une notification
+# par execution en echec tant que la panne dure (a verifier sur le premier incident).
+# Propose le 15/09/2026 T2108 par CC (Fable 5.1) ; commit et push : JP exclusivement.
+name: ha4-health-monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe /api/health?strict=1 (2 tentatives, 30 s d'ecart)
+        shell: bash
+        run: |
+          url='https://jeanpierrecharles.com/api/health?strict=1'
+          for attempt in 1 2; do
+            code=$(curl -sS -m 25 -o body.json -w '%{http_code}' \
+              -A 'AEGIS-HA4-Monitor/1.0 (GitHub Actions)' "$url" || echo '000')
+            echo "attempt=$attempt http=$code"
+            if [ "$code" = "200" ]; then
+              cat body.json; echo
+              exit 0
+            fi
+            [ "$attempt" = "1" ] && sleep 30
+          done
+          echo '::error::health strict non-200 : composant critique down ou site injoignable'
+          cat body.json 2>/dev/null; echo
+          exit 1
